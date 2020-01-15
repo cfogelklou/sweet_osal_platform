@@ -1,3 +1,7 @@
+
+set(SOP_EXTERN_LIBS ${SOP_TOP_DIR}/ext)
+set(SOP_COMMON_SRC ${SOP_TOP_DIR}/sop_src)
+
 #defines we need to build libsodium
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   #For MSVC less than or equal to 10.0, "inline" doesn't exist.
@@ -9,6 +13,18 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_definitions("/wd4146 /wd4244 /wd4996 -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
 endif ()
 
+if (WIN32)
+    #set(FREERTOS_PORT 1)
+    add_definitions(-DWIN32)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)
+elseif (APPLE)
+    add_definitions(-DAPPLE=1 -D__APPLE__=1 -DTARGET_OS_OSX=1)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)
+elseif (UNIX)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)
+endif ()
+
+add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE)
 add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
 
 # USE recursive search to add all libsodium files.
@@ -79,4 +95,16 @@ file(GLOB MINI_SOCKET_SRC
 set(GTEST_SRC
         ${SOP_TOP_DIR}/ext/googletest/googletest/src/gtest-all.cc
         ${SOP_TOP_DIR}/ext/googletest/googlemock/src/gmock-all.cc
+)
+
+set(SOP_SRC
+    ${LIBSODIUM_SRC}
+    ${MBEDTLS_SRC}
+    ${TASK_SCHED_SRC}
+    ${OSAL_SRC}
+    ${BUF_IO_SRC}
+    ${UTILS_SRC}
+    ${MINI_SOCKET_SRC}
+    ${GTEST_SRC}
+    ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )

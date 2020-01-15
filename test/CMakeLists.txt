@@ -4,21 +4,15 @@ project(sweet_osal_test)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-set(SOP_EXTERN_LIBS ${SOP_TOP_DIR}/ext)
-set(SOP_COMMON_SRC ${SOP_TOP_DIR}/sop_src)
 
-add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE)
+include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
+
+#add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE)
 
 if (WIN32)
-    #set(FREERTOS_PORT 1)
-    add_definitions(-DWIN32)
-    add_definitions(-DNATIVE_LITTLE_ENDIAN)
 elseif (APPLE)
-    add_definitions(-DAPPLE=1 -D__APPLE__=1 -DTARGET_OS_OSX=1)
-    add_definitions(-DNATIVE_LITTLE_ENDIAN)
     set(CMAKE_BUILD_TYPE Debug)
 elseif (UNIX)
-    add_definitions(-DNATIVE_LITTLE_ENDIAN)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
@@ -26,20 +20,7 @@ if (FREERTOS_PORT)
     add_definitions(-D__FREERTOS__ )
 endif(FREERTOS_PORT)
 
-#defines we need to build libsodium
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  #For MSVC less than or equal to 10.0, "inline" doesn't exist.
-  if (MSVC_VERSION)
-    if (MSVC_VERSION LESS 1601)
-      add_definitions(-Dinline=__inline)
-    endif ()
-  endif ()
-  add_definitions("/wd4146 /wd4244 /wd4996 -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
-endif ()
-
-add_definitions(-DMBEDTLS_CONFIG_FILE="src/mbedtls/myconfig.h")
-
-include(${SOP_COMMON_SRC}/LibraryFiles.cmake)
+add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
 
 file(GLOB TEST_SRC
         ${SOP_TOP_DIR}/test/*.cpp
@@ -77,7 +58,6 @@ set(SOURCE_FILES
 
 include_directories(
        .
-       ${SOP_COMMON_SRC}/mbedtls
        ${SOP_COMMON_SRC}
 
        # Google test
@@ -86,9 +66,11 @@ include_directories(
        ${SOP_TOP_DIR}/ext/googletest/googlemock
        ${SOP_TOP_DIR}/ext/googletest/googlemock/include
        
-       ${SOP_TOP_DIR}/ext/mbedtls/include/mbedtls
-       ${SOP_TOP_DIR}/ext/mbedtls/crypto/include
+       ${SOP_COMMON_SRC}/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/crypto/include
        ${SOP_EXTERN_LIBS}/mbedtls/include
+
        ${SOP_EXTERN_LIBS}/libsodium/src/libsodium
        ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
 
