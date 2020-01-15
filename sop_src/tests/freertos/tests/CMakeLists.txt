@@ -3,10 +3,9 @@ project(freertos_test)
 
 set(CMAKE_CXX_STANDARD 11)
 
-if(NOT DEFINED POLESTAR_PAK_DIR)
-    set(POLESTAR_PAK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
+if(NOT DEFINED SOP_TOP_DIR)
+    set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
 endif()
-include(${POLESTAR_PAK_DIR}/Applicaudia.cmake)
 
 if (WIN32)
     set(FREERTOS_PORT 1)
@@ -20,19 +19,13 @@ if (FREERTOS_PORT)
     add_definitions(-D__FREERTOS__ )
 endif(FREERTOS_PORT)
 
-include(${ROOT_SRC}/LibraryFiles.cmake)
-
-
-set(GTEST_SRC
-        ${POLESTAR_PAK_DIR}/extern_libs/googletest/googletest/src/gtest-all.cc
-        ${POLESTAR_PAK_DIR}/extern_libs/googletest/googlemock/src/gmock-all.cc
-)
+include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
 
 if (FREERTOS_PORT)
     set(FREERTOS_DIR ${ROOT_SRC}/ecu/pak_spc564b/components/spc5_freertos_component_rla/lib)
 
     file(GLOB FREERTOS_SRC
-        ${ROOT_SRC}/tests/freertos/portable/MSVC-MingW/*.c
+        ${SOP_COMMON_SRC}/tests/freertos/portable/MSVC-MingW/*.c
         ${FREERTOS_DIR}/src/*.c
     ) 
 
@@ -42,9 +35,9 @@ file(GLOB TESTS_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
-    ${ROOT_SRC}/tests/embedded_tests/test_osal.cpp
-    ${ROOT_SRC}/tests/embedded_tests/test_mempools.cpp
-    ${ROOT_SRC}/tests/embedded_tests/test_random.cpp
+    ${SOP_COMMON_SRC}/osal/test/test_osal.cpp
+    ${SOP_COMMON_SRC}/osal/test/test_mempools.cpp
+    ${SOP_COMMON_SRC}/osal/test/test_random.cpp
     
 )
 
@@ -65,27 +58,27 @@ set(SOURCE_FILES
 )
 
 include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/..
-        ${EXTERN_LIBS}/../
-        ${POLESTAR_PAK_DIR}/src
-        ${POLESTAR_PAK_DIR}/src/common_src
-        ${ROOT_SRC}
-        ${EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
-        ${COMMON_SRC}
-        ${COMMON_SRC}/mbedtls
-        ${ROOT_SRC}/tests/freertos/portable/MSVC-MingW
-        ${ROOT_SRC}/tests/freertos
-        ${FREERTOS_DIR}/include
-        ${EXTERN_LIBS}/mbedtls/include/mbedtls
-        ${EXTERN_LIBS}/mbedtls/include
-        ${EXTERN_LIBS}
-        ${EXTERN_LIBS}/json/src
-        # Google test (the real thing)
-        ${EXTERN_LIBS}/googletest/googletest
-        ${EXTERN_LIBS}/googletest/googletest/include
-        ${POLESTAR_PAK_DIR}/extern_libs/googletest/googlemock
-        ${POLESTAR_PAK_DIR}/extern_libs/googletest/googlemock/include
+       ${SOP_TOP_DIR}
+
+       ${SOP_COMMON_SRC}
+
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+
+       ${SOP_COMMON_SRC}/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/crypto/include
+       ${SOP_EXTERN_LIBS}/mbedtls/include
+
+       ${SOP_EXTERN_LIBS}/cifra/src
+       ${SOP_EXTERN_LIBS}/cifra/src/ext
+       ${SOP_EXTERN_LIBS}/googletest/googletest
+       ${SOP_EXTERN_LIBS}/googletest/googletest/include
+       ${SOP_EXTERN_LIBS}/googletest/googlemock
+       ${SOP_EXTERN_LIBS}/googletest/googlemock/include
+       ${SOP_COMMON_SRC}/osal
+
+       ${ROOT_SRC}/tests/freertos/portable/MSVC-MingW
+       ${ROOT_SRC}/tests/freertos
 )
 
 include_directories(

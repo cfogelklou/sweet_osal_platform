@@ -65,11 +65,11 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 find_package(Threads REQUIRED)
 
 if (WIN32)
-    #target_link_libraries(${PROJECT_NAME} ws2_32 polestar_test_lib)
+    #target_link_libraries(${PROJECT_NAME} ws2_32 applicaudia_test_lib)
     target_link_libraries(${PROJECT_NAME} ws2_32)
 else (WIN32)
     find_package(Threads REQUIRED)
-    #target_link_libraries(${PROJECT_NAME} Threads::Threads polestar_test_lib)
+    #target_link_libraries(${PROJECT_NAME} Threads::Threads applicaudia_test_lib)
     target_link_libraries(${PROJECT_NAME} Threads::Threads)
 endif (WIN32)
 

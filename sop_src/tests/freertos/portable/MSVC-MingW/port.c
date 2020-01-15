@@ -70,7 +70,7 @@
 /* Standard includes. */
 #include <stdio.h>
 
-/* Scheduler includes. */
+/* Scheduler id. */
 #include "FreeRTOS.h"
 #include "task.h"
 
