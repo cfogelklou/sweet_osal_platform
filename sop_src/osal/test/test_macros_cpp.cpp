@@ -1,5 +1,5 @@
 /**
- * COPYRIGHT    (c) Volvo Cars / Polestar 2018
+ * COPYRIGHT    (c)Applicaudia 2018
  * @file        test_macros_cpp.cpp   
  */
 
