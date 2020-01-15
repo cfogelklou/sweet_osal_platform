@@ -24,7 +24,7 @@ elseif (UNIX)
     add_definitions(-DNATIVE_LITTLE_ENDIAN)
 endif ()
 
-add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE)
+add_definitions(-DSODIUM_STATIC -DDEV_MODE -DCONFIGURED=1 -DDEBUG -D_CONSOLE)
 add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
 
 # USE recursive search to add all libsodium files.
