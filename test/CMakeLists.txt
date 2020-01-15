@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(SOP_EXTERN_LIBS ${SOP_TOP_DIR}/ext)
-set(SOP_COMMON_SRC ${SOP_TOP_DIR}/src)
+set(SOP_COMMON_SRC ${SOP_TOP_DIR}/sop_src)
 
-add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE -DMBEDTLS_CONFIG_FILE="src/mbedtls/myconfig.h")
+add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE)
 
 if (WIN32)
     #set(FREERTOS_PORT 1)
@@ -49,11 +49,7 @@ file(GLOB TEST_SRC
 )
 
 file(GLOB LOCAL_SRC
-        ${SOP_TOP_DIR}/src/LibraryFiles.cmake
-        ${SOP_TOP_DIR}/src/*.c
-        ${SOP_TOP_DIR}/src/*.cpp
-        ${SOP_TOP_DIR}/src/*.h
-        ${SOP_TOP_DIR}/src/*.hpp
+        ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )
 
 set(SOURCE_FILES
@@ -81,8 +77,8 @@ set(SOURCE_FILES
 
 include_directories(
        .
-       ${SOP_TOP_DIR}/src/mbedtls
-       ${SOP_TOP_DIR}/src
+       ${SOP_COMMON_SRC}/mbedtls
+       ${SOP_COMMON_SRC}
 
        # Google test
        ${SOP_TOP_DIR}/ext/googletest/googletest
