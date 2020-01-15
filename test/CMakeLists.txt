@@ -57,23 +57,9 @@ set(SOURCE_FILES
 
 include_directories(
        .
-       ${SOP_COMMON_SRC}
+       ${SAU_COMMON_SRC}
+       ${SAU_TOP_DIR}
 
-       # Google test
-       ${SOP_TOP_DIR}/ext/googletest/googletest
-       ${SOP_TOP_DIR}/ext/googletest/googletest/include
-       ${SOP_TOP_DIR}/ext/googletest/googlemock
-       ${SOP_TOP_DIR}/ext/googletest/googlemock/include
-       
-       ${SOP_COMMON_SRC}/mbedtls
-       ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
-       ${SOP_EXTERN_LIBS}/mbedtls/crypto/include
-       ${SOP_EXTERN_LIBS}/mbedtls/include
-
-       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium
-       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
-
-       ${SOP_TOP_DIR}
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

@@ -27,6 +27,29 @@ endif ()
 add_definitions(-DSODIUM_STATIC -DDEV_MODE -DCONFIGURED=1 -DDEBUG -D_CONSOLE)
 add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
 
+
+include_directories(
+       .
+       ${SOP_COMMON_SRC}
+
+       # Google test
+       ${SOP_TOP_DIR}/ext/googletest/googletest
+       ${SOP_TOP_DIR}/ext/googletest/googletest/include
+       ${SOP_TOP_DIR}/ext/googletest/googlemock
+       ${SOP_TOP_DIR}/ext/googletest/googlemock/include
+       
+       ${SOP_COMMON_SRC}/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/crypto/include
+       ${SOP_EXTERN_LIBS}/mbedtls/include
+
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+
+       ${SOP_TOP_DIR}
+)
+
+
 # USE recursive search to add all libsodium files.
 file(GLOB_RECURSE LIBSODIUM_SRC
   ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/*.c
