@@ -1,9 +1,0 @@
-[submodule "ext/googletest"]
-	path = ext/googletest
-	url = git@github.com:google/googletest.git
-[submodule "ext/libsodium"]
-	path = ext/libsodium
-	url = git@github.com:jedisct1/libsodium.git
-[submodule "ext/mbedtls"]
-	path = ext/mbedtls
-	url = https://github.com/ARMmbed/mbedtls.git
