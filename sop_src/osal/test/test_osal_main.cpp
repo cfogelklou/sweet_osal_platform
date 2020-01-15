@@ -1,20 +1,20 @@
 /**
  * COPYRIGHT    (c)	Applicaudia 2017
- * @file        test_spi_bitbang.cpp
- * @brief       Test of SPI bitbang
+ * @file        test_osal_main.cpp
+ * @brief       Test of OSAL
  */
 #include "gtest/gtest.h"
 
-#ifndef RUN_GTEST
+//#ifndef RUN_GTEST
 #include <gmock/gmock.h>
 using namespace testing;
-#endif
+//#endif
 
 #include "osal/osal.h"
 #include "task_sched/task_sched.h"
 #include <thread>
 
-#ifndef RUN_GTEST
+//#ifndef RUN_GTEST
 static volatile bool main_done = false;
 // ////////////////////////////////////////////////////////////////////////////
 int main(int argc, char** argv) {
@@ -48,4 +48,4 @@ int main(int argc, char** argv) {
   return gtest_rval;
 
 }
-#endif
+//#endif

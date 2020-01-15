@@ -154,11 +154,12 @@ TEST_F(OSALTest, Rescheduler) {
       }
     }
 
+    OSALSleep(500);
     TaskSchedCancelScheduledTask(&sched);
     resched.disable();
     OSALSleep(500);
 
-    EXPECT_TRUE(numExecutions > (0.8 * executionsWithForceResched));
+    EXPECT_TRUE(numExecutions > (0.5 * executionsWithForceResched));
   }
   OSALSleep(500);
 }
@@ -261,7 +262,7 @@ TEST_F(OSALTest, osal_TestSleep) {
 
   LOG_TRACE(("Sleeping 10\r\n"));
   {
-    CheckTimer checkTimer(5, 20);
+    CheckTimer checkTimer(5, 40);
     OSALSleep(10);
   }
 

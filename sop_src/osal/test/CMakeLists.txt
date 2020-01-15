@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
+
+
+include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
+add_definitions(-DRUN_GTEST)
+
 if (WIN32)
     #set(FREERTOS_PORT 1)
 elseif (APPLE)
@@ -13,14 +18,12 @@ elseif (UNIX)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
-include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
-
-
 file(GLOB LOCAL_SRC 
     ${CMAKE_CURRENT_SOURCE_DIR}/../*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp

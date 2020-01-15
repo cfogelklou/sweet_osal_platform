@@ -1,9 +1,9 @@
 #ifdef RUN_GTEST
 
 #include <stdint.h>
-#include "platform/mempools.h"
-#include "platform/osal.h"
-#include "utils/ble_log.h"
+#include "osal/mempools.h"
+#include "osal/osal.h"
+#include "utils/platform_log.h"
 #include "utils/dl_list.h"
 #include "utils/sl_list.h"
 #include "gtest/gtest.h"

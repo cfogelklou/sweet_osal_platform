@@ -6,8 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
-
-#add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE)
+add_definitions(-DRUN_GTEST)
 
 if (WIN32)
 elseif (APPLE)

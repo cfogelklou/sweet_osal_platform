@@ -1,8 +1,8 @@
 #ifdef RUN_GTEST
 #include <string.h>
 #include "gtest/gtest.h"
-#include "platform/osal.h"
-#include "utils/ble_log.h"
+#include "osal/osal.h"
+#include "utils/platform_log.h"
 #include "utils/util_vsnprintf.h"
 #include "utils/helper_macros.h"
 #include "utils/convert_utils.h"

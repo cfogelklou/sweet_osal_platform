@@ -1,7 +1,7 @@
 
 #ifdef RUN_GTEST
 #include "gtest/gtest.h"
-#include "utils/ble_log.h"
+#include "utils/platform_log.h"
 LOG_MODNAME("test_bool_type")
 
 extern "C" {
