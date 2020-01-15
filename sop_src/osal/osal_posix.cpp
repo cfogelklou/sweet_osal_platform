@@ -270,7 +270,7 @@ void OSALInit(void) {
 #endif
     init = true;
     MemPoolsInitialize();
-    LCAL_Init();
+    //LCAL_Init();
     (void)OSAL::inst();
     //OSALRandomInit("posix", 5);
   }
