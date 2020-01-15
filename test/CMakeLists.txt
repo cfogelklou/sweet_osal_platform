@@ -1,25 +1,24 @@
 cmake_minimum_required(VERSION 3.5)
-project(audio_test)
+project(sweet_osal_test)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-set(EXTERN_LIBS ${TOP_DIR}/ext)
-set(COMMON_SRC ${TOP_DIR}/src)
+set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+set(SOP_EXTERN_LIBS ${SOP_TOP_DIR}/ext)
+set(SOP_COMMON_SRC ${SOP_TOP_DIR}/src)
 
-
-add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE -DNATIVE_LITTLE_ENDIAN -DMBEDTLS_CONFIG_FILE="src/mbedtls/myconfig.h")
-#add_definitions(-DED25519_COMPAT)
-
-
+add_definitions(-DSODIUM_STATIC -DDEBUG -D_CONSOLE -DMBEDTLS_CONFIG_FILE="src/mbedtls/myconfig.h")
 
 if (WIN32)
     #set(FREERTOS_PORT 1)
     add_definitions(-DWIN32)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)
 elseif (APPLE)
     add_definitions(-DAPPLE=1 -D__APPLE__=1 -DTARGET_OS_OSX=1)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)
     set(CMAKE_BUILD_TYPE Debug)
 elseif (UNIX)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
@@ -40,21 +39,21 @@ endif ()
 
 add_definitions(-DMBEDTLS_CONFIG_FILE="src/mbedtls/myconfig.h")
 
-include(${COMMON_SRC}/LibraryFiles.cmake)
+include(${SOP_COMMON_SRC}/LibraryFiles.cmake)
 
 file(GLOB TEST_SRC
-        ${TOP_DIR}/test/*.cpp
-        ${TOP_DIR}/test/*.c
-        ${TOP_DIR}/test/*.h
-        ${TOP_DIR}/test/*.hpp
+        ${SOP_TOP_DIR}/test/*.cpp
+        ${SOP_TOP_DIR}/test/*.c
+        ${SOP_TOP_DIR}/test/*.h
+        ${SOP_TOP_DIR}/test/*.hpp
 )
 
 file(GLOB LOCAL_SRC
-        ${TOP_DIR}/src/LibraryFiles.cmake
-        ${TOP_DIR}/src/*.c
-        ${TOP_DIR}/src/*.cpp
-        ${TOP_DIR}/src/*.h
-        ${TOP_DIR}/src/*.hpp
+        ${SOP_TOP_DIR}/src/LibraryFiles.cmake
+        ${SOP_TOP_DIR}/src/*.c
+        ${SOP_TOP_DIR}/src/*.cpp
+        ${SOP_TOP_DIR}/src/*.h
+        ${SOP_TOP_DIR}/src/*.hpp
 )
 
 set(SOURCE_FILES
@@ -74,33 +73,30 @@ set(SOURCE_FILES
 
         ${TEST_SRC}
 
-        ${TONE_GEN_SRC}
-        ${TONE_DET_SRC}
         ${MINI_SOCKET_SRC}
 
         ${GTEST_SRC}
 
-        ${AUDIO_SRC}
 )
 
 include_directories(
        .
-       ${TOP_DIR}/src/mbedtls
-       ${TOP_DIR}/src
-       # Google test (the real thing)
-       ${TOP_DIR}/ext/googletest/googletest
-       ${TOP_DIR}/ext/googletest/googletest/include
-       ${TOP_DIR}/ext/googletest/googlemock
-       ${TOP_DIR}/ext/googletest/googlemock/include
-       
-       ${TOP_DIR}/ext/mbedtls/include/mbedtls
-       ${TOP_DIR}/ext/mbedtls/crypto/include
-       ${EXTERN_LIBS}/mbedtls/include
-       ${EXTERN_LIBS}/libsodium/src/libsodium
-       ${EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+       ${SOP_TOP_DIR}/src/mbedtls
+       ${SOP_TOP_DIR}/src
 
-       ${TOP_DIR}
-       ${TOP_DIR}/src
+       # Google test
+       ${SOP_TOP_DIR}/ext/googletest/googletest
+       ${SOP_TOP_DIR}/ext/googletest/googletest/include
+       ${SOP_TOP_DIR}/ext/googletest/googlemock
+       ${SOP_TOP_DIR}/ext/googletest/googlemock/include
+       
+       ${SOP_TOP_DIR}/ext/mbedtls/include/mbedtls
+       ${SOP_TOP_DIR}/ext/mbedtls/crypto/include
+       ${SOP_EXTERN_LIBS}/mbedtls/include
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+
+       ${SOP_TOP_DIR}
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

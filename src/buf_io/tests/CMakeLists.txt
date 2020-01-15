@@ -23,10 +23,10 @@ endif()
 
 
 file(GLOB UTILS_SRC
-        ${COMMON_SRC}/utils/*.cpp
-        ${COMMON_SRC}/utils/*.c
-        ${COMMON_SRC}/utils/*.h
-        ${COMMON_SRC}/utils/*.hpp
+        ${SOP_COMMON_SRC}/utils/*.cpp
+        ${SOP_COMMON_SRC}/utils/*.c
+        ${SOP_COMMON_SRC}/utils/*.h
+        ${SOP_COMMON_SRC}/utils/*.hpp
 )
 
 file(GLOB LOCAL_SRC
@@ -58,25 +58,25 @@ set(SOURCE_FILES
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/..
-        ${EXTERN_LIBS}/../
+        ${SOP_EXTERN_LIBS}/../
         ${APPLICAUDIA_LIB_DIR}/src
         ${APPLICAUDIA_LIB_DIR}/src/common_src
         ${ROOT_SRC}
-        ${COMMON_SRC}
-        ${COMMON_SRC}/mbedtls
-        ${COMMON_SRC}/acp
-        ${COMMON_SRC}/libsodium
-        ${COMMON_SRC}/cifra
+        ${SOP_COMMON_SRC}
+        ${SOP_COMMON_SRC}/mbedtls
+        ${SOP_COMMON_SRC}/acp
+        ${SOP_COMMON_SRC}/libsodium
+        ${SOP_COMMON_SRC}/cifra
         ${PROJECTS}/testapp/freertos/portable/MSVC-MingW
         ${FREERTOS_DIR}/include
-        ${EXTERN_LIBS}/mbedtls/include/mbedtls
-        ${EXTERN_LIBS}/mbedtls/include
-        ${EXTERN_LIBS}
-        ${EXTERN_LIBS}/json/src
-        ${EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+        ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
+        ${SOP_EXTERN_LIBS}/mbedtls/include
+        ${SOP_EXTERN_LIBS}
+        ${SOP_EXTERN_LIBS}/json/src
+        ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
         # Google test (the real thing)
-        ${EXTERN_LIBS}/googletest/googletest
-        ${EXTERN_LIBS}/googletest/googletest/include
+        ${SOP_EXTERN_LIBS}/googletest/googletest
+        ${SOP_EXTERN_LIBS}/googletest/googletest/include
         ${APPLICAUDIA_LIB_DIR}/extern_libs/googletest/googlemock
         ${APPLICAUDIA_LIB_DIR}/extern_libs/googletest/googlemock/include
 )
