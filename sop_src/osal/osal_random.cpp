@@ -1,7 +1,7 @@
 /**
 * COPYRIGHT    (c)	Applicaudia 2020
 * @file        osal_random.cpp
-* @brief       Secure random number generation for PAK.
+* @brief       Random number generation.
 */
 #include "mbedtls/myconfig.h"
 #include "osal/osal_random.hpp"
@@ -137,7 +137,7 @@ int OsalRandom::Read(uint8_t *const pBytes, const int numBytes) {
   }
 
 // TODO fix: chfo should fix OSALRandom()
-#ifndef DIGITAL_KEY_PROD_APP
+#ifndef APPLICAUDIA_PROD_APP
   mResched.doReschedule(10);
 #endif
 
