@@ -5,8 +5,8 @@
  */
 
 
-#ifndef BLE_LOG_H
-#define BLE_LOG_H
+#ifndef PLATFORM_LOG_H
+#define PLATFORM_LOG_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -156,4 +156,4 @@ void LOG_LargeStr(
 
 #define LOG_ASSERT_EXIT_CODE 255
 
-#endif /* BLE_LOG_H */
+#endif /* PLATFORM_LOG_H */
