@@ -65,9 +65,9 @@ list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto
 #list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/sodium/core.c)
 
 file(GLOB MBEDTLS_SRC
-  ${SOP_EXTERN_LIBS}/mbedtls/library/*.c
+#  ${SOP_EXTERN_LIBS}/mbedtls/library/*.c
   ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls/*.h
-  ${SOP_EXTERN_LIBS}/mbedtls/library/ed25519/*.c
+#  ${SOP_EXTERN_LIBS}/mbedtls/library/ed25519/*.c
   ${SOP_EXTERN_LIBS}/mbedtls/library/ed25519/*.h
   ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/*.c
   ${SOP_COMMON_SRC}/mbedtls/*.cpp
@@ -121,7 +121,7 @@ set(GTEST_SRC
 )
 
 set(SOP_SRC
-    ${LIBSODIUM_SRC}
+#    ${LIBSODIUM_SRC}
     ${MBEDTLS_SRC}
     ${TASK_SCHED_SRC}
     ${OSAL_SRC}
