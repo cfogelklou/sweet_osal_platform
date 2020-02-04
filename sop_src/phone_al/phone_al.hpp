@@ -4,6 +4,7 @@
 #ifdef __cplusplus
 #include <cstdint>
 
+// This abstract class shall be implemented by Android/iOS/Windows
 class PhoneAL {
 public:
   virtual ~PhoneAL() {}
@@ -29,10 +30,15 @@ public:
     (void)pObjReturnedFromRunCall;
   }
 
+  // Implement in Android/iOS/Windows/etc.
+  static PhoneAL &inst();
+
 };
 
+
+
 // Called by the .mm or ndk implementation of the phone AL.
-void PakSchedInit(PhoneAL* const pHal);
+//void PakSchedInit(PhoneAL* const pHal);
 
 #endif // __cplusplus
 
