@@ -39,8 +39,8 @@
 #define MEMPOOLS_DEBUG_FILETRACE 0
 #endif
 
-#if (defined(__SPC5__) && defined(BUILDING_LIBCRYPTO))
-#define BUILDING_SPC5_LIBCRYPTO
+#if (defined(__EMBEDDED_MCU_BE__) && defined(BUILDING_LIBCRYPTO))
+#define BUILDING_EMBEDDED_MCU_BE_LIBCRYPTO
 #endif
 /**
 * \name SECTION: System support
@@ -53,7 +53,7 @@
 #ifdef OVERWRITE_TO_EMBEDDED
 #define PLATFORM_FULL_OS_OLD PLATFORM_FULL_OS
 #define PLATFORM_EMBEDDED_OLD PLATFORM_EMBEDDED
-// Uncomment following two lines to force operation as if SPC5
+// Uncomment following two lines to force operation as if EMBEDDED_MCU_BE
 #undef PLATFORM_FULL_OS
 #undef PLATFORM_EMBEDDED
 #define PLATFORM_EMBEDDED 1
@@ -2002,7 +2002,7 @@
 */
 //#define MBEDTLS_ARIA_C
 
-#if !defined(BUILDING_SPC5_LIBCRYPTO) // Libcrypto doesn't (yet) include CCM.
+#if !defined(BUILDING_EMBEDDED_MCU_BE_LIBCRYPTO) // Libcrypto doesn't (yet) include CCM.
 /**
 * \def MBEDTLS_CCM_C
 *
@@ -2249,7 +2249,7 @@
 #define MBEDTLS_ERROR_C
 #endif
 
-#if !defined(BUILDING_SPC5_LIBCRYPTO) // Libcrypto doesn't (yet) include GCM.
+#if !defined(BUILDING_EMBEDDED_MCU_BE_LIBCRYPTO) // Libcrypto doesn't (yet) include GCM.
 /**
 * \def MBEDTLS_GCM_C
 *
@@ -2398,7 +2398,7 @@
 */
 #define MBEDTLS_MD5_C
 
-#if (!NO_MEMPOOLS) && (!(defined(BUILDING_SPC5_LIBCRYPTO))) // Libcrypto uses external allocator lcal_calloc
+#if (!NO_MEMPOOLS) && (!(defined(BUILDING_EMBEDDED_MCU_BE_LIBCRYPTO))) // Libcrypto uses external allocator lcal_calloc
 /**
 * \def MBEDTLS_MEMORY_BUFFER_ALLOC_C
 *
@@ -3012,7 +3012,7 @@
 #define MBEDTLS_ECP_MAX_BITS             384 /**< Maximum bit size of groups */
 //#define MBEDTLS_ECP_WINDOW_SIZE            7 /**< Maximum window size used */
 //#define MBEDTLS_ECP_FIXED_POINT_OPTIM      1 /**< Enable fixed-point speed-up */
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
 //#define MBEDTLS_NO_UDBL_DIVISION
 //#define MBEDTLS_HAVE_INT32
 //#define MBEDTLS_HAVE_INT64

@@ -16,7 +16,7 @@ TEST(MemPools, TestHeap) {
   }
 }
 
-#if !defined(__SPC5__)
+#if !defined(__EMBEDDED_MCU_BE__)
 #include <string>
 static void stringMallocTest() {
   std::string s = "Hi";

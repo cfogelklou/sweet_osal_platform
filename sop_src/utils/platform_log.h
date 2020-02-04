@@ -46,8 +46,6 @@ extern bool log_VerboseEnabled;
 // Pass in a different function to use for logging.
 void LOG_Init(LOG_LoggingFn logFn, void *pUserData);
 
-void LOG_InitUI(LOG_LogUIFn logUiFn, void *pUserData);
-
 int LOG_VPrintf(const char * format, va_list arg);
 
 // Debug, prints to the platform's logging area.

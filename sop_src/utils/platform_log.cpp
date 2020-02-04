@@ -31,10 +31,6 @@
 #define System_vsnprintf(pb, sz, fmt, va) util_vsnprintf((pb), (sz), (fmt), (va))
 #endif
 
-#ifdef __SPC5__
-#include "components.h"
-#endif
-
 #include "utils/byteq.hpp"
 #include "utils/sl_list.hpp"
 
@@ -44,10 +40,6 @@
 
 #ifdef WIN32
 #include <Windows.h>
-#endif
-
-#if (PLATFORM_FULL_OS > 0)
-#include <stdio.h>
 #endif
 
 LOG_MODNAME("platform_log")
@@ -294,7 +286,7 @@ void Logger::AssertionWarningFailed(const char *szFile, const int line) {
 extern "C" {
 
 bool log_TraceEnabled = true;
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
 bool log_VerboseEnabled = false;
 #else
 bool log_VerboseEnabled = true;
@@ -503,7 +495,7 @@ void LOG_LargeStrC(
 }
 }
 
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
 #include "platform/drivers/st_spc5/st_uart.h"
 #endif
 
@@ -521,7 +513,7 @@ void LOG_AssertionFailed(const char *szFile, const int line) {
     EvtLogPinsTraceBytes((const uint8_t *)&line, sizeof(line));
 #endif
 
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
     if (log_TraceEnabled){
       OSALEnterCritical();
       STUartAssertOut("\r\n\r\nASSERT:");
@@ -541,7 +533,7 @@ void LOG_AssertionFailed(const char *szFile, const int line) {
 
 #if (PLATFORM_EMBEDDED > 0)
     // In an embedded system, we cannot simply "exit" the program.
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
     OSALEnterTaskCritical();
     pal_lld_writepad(PORT_E, PIN_MRDY, 1);
     pal_lld_writepad(PORT_E, PIN_RST_BLE, 1); // A "high" pulls the line low via NPN.
@@ -566,7 +558,7 @@ void LOG_AssertionFailed(const char *szFile, const int line) {
  
   }
   else {
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
     while (!ignoreAssert) {
       OSALSleep(1);
     }

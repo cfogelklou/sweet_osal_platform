@@ -6,7 +6,7 @@ if(NOT DEFINED SOP_TOP_DIR)
     set(SOP_TOP_DIR ${CMAKE_SOURCE_DIR}/..)
 endif()
 
-add_subdirectory(osal/test)
+
 #a#dss_subdirectory(tests/freertos/tests)
 
 #if (LINUX OR WIN32)

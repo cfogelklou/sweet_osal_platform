@@ -14,12 +14,14 @@
 
 #include "osal/osal.h"
 #include "utils/platform_log.h"
-#include "utils/ble_utils.h"
+#include "utils/helper_utils.h"
 #include "utils/helper_macros.h"
 #include "osal/cs_task_locker.hpp"
 #include <map>
 #include <stdint.h>
 #include <string.h>
+#include <thread>
+#include <mutex>
 
 #ifndef EOK
 #define EOK 0
@@ -49,15 +51,6 @@ LOG_MODNAME("osal.cpp");
 
 #include "mbedtls/entropy.h"
 
-#ifdef PTHREAD_RMUTEX_INITIALIZER
-const pthread_mutex_t rMutexInit = PTHREAD_RMUTEX_INITIALIZER;
-#else
-#ifdef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
-const pthread_mutex_t rMutexInit = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-#else
-const pthread_mutex_t rMutexInit = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
-#endif
-#endif
 #define POSIX_OBJHDR 0x5432abcdu
 
 class posix_OsalBase {
@@ -97,11 +90,12 @@ static uint32_t getMS(void) {
 // //////////////////////////////////////////////
 class posix_OsalMutex : public posix_OsalBase {
 protected:
-  pthread_mutex_t mMutex;
+  std::recursive_mutex mMutex;
 
 public:
-  posix_OsalMutex() : posix_OsalBase() {
-    memcpy(&mMutex, (void *)&rMutexInit, sizeof(pthread_mutex_t));
+  posix_OsalMutex()
+  : posix_OsalBase()
+  , mMutex(){
   }
 
   virtual ~posix_OsalMutex() {
@@ -109,7 +103,10 @@ public:
     if (!lock(10000)) {
       fprintf(stderr, "Unable to get lock in 10 seconds, destroying anyway\r\n");
     }
-    pthread_mutex_destroy(&mMutex);
+    else {
+      unlock();
+    }
+    
   }
 
   bool lock(const uint32_t timeoutMs) {
@@ -117,7 +114,7 @@ public:
     bool rval = false;
     if (timeoutMs == OSAL_WAIT_INFINITE) {
       // If no timeout specified, then just do a normal wait
-      LOG_ASSERT_FN(EOK == pthread_mutex_lock(&mMutex));
+      mMutex.lock();
       rval = true;
     } else {
       bool gotSem = false;
@@ -125,13 +122,9 @@ public:
       const uint32_t timeOut = currentTime + (0x7fffffff & timeoutMs);
       int32_t timeRemaining = timeOut - currentTime;
       while ((!gotSem) && (timeRemaining > 0)) {
-        const int status = pthread_mutex_trylock(&mMutex);
-        gotSem = (EOK == status);
+        const bool gotIt = mMutex.try_lock();
+        gotSem = gotIt;
         if (!gotSem) {
-#ifdef EBUSY
-          LOG_ASSERT(EBUSY ==
-                     status); // Check that the wait failed due to business.
-#endif
           usleep(2000);
           currentTime = getMS();
           timeRemaining = timeOut - currentTime;
@@ -144,9 +137,8 @@ public:
 
   bool unlock() {
     check();
-    const bool rval = (EOK == pthread_mutex_unlock(&mMutex));
-    LOG_ASSERT_WARN(rval);
-    return rval;
+    mMutex.unlock();
+    return true;
   }
 };
 

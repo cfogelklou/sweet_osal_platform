@@ -65,7 +65,7 @@ void OSALClearFlag(bool * const pBoolToClear){
   }
 }
 
-#if (PLATFORM_EMBEDDED > 0) && defined(__SPC5__)
+#if (PLATFORM_EMBEDDED > 0) && defined(__EMBEDDED_MCU_BE__)
 #define STUB_RANDOMBYTES
 #endif
 

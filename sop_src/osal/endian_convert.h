@@ -13,6 +13,11 @@
 extern "C" {
 #endif
 
+#include "platform_type.h"
+#if (TARGET_OS_IOS)
+#define NATIVE_LITTLE_ENDIAN
+#endif
+
 #if !defined(NATIVE_LITTLE_ENDIAN) && !defined(NATIVE_BIG_ENDIAN)
 #ifndef ccs
 #error "Libsodium requires NATIVE_LITTLE_ENDIAN if NATIVE_BIG_ENDIAN is not defined."

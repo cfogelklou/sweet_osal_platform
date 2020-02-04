@@ -35,7 +35,7 @@ file(GLOB LOCAL_SRC
 set(SOURCE_FILES
         ${OSAL_SRC}
 
-        ${MBEDTLS_SRC}
+        ${MBEDTLS_BASICS_SRC}
 
         ${LIBSODIUM_SRC}
 
