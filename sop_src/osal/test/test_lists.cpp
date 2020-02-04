@@ -20,7 +20,7 @@ protected:
 };
 
 
-#if defined(__SPC5__)
+#if defined(__EMBEDDED_MCU_BE__)
 #define OSALRandom(p,l) _OSALRandom(p,l)
 void _OSALRandom( uint8_t *ptmp, int len ){
   for (int i = 0; i < len; i++){

@@ -5,7 +5,7 @@
 //  Created by Chris Fogelklou on 10/09/15.
 //  Copyright © 2020 Acorn Technology. All rights reserved.
 //
-#include "utils/ble_utils.h"
+#include "utils/helper_utils.h"
 #if (PLATFORM_FULL_OS > 0)
 
 #include "utils/convert_utils.h"
@@ -21,14 +21,14 @@
 
 
 #include "osal/osal.h"
-LOG_MODNAME("ble_utils_cpp")
+LOG_MODNAME("helpers_utils_cpp")
 
 using namespace std;
 
 extern "C" {
 
 // ////////////////////////////////////////////////////////////////////////////
-int BLEU_GetFileLen(const char *szFileName) {
+int HELPER_GetFileLen(const char *szFileName) {
   ifstream is;
   is.open(szFileName, ios::binary);
 
@@ -40,24 +40,9 @@ int BLEU_GetFileLen(const char *szFileName) {
   return (int)length;
 }
 
-
-// ////////////////////////////////////////////////////////////////////////////
-void BLEU_PubKeyToUUID(const sstring &pubkey, sstring &uuid) {
-  LOG_ASSERT(pubkey.length() >= 6);
-  uuid.clear();
-  uuid.append("HONEASAKEY");
-  uuid.trim_null();
-  sstring pubkeystr;
-  CNV_BinToHexStr(pubkey.u_str(), pubkey.length(), pubkeystr);
-  uuid.append(pubkeystr.u_str(), 6);
-  uuid.trim_null();
-  LOG_ASSERT(uuid.length() == BLEU_UUID_LEN);
-
-}
-
 // ////////////////////////////////////////////////////////////////////////////
 // Takes incoming ASCII characters and converts to hexadecimal.
-int BLEU_AsciiToHexBin(const uint8_t *const pAsciiIn, const int numChars,
+int HELPER_AsciiToHexBin(const uint8_t *const pAsciiIn, const int numChars,
                        uint8_t *pBinaryOut, const int binaryOutSize) {
   deque<uint8_t> nybbles;
 
@@ -94,7 +79,7 @@ int BLEU_AsciiToHexBin(const uint8_t *const pAsciiIn, const int numChars,
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 // Takes incoming ASCII characters and converts to hexadecimal.
-int BLEU_StrAsciiToHex(const std::string &asc, std::string &binStr) {
+int HELPER_StrAsciiToHex(const std::string &asc, std::string &binStr) {
   deque<uint8_t> nybbles;
   const size_t numChars = asc.length();
   const char *const pAscStr = asc.c_str();
@@ -129,7 +114,7 @@ int BLEU_StrAsciiToHex(const std::string &asc, std::string &binStr) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-int BLEU_BinHexToAsciiHex(const std::string &binStr, std::string &ascStr) {
+int HELPER_BinHexToAsciiHex(const std::string &binStr, std::string &ascStr) {
   ascStr.clear();
   const char *pc = binStr.data();
   const int len = (int)binStr.length();
@@ -144,7 +129,7 @@ int BLEU_BinHexToAsciiHex(const std::string &binStr, std::string &ascStr) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-void BLEU_BinToAsciiHexString(const string &str, string &outAsciiHex) {
+void HELPER_BinToAsciiHexString(const string &str, string &outAsciiHex) {
   outAsciiHex.clear();
   const char *pc = str.data();
   const int len = (int)str.length();
@@ -157,7 +142,7 @@ void BLEU_BinToAsciiHexString(const string &str, string &outAsciiHex) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-void BLEU_GetFileContentsAsAscii(string &filename, string &outAsciiHex) {
+void HELPER_GetFileContentsAsAscii(string &filename, string &outAsciiHex) {
   fstream f(filename.c_str(), ios_base::binary | ios_base::in);
   outAsciiHex = "";
   if (f.is_open()) {
@@ -174,10 +159,10 @@ void BLEU_GetFileContentsAsAscii(string &filename, string &outAsciiHex) {
 }
 
 extern "C" {
-void BLEU_TraceFileContents(const char *szFname) {
+void HELPER_TraceFileContents(const char *szFname) {
   std::string contents;
   std::string filename(szFname);
-  BLEU_GetFileContentsAsAscii(filename, contents);
+  HELPER_GetFileContentsAsAscii(filename, contents);
   LOG_TRACE((contents.c_str()));
 }
 }

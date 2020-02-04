@@ -1,2 +1,20 @@
-# sweet_osal_platform
-A simple, easily ported OS Abstraction Layer with additional utilities for embedded and app integration and basic crypto support.
+# sweet_osal_platform (SOP)
+An abstraction layer for Windows, Linux, Android, and iOS platforms containing OS abstractions and utilities that have been proven useful over my career.
+
+Many of these source files originated in embedded projects 20 years ago, so are lightweight but also not "modern" and might be closer to C than C++ (utils/byteq for example) but correctness trumps modernity.  For example, I recently replaced the "mutex" in the osal with a std::recursivemutex, as C++11 is now mostly implemented even in the embedded world.
+
+The goal with open sourcing these is to ensure their use continues in all future projects while simultaneously refactoring them, modernizing them, and building upon them.  (as opposed to the typical process of picking, choosing, and rewriting as the needs arise)
+
+Unit tests can be built and run using cmake:
+
+```bash
+
+git submodule update --init --recursive
+
+mkdir build
+cd build
+cmake ../
+make
+ctest
+
+```

@@ -9,7 +9,7 @@
 
 #include "platform/osal.h"
 #include "utils/platform_log.h"
-#include "utils/ble_utils.h"
+#include "utils/helper_utils.h"
 #include "utils/helper_macros.h"
 #include <stdint.h>
 #include "mempools.h"
@@ -499,7 +499,7 @@ static int entropy_gen( void *data, unsigned char *x, size_t xlen ){
 // process in that library.  Used on CC2650.
 
 #include "ICall.h"
-#include "utils/ble_utils.h"
+#include "utils/helper_utils.h"
 #include "utils/helper_macros.h"
 #include <ti/sysbios/hal/Hwi.h>
 #include "platform/osal.h"

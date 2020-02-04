@@ -312,8 +312,6 @@ static const OSALTaskStructT *stacks[TS_NUM_PRIORITIES-1] = {
 static const OSALPrioT taskPriorities[TS_NUM_PRIORITIES-1]  = {
   OSAL_PRIO_HIGH,           ///< High priority interface (audio, etc.)
   OSAL_PRIO_MEDIUM_PLUS,    ///< Low priority (worker)
-  // As TLS takes so much time for some operations on SPC5, place its priority UNDER background.
-  // TODO: Adjust some OS unit tests to use these same priorities.
   OSAL_PRIO_MEDIUM,         ///< App & TLS priority
   OSAL_PRIO_LOW             ///< Low priority (worker)
 };

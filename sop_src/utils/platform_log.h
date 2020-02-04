@@ -5,8 +5,8 @@
  */
 
 
-#ifndef BLE_LOG_H
-#define BLE_LOG_H
+#ifndef PLATFORM_LOG_H
+#define PLATFORM_LOG_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -45,8 +45,6 @@ extern bool log_VerboseEnabled;
 
 // Pass in a different function to use for logging.
 void LOG_Init(LOG_LoggingFn logFn, void *pUserData);
-
-void LOG_InitUI(LOG_LogUIFn logUiFn, void *pUserData);
 
 int LOG_VPrintf(const char * format, va_list arg);
 
@@ -156,4 +154,4 @@ void LOG_LargeStr(
 
 #define LOG_ASSERT_EXIT_CODE 255
 
-#endif /* BLE_LOG_H */
+#endif /* PLATFORM_LOG_H */

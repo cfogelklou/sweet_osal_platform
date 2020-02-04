@@ -25,9 +25,9 @@
 
 #if (NO_MEMPOOLS > 0)
 #undef MEMPOOLS_DEBUG
-#define MEMPOOLS_DEBUG 0
+//#define MEMPOOLS_DEBUG 0
 #undef MEMPOOLS_DEBUG_FILETRACE
-#define MEMPOOLS_DEBUG_FILETRACE 0
+//#define MEMPOOLS_DEBUG_FILETRACE 0
 
 
 #define MemPoolsMalloc(size) calloc(1, (size))

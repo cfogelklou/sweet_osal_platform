@@ -37,6 +37,6 @@ endif()
 
 add_subdirectory(sop_src)
 add_subdirectory(test)
-
-
-
+add_subdirectory(sop_src/osal/test)
+#add_subdirectory(ext/mbedtls)
+add_subdirectory(sop_src/buf_io/tests)

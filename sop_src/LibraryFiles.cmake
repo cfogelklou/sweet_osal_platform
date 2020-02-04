@@ -27,6 +27,32 @@ endif ()
 add_definitions(-DSODIUM_STATIC -DDEV_MODE -DCONFIGURED=1 -DDEBUG -D_CONSOLE)
 add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
 
+
+include_directories(
+       .
+       ${SOP_COMMON_SRC}
+
+       # Google test
+       ${SOP_TOP_DIR}/ext/googletest/googletest
+       ${SOP_TOP_DIR}/ext/googletest/googletest/include
+       ${SOP_TOP_DIR}/ext/googletest/googlemock
+       ${SOP_TOP_DIR}/ext/googletest/googlemock/include
+	   
+	   #json
+	   ${SOP_TOP_DIR}/ext/json/include
+       
+       ${SOP_COMMON_SRC}/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/crypto/include
+       ${SOP_EXTERN_LIBS}/mbedtls/include
+
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+
+       ${SOP_TOP_DIR}
+)
+
+
 # USE recursive search to add all libsodium files.
 file(GLOB_RECURSE LIBSODIUM_SRC
   ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/*.c
@@ -41,6 +67,27 @@ list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto
 list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto_aead/aegis256/aesni/aead_aegis256_aesni.c)
 #list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/sodium/core.c)
 
+file(GLOB MBEDTLS_BASICS_SRC
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/sha1.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/sha256.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/sha512.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/platform_util.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/base64.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/entropy.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/entropy_poll.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/threading.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/timing.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/memory_buffer_alloc.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/platform.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/hmac_drbg.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/md.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/md2.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/md4.c
+  ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/md5.c
+  ${SOP_COMMON_SRC}/mbedtls/*.cpp
+  ${SOP_COMMON_SRC}/mbedtls/*.c
+)
+                                             
 file(GLOB MBEDTLS_SRC
   ${SOP_EXTERN_LIBS}/mbedtls/library/*.c
   ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls/*.h
@@ -50,6 +97,8 @@ file(GLOB MBEDTLS_SRC
   ${SOP_COMMON_SRC}/mbedtls/*.cpp
   ${SOP_COMMON_SRC}/mbedtls/*.c
 )
+                                             
+                                             
 
 list(REMOVE_ITEM MBEDTLS_SRC ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/version.c)
 list(REMOVE_ITEM MBEDTLS_SRC ${SOP_EXTERN_LIBS}/mbedtls/library/error.c)
@@ -84,6 +133,12 @@ file(GLOB UTILS_SRC
         ${SOP_COMMON_SRC}/utils/*.hpp
 )
 
+file(GLOB PHONE_AL_SRC
+        ${SOP_COMMON_SRC}/phone_al/*.cpp
+        ${SOP_COMMON_SRC}/phone_al/*.c
+        ${SOP_COMMON_SRC}/phone_al/*.h
+        ${SOP_COMMON_SRC}/phone_al/*.hpp
+)
 
 file(GLOB MINI_SOCKET_SRC
         ${SOP_COMMON_SRC}/mini_socket/*.c
@@ -99,12 +154,15 @@ set(GTEST_SRC
 
 set(SOP_SRC
     ${LIBSODIUM_SRC}
-    ${MBEDTLS_SRC}
+    ${MBEDTLS_BASICS_SRC}
     ${TASK_SCHED_SRC}
     ${OSAL_SRC}
+    ${PHONE_AL_SRC}
     ${BUF_IO_SRC}
     ${UTILS_SRC}
     ${MINI_SOCKET_SRC}
     ${GTEST_SRC}
     ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )
+
+list(REMOVE_DUPLICATES SOP_SRC)

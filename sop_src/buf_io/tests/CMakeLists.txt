@@ -3,31 +3,23 @@ project(transport_test)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
-
-if(NOT DEFINED APPLICAUDIA_LIB_DIR)
-    set(APPLICAUDIA_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
-endif()
-include(${APPLICAUDIA_LIB_DIR}/Applicaudia.cmake)
-include(${ROOT_SRC}/LibraryFiles.cmake)
+include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
 
 add_definitions(-DMEMPOOLS_DEBUG=1 -DNO_MEMPOOLS=0)
 
 if (WIN32)
+    add_definitions(-DMBEDTLS_NO_SOCKETS)
+elseif (APPLE)
+    set(CMAKE_BUILD_TYPE Debug)
 elseif (UNIX)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99")
+    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99")
 
-#TODO the following definition is only needed on BASH under windows.
-add_definitions(-DMBEDTLS_NO_SOCKETS)
+    #TODO the following definition is only needed on BASH under windows.
+    add_definitions(-DMBEDTLS_NO_SOCKETS)
 endif()
-
-
-file(GLOB UTILS_SRC
-        ${SOP_COMMON_SRC}/utils/*.cpp
-        ${SOP_COMMON_SRC}/utils/*.c
-        ${SOP_COMMON_SRC}/utils/*.h
-        ${SOP_COMMON_SRC}/utils/*.hpp
-)
 
 file(GLOB LOCAL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
@@ -35,59 +27,38 @@ file(GLOB LOCAL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
 )
 
-set(GTEST_SRC
-        ${APPLICAUDIA_LIB_DIR}/extern_libs/googletest/googletest/src/gtest-all.cc
-        ${APPLICAUDIA_LIB_DIR}/extern_libs/googletest/googlemock/src/gmock-all.cc
-)
-
 set(SOURCE_FILES
-        ${PLATFORM_SRC}
-        ${RTC_EMUL_SRC}
+        # Google Test / Mock
+        ${SOP_SRC}
 
-        ${ALL_CRYPTO_SRC}
-
-        ${GTEST_SRC}
-
-        ${BLEIOQ_BASE_SRC}
-
-        ${UTILS_SRC}
-
+        # These main files.
         ${LOCAL_SRC}
+
+
 )
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/..
-        ${SOP_EXTERN_LIBS}/../
-        ${APPLICAUDIA_LIB_DIR}/src
-        ${APPLICAUDIA_LIB_DIR}/src/common_src
-        ${ROOT_SRC}
-        ${SOP_COMMON_SRC}
-        ${SOP_COMMON_SRC}/mbedtls
-        ${SOP_COMMON_SRC}/acp
-        ${SOP_COMMON_SRC}/libsodium
-        ${SOP_COMMON_SRC}/cifra
-        ${PROJECTS}/testapp/freertos/portable/MSVC-MingW
-        ${FREERTOS_DIR}/include
-        ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
-        ${SOP_EXTERN_LIBS}/mbedtls/include
-        ${SOP_EXTERN_LIBS}
-        ${SOP_EXTERN_LIBS}/json/src
-        ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
-        # Google test (the real thing)
-        ${SOP_EXTERN_LIBS}/googletest/googletest
-        ${SOP_EXTERN_LIBS}/googletest/googletest/include
-        ${APPLICAUDIA_LIB_DIR}/extern_libs/googletest/googlemock
-        ${APPLICAUDIA_LIB_DIR}/extern_libs/googletest/googlemock/include
-)
+list(REMOVE_DUPLICATES SOURCE_FILES)
 
-if (WIN32)
 include_directories(
-       ${PLATFORM}/pc_port/windows
- )
-endif (WIN32)
+       ${SOP_TOP_DIR}
+
+       ${SOP_COMMON_SRC}
+
+       ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/include/sodium
+
+       ${SOP_COMMON_SRC}/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/include/mbedtls
+       ${SOP_EXTERN_LIBS}/mbedtls/crypto/include
+       ${SOP_EXTERN_LIBS}/mbedtls/include
+
+       ${SOP_EXTERN_LIBS}/googletest/googletest
+       ${SOP_EXTERN_LIBS}/googletest/googletest/include
+       ${SOP_EXTERN_LIBS}/googletest/googlemock
+       ${SOP_EXTERN_LIBS}/googletest/googlemock/include
+)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+find_package(Threads REQUIRED)
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} ws2_32)
 else (WIN32)

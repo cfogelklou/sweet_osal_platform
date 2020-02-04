@@ -4,7 +4,7 @@
 #include "mbedtls/aes.h"
 #include "utils/platform_log.h"
 
-#ifndef __SPC5__
+#ifndef __EMBEDDED_MCU_BE__
 #include "crypto/crypto_aes_cifra.hpp"
 #else
 #include "crypto/crypto_aes_mbedtls.hpp"
@@ -37,7 +37,7 @@ extern "C" {
  * \param ctx      AES context to be initialized
  */
 void mbedtls_aes_init( mbedtls_aes_context *ctx ){
-#ifndef __SPC5__
+#ifndef __EMBEDDED_MCU_BE__
   ASSERT_AT_COMPILE_TIME(sizeof(CryptoAesBG) < sizeof(ctx->enclassMem));
   ASSERT_AT_COMPILE_TIME(sizeof(CryptoAesBG) < sizeof(ctx->declassMem));
   LOG_ASSERT(sizeof(CryptoAesBG) < sizeof(ctx->enclassMem));
