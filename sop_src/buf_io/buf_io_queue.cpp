@@ -12,7 +12,7 @@ LOG_MODNAME("buf_io_queue")
 extern "C" {
 
 // //////////////////////////////////////////////////////////////////////////
-void buf_ioqueue_tx_free(BufIOQTransT * const pTrans) {
+void _buf_ioqueue_tx_free(BufIOQTransT * const pTrans) {
   OSALFREE(pTrans);
 }
 
@@ -27,7 +27,7 @@ bool BufIOQueue_InitTransaction(BufIOQTransT *const pTransaction,
     SLL_NodeInit(&pTransaction->listNode);
     pTransaction->pBuf8 = pBuf;
     pTransaction->transactionLen = bufLen;
-    pTransaction->completedCb = (cb) ? cb : buf_ioqueue_tx_free;
+    pTransaction->completedCb = (cb) ? cb : _buf_ioqueue_tx_free;
     pTransaction->expiryTime = OSAL_WAIT_INFINITE;
     pTransaction->pUserData = pUserData;
     rval = true;
@@ -48,7 +48,7 @@ BufIOQTransWithPayloadT * BufIOQueue_MallocWithPayload(
   BufIOQTransWithPayloadT * const p =
      (BufIOQTransWithPayloadT *)OSALMALLOC(sizeof(BufIOQTransT) + numPayloadBytes);
   if (p){
-    const BufIOQueue_TransactionCompleteCb fn = (cb) ? cb : buf_ioqueue_tx_free;
+    const BufIOQueue_TransactionCompleteCb fn = (cb) ? cb : _buf_ioqueue_tx_free;
     BufIOQueue_InitTransaction(&p->trans, p->payload, numPayloadBytes, fn, pUserData);
     if (pPayload) {
       memcpy(p->payload, pPayload, numPayloadBytes);
