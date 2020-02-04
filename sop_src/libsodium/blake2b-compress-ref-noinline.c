@@ -34,7 +34,7 @@ static const uint8_t blake2b_sigma[12][16] = {
   { 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 }
 };
 
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
 #define B2B_NO_INLINE_UNROLL
 #endif
 

@@ -18,7 +18,7 @@ extern "C" {
 #include "mempools.h"
 #include "utils/dl_list.h"
 #include "utils/platform_log.h"
-#include "utils/ble_utils.h"
+#include "utils/helper_utils.h"
 #include "utils/helper_macros.h"
 #include "utils/buf_alloc.hpp"
 #include "platform/cs_locker.hpp"
@@ -638,7 +638,7 @@ size_t xPortGetFreeHeapSize( void ) {
   return mp_Buf.AvailBytes();
 }
 
-#ifdef __SPC5__
+#ifdef __EMBEDDED_MCU_BE__
 
 #include <sys/time.h>
 #ifndef _TIMEVAL_DEFINED

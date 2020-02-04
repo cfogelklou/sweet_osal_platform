@@ -291,12 +291,16 @@ TEST_F(OSALTest, osal_TestSleep) {
 ******************************************************************************/
 TEST_F(OSALTest, TestMutex) {
   OSALMutexPtrT mId, mIdSave;
-  OSALInit();
+  //OSALInit();
 
   uint32_t time = OSALGetMS();
 
   // Recursive check: Test that a mutex can be locked more than once...
   mId = OSALCreateMutex();
+  OSALDeleteMutex(&mId);
+  mId = OSALCreateMutex();
+
+  // Save a pointer to the mutex.
   mIdSave = mId;
 
   time = OSALGetMS();
@@ -338,7 +342,6 @@ TEST_F(OSALTest, TestMutex) {
   // Now post the mutex
   EXPECT_TRUE(OSALUnlockMutex(mId));
 
-
   auto osal_TestMutex_task2 = [](void *pParam, uint32_t timeOrTicks) {
     uint32_t time2;
     (void)timeOrTicks;
@@ -360,6 +363,7 @@ TEST_F(OSALTest, TestMutex) {
 
   OSALSleep(2000);
   EXPECT_TRUE(mId == 0);
+
   mId = mIdSave;
   EXPECT_TRUE(mId != 0);
 

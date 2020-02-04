@@ -9,7 +9,7 @@
 
 #include "osal/osal.h"
 #include "utils/platform_log.h"
-#include "utils/ble_utils.h"
+#include "utils/helper_utils.h"
 #include "utils/helper_macros.h"
 #include "osal/cs_locker.hpp"
 #include <map>
@@ -20,7 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
-
+#include <thread>
+#include <mutex>
 
 #ifndef EOK
 #define EOK 0
@@ -131,14 +132,15 @@ extern "C" {
 
 #define HDRMUTEX 0x28a22a22
 class OSALMutex {
-public:
+protected:
   uint32_t hdr;
-  HANDLE hMutex;
+  std::recursive_mutex mMutex;
+
+public:
   OSALMutex() 
     : hdr(HDRMUTEX)
-    , hMutex(CreateMutex(NULL, FALSE, NULL))
+    , mMutex()
   {
-    hdr = HDRMUTEX;
     check();
   }
 
@@ -149,7 +151,45 @@ public:
 
   ~OSALMutex() {
     check();
-    hdr = ~HDRMUTEX;
+    if (!lock(10000)) {
+      fprintf(stderr, "Unable to get lock in 10 seconds, destroying anyway\r\n");
+    }
+    else {
+      unlock();
+    }
+  }
+
+  bool lock(const uint32_t timeoutMs) {
+    check();
+    bool rval = false;
+    if (timeoutMs == OSAL_WAIT_INFINITE) {
+      // If no timeout specified, then just do a normal wait
+      mMutex.lock();
+      rval = true;
+    }
+    else {
+      bool gotSem = false;
+      uint32_t currentTime = OSALGetMS();
+      const uint32_t timeOut = currentTime + (0x7fffffff & timeoutMs);
+      int32_t timeRemaining = timeOut - currentTime;
+      while ((!gotSem) && (timeRemaining > 0)) {
+        const bool gotIt = mMutex.try_lock();
+        gotSem = gotIt;
+        if (!gotSem) {
+          Sleep(2);
+          currentTime = OSALGetMS();
+          timeRemaining = timeOut - currentTime;
+        }
+      }
+      rval = gotSem;
+    }
+    return rval;
+  }
+
+  bool unlock() {
+    check();
+    mMutex.unlock();
+    return true;
   }
 };
 
@@ -157,16 +197,9 @@ public:
 // Description - see the header file.
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 void *OSALCreateMutex() {
-  OSALMutex *pMutex = new OSALMutex();
-  LOG_ASSERT(pMutex != NULL);
-  if (pMutex != NULL) {
-    LOG_ASSERT(pMutex->hMutex != INVALID_HANDLE_VALUE);
-    if (pMutex->hMutex == INVALID_HANDLE_VALUE) {
-      delete pMutex;
-      pMutex = NULL;
-    }
-  }
-  return pMutex;
+  OSALMutex* const pMutex = new OSALMutex();
+  LOG_ASSERT(pMutex);
+  return (void*)pMutex;
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,16 +207,13 @@ void *OSALCreateMutex() {
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 void OSALDeleteMutex(void **ppPortMutex) {
 
-  OSALMutex **ppMutex = (OSALMutex **)ppPortMutex;
-  OSALMutex *pMutex = *ppMutex;
-  LOG_ASSERT(pMutex != NULL);
+  OSALMutex** ppMutex = (OSALMutex**)ppPortMutex;
+  OSALMutex* const pMutex = *ppMutex;
 
+  LOG_ASSERT(pMutex != NULL);
   if (pMutex != NULL) {
-    LOG_ASSERT(pMutex->check());
-    const HANDLE hMutex = pMutex->hMutex;
     delete pMutex;
-    LOG_ASSERT_WARN_FN(CloseHandle(hMutex));
-    *ppMutex = NULL;
+    *ppPortMutex = NULL;
   }
 }
 
@@ -191,34 +221,26 @@ void OSALDeleteMutex(void **ppPortMutex) {
 // Description - see the header file.
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 bool OSALLockMutex(void *const pPortMutex, const uint32_t timeoutMs) {
-  bool rval = false;
-  OSALMutex *pMutex = (OSALMutex * const)pPortMutex;
-
-  // Do not lock from within a CS!
-  LOG_ASSERT(GetCurrentThreadId() != OSAL::inst().m_CSThreadId);
-
-  LOG_ASSERT(pMutex != NULL);
-  LOG_ASSERT(pMutex->check());
-
-  if (timeoutMs == OSAL_WAIT_INFINITE) {
-    // If no timeout specified, then just do a normal wait
-    const DWORD stat = WaitForSingleObject(pMutex->hMutex, INFINITE);
-    rval = ((stat == WAIT_OBJECT_0) || (stat == WAIT_ABANDONED));
-  } else {
-    const DWORD stat = WaitForSingleObject(pMutex->hMutex, timeoutMs);
-    rval = ((stat == WAIT_OBJECT_0) || (stat == WAIT_ABANDONED));
+  OSALMutex* const pMutex = (OSALMutex*)pPortMutex;
+  if (pMutex) {
+    return pMutex->lock(timeoutMs);
   }
-  return rval;
+  else {
+    return false;
+  }
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 // Description - see the header file.
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 bool OSALUnlockMutex(void *const pPortMutex) {
-  OSALMutex *const pMutex = (OSALMutex * const)pPortMutex;
-  LOG_ASSERT(pMutex != NULL);
-  LOG_ASSERT(pMutex->check());
-  return (TRUE == ReleaseMutex(pMutex->hMutex));
+  OSALMutex* const pMutex = (OSALMutex*)pPortMutex;
+  if (pMutex) {
+    return pMutex->unlock();
+  }
+  else {
+    return false;
+  }
 }
 
 #define WINSEMHDR 0x97386452
