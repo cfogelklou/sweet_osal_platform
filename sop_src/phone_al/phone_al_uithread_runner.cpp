@@ -2,40 +2,55 @@
 #include "osal/osal.h"
 #include "utils/helper_utils.h"
 #include "task_sched/task_sched.h"
+#include "phone_al_uithread_runner.hpp"
 
-LOG_MODNAME("pak_sched")
+LOG_MODNAME("uit_sched")
 
-// //////////////////////////////////////////////////////////////////////////////////
-void pakp_tasksched_runnableCb(void *pObj);
-
-typedef void(*pakp_RunnableFnPtr)(void *pCallbackData, uint32_t timeOrTicks);
-
-struct PakSchedulableTag;
-
-// //////////////////////////////////////////////////////////////////////////////////
-typedef struct PakSchedulableTag {
-  void *pObjectReturnedFromLastCall = nullptr;
-  pakp_RunnableFnPtr pFnRunnable = nullptr;
-  void *pCallbackData = nullptr;
-} PakSchedulable;
-
-// We can only schedule one task at a time.
-// //////////////////////////////////////////////////////////////////////////////////
-void PakSchedDoSchedule(const uint32_t delay);
-void PakSchedInitSched(
-    PakSchedulable * const pSched,
-    pakp_RunnableFnPtr   const pTaskFn,
-    void           * const /*@unused@*/ pUserData);
-
-class PakSched {
+class UiTSched {
 public:
-  static PakSched &inst(){
-    static PakSched theInst;
+  static UiTSched &inst(){
+    static UiTSched theInst;
     return theInst;
   }
 
   // //////////////////////////////////////////////////////////////////////////////////
-  static void paksched_TaskSchedPoll(void *, uint32_t timeOrTicks) {
+  bool Cancel() {
+    OSALEnterCritical();
+    if (pObjectReturnedFromLastCall) {
+      PhoneAL::inst().CancelRunnable(pObjectReturnedFromLastCall);
+      pObjectReturnedFromLastCall = nullptr;
+    }
+    OSALExitCritical();
+    return false;
+  }
+
+  // ////////////////////////////////////////////////////////////////////////////
+  void DoSchedule(const uint32_t delay){
+    Cancel();
+
+    OSALEnterCritical();
+    if (pObjectReturnedFromLastCall) {
+      Cancel();
+    }
+
+    // Run the next task on the thread
+    pObjectReturnedFromLastCall = PhoneAL::inst().RunOnUiThread(uitp_tasksched_runnableCb, this, delay);
+
+    OSALExitCritical();
+  }
+private:
+
+  UiTSched()
+  : pObjectReturnedFromLastCall(nullptr)
+  {
+  }
+
+  // //////////////////////////////////////////////////////////////////////////////////
+  static void uitp_tasksched_runnableCb(void *pObj) {
+    UiTSched *pThis = (UiTSched *)pObj;
+    OSALEnterCritical();
+    pThis->pObjectReturnedFromLastCall = nullptr;
+    OSALExitCritical();
     bool runAgain = true;
     while (runAgain){
       runAgain = false;
@@ -44,90 +59,22 @@ public:
         runAgain = true;
       }
       else if (delay > 0){
-        PakSchedDoSchedule(delay);
+        pThis->DoSchedule(delay);
       }
     }
   }
 
-  PakSchedulable &getSched(){
-    return pakSchedTask;
-  }
 private:
 
-  PakSched()
-  : pakSchedTask()
-  {
-    PakSchedInitSched(&pakSchedTask, paksched_TaskSchedPoll, nullptr);
-  }
-  PakSchedulable pakSchedTask;
+  // When non-null, indicates that there is a callback pending.
+  void *pObjectReturnedFromLastCall;
+
 };
 
 
-// //////////////////////////////////////////////////////////////////////////////////
-bool PakSchedCancel() {
-  auto &sched = PakSched::inst().getSched();
-  OSALEnterCritical();
-  if (sched.pObjectReturnedFromLastCall) {
-    PhoneAL::inst().CancelRunnable(sched.pObjectReturnedFromLastCall);
-    sched.pObjectReturnedFromLastCall = nullptr;
-  }
-  OSALExitCritical();
-  return false;
-}
-
-// //////////////////////////////////////////////////////////////////////////////////
-void PakSchedInitSched(
-    pakp_RunnableFnPtr   const pTaskFn,
-    void           * const /*@unused@*/ pUserData) {
-  PakSchedulable &sched = PakSched::inst().getSched();
-  OSALEnterCritical();
-  if (sched.pObjectReturnedFromLastCall) {
-    PakSchedCancel();
-  }
-  sched.pFnRunnable = pTaskFn;
-  sched.pCallbackData = pUserData;
-  sched.pObjectReturnedFromLastCall = nullptr;
-  OSALExitCritical();
-}
-
-// //////////////////////////////////////////////////////////////////////////////////
-void pakp_tasksched_runnableCb(void *pObj) {
-  PakSchedulable &sched = PakSched::inst().getSched();
-  LOG_ASSERT(sched.pFnRunnable);
-  if (sched.pFnRunnable) {
-    PakSchedulable tmp;
-    OSALEnterCritical();
-    tmp = sched;
-    sched.pObjectReturnedFromLastCall = nullptr;
-    OSALExitCritical();
-    tmp.pFnRunnable(tmp.pCallbackData, OSALGetMS());
-  }
-}
-
-// //////////////////////////////////////////////////////////////////////////////////
-bool PakSchedIsListed(
-    const PakSchedulable * const pSched) {
-  bool rval = false;
-  LOG_ASSERT(pSched);
-  if (pSched) {
-    rval = (pSched->pObjectReturnedFromLastCall) ? true : false;
-  }
-  return rval;
-}
-
 // ////////////////////////////////////////////////////////////////////////////
-void PakSchedDoSchedule(const uint32_t delay){
-  PakSchedCancel();
-  PakSchedulable &sched = PakSched::inst().getSched();
-  LOG_ASSERT(sched.pFnRunnable);
-  OSALEnterCritical();
-  if (sched.pObjectReturnedFromLastCall) {
-    PakSchedCancel();
-  }
-
-  // Run the next task on the thread
-  sched.pObjectReturnedFromLastCall =
-      PhoneAL::inst().RunOnUiThread(pakp_tasksched_runnableCb, &sched, delay);
-  OSALExitCritical();
+// Externally accessible
+void UiTSchedDoSchedule(const uint32_t delay){
+  UiTSched::inst().DoSchedule(delay);
 }
 
