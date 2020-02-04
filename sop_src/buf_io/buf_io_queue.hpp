@@ -28,8 +28,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-struct BufIOQTransTag;
-
 // ////////////////////////////////////////////////////////////////////////////
 // Callback called when a transaction is completed.
 // Called by the physical layer (UART/BLE/etc) when a read or write transaction
@@ -38,6 +36,12 @@ struct BufIOQTransTag;
 
 typedef void (*BufIOQueue_TransactionCompleteCb)(
     struct BufIOQTransTag *pTransaction);
+
+struct BufIOQTransTag;
+
+extern "C" {
+  void buf_ioqueue_tx_free(struct BufIOQTransTag* const pTrans);
+}
 
 // ////////////////////////////////////////////////////////////////////////////
 // Allows for transactions to be queued.  The completedCb will be called when
@@ -70,6 +74,25 @@ typedef struct BufIOQTransTag {
   
   /// Data included to pass back to the completedCb.
   void *pUserData;
+
+#ifdef __cplusplus
+  BufIOQTransTag(
+    uint8_t* _pBuf8 = nullptr,
+    uint16_t _transactionLen = 0,
+    BufIOQueue_TransactionCompleteCb _completedCb = nullptr,
+    void* const _pUserData = nullptr,
+    uint32_t _expiryTime = 0xffffffff)
+    : listNode()
+    , expiryTime()
+    , pBuf8(_pBuf8)
+    , transactionLen(_transactionLen)
+    , completedCb((_completedCb) ? _completedCb : buf_ioqueue_tx_free)
+    , pUserData(_pUserData)
+  {
+    SLL_NodeInit(&listNode);
+  };
+#endif
+
 } BufIOQTransT;
 
 // Utility class that makes allocating memory with the buffer appended easier.

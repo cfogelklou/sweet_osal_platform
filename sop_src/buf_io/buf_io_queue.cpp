@@ -9,13 +9,12 @@
 #include <string.h>
 LOG_MODNAME("buf_io_queue")
 
+extern "C" {
 
 // //////////////////////////////////////////////////////////////////////////
-static void buf_ioqueue_tx_free(BufIOQTransT * const pTrans) {
+void buf_ioqueue_tx_free(BufIOQTransT * const pTrans) {
   OSALFREE(pTrans);
 }
-
-extern "C" {
 
 // //////////////////////////////////////////////////////////////////////////
 bool BufIOQueue_InitTransaction(BufIOQTransT *const pTransaction,

@@ -19,8 +19,7 @@
 #include <mutex>          // std::mutex, std::unique_lock, std::defer_lock
 
 class UdpClient: public BufIOQueue {
-public:
-  
+
 public:
   UdpClient(const char *szAddr, const int port)
   : BufIOQueue(CriticalSectionType::Critical)
@@ -148,8 +147,7 @@ private:
       OSALExitCritical();
     }
     else {
-      const int err = WSAGetLastError();
-      LOG_TRACE(("recv: %s\n", gai_strerror(err)));
+      LOG_TRACE(("No receive was queued, so could not fetch from socket.\r\n"));
     }
   };
 
