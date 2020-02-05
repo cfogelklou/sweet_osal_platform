@@ -36,10 +36,6 @@ public:
 };
 
 
-
-// Called by the .mm or ndk implementation of the phone AL.
-//void PakSchedInit(PhoneAL* const pHal);
-
 #endif // __cplusplus
 
 #endif

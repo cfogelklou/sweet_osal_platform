@@ -1,8 +1,15 @@
+/**
+  This file was originally a fully-fledged task scheduler.
+  Then it was pared down when the real task-scheduler was brought in
+  And now it is only used in Android to ensure that the real task scheduler
+  is run using the "IdlePoll" task whenever the next "task" should run.
+*/
 #include "phone_al.hpp"
 #include "osal/osal.h"
 #include "utils/helper_utils.h"
 #include "task_sched/task_sched.h"
 #include "phone_al_uithread_runner.hpp"
+#include "osal/platform_type.h"
 
 LOG_MODNAME("uit_sched")
 
@@ -71,6 +78,7 @@ private:
 
 };
 
+#if (TARGET_OS_ANDROID > 0)
 
 // ////////////////////////////////////////////////////////////////////////////
 // Externally accessible
@@ -78,3 +86,4 @@ void UiTSchedDoSchedule(const uint32_t delay){
   UiTSched::inst().DoSchedule(delay);
 }
 
+#endif
