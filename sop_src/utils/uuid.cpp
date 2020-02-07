@@ -115,7 +115,7 @@ void UUID::reverse_uuid(uint8_t bin[UUID_BYTES]){
   uint8_t tmp[UUID_BYTES];
   memcpy(tmp, bin, UUID_BYTES);
   for (size_t i = 0; i < UUID_BYTES; i++){
-    const int o = UUID_BYTES - 1 - i;
+    const size_t o = UUID_BYTES - 1 - i;
     bin[o] = tmp[i];
   }
 }

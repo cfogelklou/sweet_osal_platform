@@ -380,7 +380,7 @@ void LOG_Hex(const uint8_t *const pHex, const int hexLen) {
   int iter = 0;
   sstring dbg;
   while (iter < hex.length()) {
-    int remain = hex.length() - iter;
+    int remain = (hex.nlength() - iter);
     int outSize = MIN(remain, 70);
     dbg.assign((uint8_t *)&p[iter], outSize);
     dbg.push_back(0);
@@ -397,7 +397,7 @@ void LOG_Base64(
   sstring base64;
   CNV_Base64EncBin(pBuf, len, base64);
   const char *pB64 = base64.c_str();
-  int remaining = base64.length();
+  int remaining = base64.nlength();
   int idx = 0;
   char bytesArr[70 + 1];
   while (remaining > 0) {

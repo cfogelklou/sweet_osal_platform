@@ -529,7 +529,7 @@ void ByteQSetRdIdxFromPointer(ByteQ_t *const pQ, void *pRdPtr) {
     const bq_t *const pRd8 = (const bq_t *)pRdPtr;
     //(Lint):Note 946: Relational or subtract operator applied to pointers
     //[MISRA 2004 Rule 17.3]
-    int newRdIdx = pRd8 - pQ->pfBuf; // lint !e946
+    ssize_t newRdIdx = pRd8 - pQ->pfBuf; // lint !e946
 
     // Check for within range.
     if ((newRdIdx >= 0) && (newRdIdx <= (int)pQ->nBufSz)) // lint !e574 !e737
@@ -544,7 +544,7 @@ void ByteQSetRdIdxFromPointer(ByteQ_t *const pQ, void *pRdPtr) {
       }
 
       // New count is amount write is ahead of read.
-      newCount = (int)pQ->nWrIdx - newRdIdx;
+      newCount = (int)(pQ->nWrIdx - newRdIdx);
 
       // Assume we are being called from consumer, so wr==rd results in zero
       // count

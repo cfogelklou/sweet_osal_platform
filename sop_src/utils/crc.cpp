@@ -82,7 +82,7 @@ uint16_t CRC_16_CONT(const uint8_t *data_p, const unsigned int bytes, const uint
   /*                                                               */
   /*****************************************************************/
   
-  unsigned long  crc32table[256] =
+  uint32_t crc32table[256] =
   {
     0x00000000L, 0x77073096L, 0xEE0E612CL, 0x990951BAL,
     0x076DC419L, 0x706AF48FL, 0xE963A535L, 0x9E6495A3L,

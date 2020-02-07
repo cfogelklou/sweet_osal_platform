@@ -69,7 +69,7 @@ OsalRandom::~OsalRandom() {
 void OsalRandom::Deserialize(const sstring &in) {
   CSTaskLocker lock;
   const int reseedSize = mDefaultEntropy.GetReseedSize();
-  const int sz = MIN(reseedSize, in.length());
+  const int sz = MIN(reseedSize, in.nlength());
   mDefaultEntropy.ForceReseed(in.u_str(), sz);
 
   // Ensure all future reads use new data.
@@ -167,7 +167,7 @@ int OsalRandom::mbedtls_hardware_poll(unsigned char *output, size_t len, size_t 
     EntropySrcEntry * const pEntry = (EntropySrcEntry *)pIter;
     pIter = pIter->pNext;
     LOG_ASSERT((pEntry) && (pEntry->pSrc));
-    const size_t read = pEntry->pSrc->GetEntropy(output, len);
+    const size_t read = pEntry->pSrc->GetEntropy(output, (int)len);
     LOG_ASSERT(read == len);
   }
 
