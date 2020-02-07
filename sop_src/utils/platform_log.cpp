@@ -401,7 +401,7 @@ void LOG_Base64(
   int idx = 0;
   char bytesArr[70 + 1];
   while (remaining > 0) {
-    int bytes = ARRSZ(bytesArr) - 1;
+    int bytes = ARRSZN(bytesArr) - 1;
     bytes = MIN(bytes, remaining);
     memcpy(bytesArr, &pB64[idx], bytes);
     bytesArr[bytes] = 0;

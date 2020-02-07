@@ -142,7 +142,8 @@ TEST_F(OSALTest, Rescheduler) {
     };
 
     resched.enable();
-    TaskSchedulable sched(resched_test_fast_cb, &resched, reschedTaskPrio, 0, resched_period_fast);
+    TaskSchedulable sched(resched_test_fast_cb, &resched, reschedTaskPrio, 0, resched_period_fast, true);
+    
 
     {
       const uint32_t startTime = OSALGetMS();

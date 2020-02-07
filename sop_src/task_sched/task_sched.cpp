@@ -51,7 +51,8 @@ TaskSchedulableTag::TaskSchedulableTag(
   void * const pU,
   const TaskSchedPriority tspr,
   const uint32_t to,
-  const uint32_t per
+  const uint32_t per,
+  const bool scheduleNow
 )
 : listNode()
 , chk(TASK_SCHED_CHECK)
@@ -64,6 +65,9 @@ TaskSchedulableTag::TaskSchedulableTag(
 , line(0)
 #endif
 {
+  if (scheduleNow) {
+    _TaskSchedAddTimerFn(tspr, this, per, to, pFile, line);
+  }
 }
 
 #if (HARDCODE_TASK_DEBUG > 0)
