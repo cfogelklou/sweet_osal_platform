@@ -14,6 +14,7 @@
 #include "utils/platform_log.h"
 #include "utils/helper_macros.h"
 #include "osal/cs_task_locker.hpp"
+#include "phone_al/phone_al_uithread_runner.hpp"
 //#include "evt_log/evt_log_c_api.h"
 #include "utils/convert_utils.h"
 
@@ -50,7 +51,8 @@ TaskSchedulableTag::TaskSchedulableTag(
   void * const pU,
   const TaskSchedPriority tspr,
   const uint32_t to,
-  const uint32_t per
+  const uint32_t per,
+  const bool scheduleNow
 )
 : listNode()
 , chk(TASK_SCHED_CHECK)
@@ -63,7 +65,7 @@ TaskSchedulableTag::TaskSchedulableTag(
 , line(0)
 #endif
 {
-  if (to != (uint32_t)(-1)) {
+  if (scheduleNow) {
     _TaskSchedAddTimerFn(tspr, this, per, to, pFile, line);
   }
 }
@@ -763,7 +765,7 @@ extern "C" {
           }
         }
 #elif (TARGET_OS_ANDROID > 0) || (TARGET_OS_IOS > 0)
-        PAKP_ScheduleTaskSched(0);
+        UiTSchedDoSchedule(0);
 #endif
         OSALExitTaskCritical();
 
@@ -810,7 +812,7 @@ extern "C" {
           }
         }
 #elif (TARGET_OS_ANDROID > 0) || (TARGET_OS_IOS > 0)
-        PAKP_ScheduleTaskSched(0);
+          UiTSchedDoSchedule(0);
 #endif
 
       }

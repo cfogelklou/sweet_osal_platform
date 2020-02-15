@@ -129,7 +129,8 @@ typedef struct TaskSchedulableTag {
     void * const pU,
     const TaskSchedPriority tspr = TS_PRIO_APP_EVENTS,
     const uint32_t to = (uint32_t)(-1),
-    const uint32_t per = 0
+    const uint32_t per = 0,
+    const bool scheduleNow = false
   );    
 
 #endif // #ifdef __cplusplus

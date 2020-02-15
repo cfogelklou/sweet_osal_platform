@@ -18,6 +18,7 @@
 #include "utils/helper_macros.h"
 #include "utils/platform_log.h"
 
+
 #define ASSERT LOG_ASSERT
 #define ASSERT_FN LOG_ASSERT_FN
 
@@ -527,8 +528,7 @@ void ByteQSetRdIdxFromPointer(ByteQ_t *const pQ, void *pRdPtr) {
   }
   {
     const bq_t *const pRd8 = (const bq_t *)pRdPtr;
-    //(Lint):Note 946: Relational or subtract operator applied to pointers
-    //[MISRA 2004 Rule 17.3]
+
     int newRdIdx = pRd8 - pQ->pfBuf; // lint !e946
 
     // Check for within range.
@@ -544,7 +544,7 @@ void ByteQSetRdIdxFromPointer(ByteQ_t *const pQ, void *pRdPtr) {
       }
 
       // New count is amount write is ahead of read.
-      newCount = (int)pQ->nWrIdx - newRdIdx;
+      newCount = (int)(pQ->nWrIdx - newRdIdx);
 
       // Assume we are being called from consumer, so wr==rd results in zero
       // count

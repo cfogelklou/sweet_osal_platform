@@ -4,7 +4,7 @@
 #include "utils/convert_utils.h"
 #include <string.h>
 
-
+#include "utils/platform_log.h"
 LOG_MODNAME("task_resched.cpp")
 
 // ////////////////////////////////////////////////////////////////////////////

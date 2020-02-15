@@ -8,8 +8,9 @@
 *              standard pool sizes.
 */
 
-#include <stdint.h>
 #ifdef __cplusplus
+#include <cstdint>
+#include <cstddef>
 
 class sstring {
 private:
@@ -21,7 +22,7 @@ private:
 public:
   static const int SS_NOALLOC_STRING_SIZE = (SS_INITIAL_STRING_SIZE-1);
 
-  typedef int ssize_t;
+  typedef size_t ssize_t;
 
   // //////////////////////////////////////////////////////////////////////////
   sstring(const sstring &rhs);
@@ -100,13 +101,13 @@ public:
   void push_char(const char c);
 
   // //////////////////////////////////////////////////////////////////////////
-  void append(const uint8_t * const pC, const ssize_t len);
+  void appendu(const uint8_t * const pC, const ssize_t len);
 
   // //////////////////////////////////////////////////////////////////////////
-  void append(const char * const pC, const ssize_t len);
+  void appendc(const char * const pC, const ssize_t len);
 
   // //////////////////////////////////////////////////////////////////////////
-  void append(const sstring &rhs);
+  void append_str(const sstring &rhs);
 
   // //////////////////////////////////////////////////////////////////////////
   // Character append.
@@ -149,6 +150,9 @@ public:
 
   // //////////////////////////////////////////////////////////////////////////
   inline ssize_t length() const { return mCurSize; }
+  
+  // //////////////////////////////////////////////////////////////////////////
+  inline int nlength() const { return (int)mCurSize; }
 
   // //////////////////////////////////////////////////////////////////////////
   static ssize_t nextPowerOfTwo(ssize_t v);

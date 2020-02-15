@@ -151,7 +151,7 @@ void sstring::assign_static(uint8_t *const pBuf, const ssize_t len) {
 sstring &sstring::operator=(const char *cstr) {
   LOG_ASSERT(cstr);
   if (cstr) {
-    const int len = strlen(cstr);
+    const size_t len = strlen(cstr);
     assign((uint8_t *)cstr, len);
   }
   return *this;
@@ -187,7 +187,7 @@ void sstring::setChar(const int idx, const char c){
 }
 
 // //////////////////////////////////////////////////////////////////////////
-void sstring::append(const uint8_t *const pC, const ssize_t len) {
+void sstring::appendu(const uint8_t *const pC, const ssize_t len) {
   LOG_ASSERT(pC);
   if (pC) {
     const ssize_t newSize = length() + len;
@@ -201,8 +201,8 @@ void sstring::append(const uint8_t *const pC, const ssize_t len) {
 }
 
 // //////////////////////////////////////////////////////////////////////////
-void sstring::append(const char * const pC, const ssize_t len){
-  append((uint8_t *)pC, len);
+void sstring::appendc(const char * const pC, const ssize_t len){
+  appendu((uint8_t *)pC, len);
 }
 
 
@@ -247,7 +247,7 @@ void sstring::commit_append(const ssize_t len) {
 }
 
 // //////////////////////////////////////////////////////////////////////////
-void sstring::push_back(const uint8_t c) { append(&c, 1); }
+void sstring::push_back(const uint8_t c) { appendu(&c, 1); }
 
 // //////////////////////////////////////////////////////////////////////////
 void sstring::push_char(const char c) {
@@ -261,8 +261,8 @@ void sstring::push_char(const char c) {
 
 
 // //////////////////////////////////////////////////////////////////////////
-void sstring::append(const sstring &rhs) { 
-  append(rhs.mpBuf, rhs.mCurSize); 
+void sstring::append_str(const sstring &rhs) {
+  appendu(rhs.mpBuf, rhs.mCurSize);
 }
 
 // //////////////////////////////////////////////////////////////////////////
@@ -274,7 +274,7 @@ void sstring::append(
   if (rhs) {
     const size_t len = strlen(rhs);
     if (len > 0) {
-      append((uint8_t *)rhs, len);
+      appendu((uint8_t *)rhs, len);
     }
   }
   if (nullTerminate) {
@@ -284,7 +284,7 @@ void sstring::append(
 
 // //////////////////////////////////////////////////////////////////////////
 void sstring::operator+=(const sstring &rhs) { 
-  append(rhs); 
+  append_str(rhs); 
 }
 
 // //////////////////////////////////////////////////////////////////////////
@@ -369,7 +369,7 @@ bool sstring::isPowerOfTwo(const ssize_t nX) { return ((nX & -nX) == nX); }
 void sstring::grow(const ssize_t incomingSize) {
 
   // We always ensure room for NULL terminator.
-  const int allocSize = (incomingSize + 1);
+  const int allocSize = (int)(incomingSize + 1);
 
   // Only grow if we need to.
   if (allocSize > mMaxSize) {

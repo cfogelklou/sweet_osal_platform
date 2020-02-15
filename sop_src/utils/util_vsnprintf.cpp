@@ -150,9 +150,9 @@ int util_snprintf( char * dst, const size_t dstSize, const char * sfmt, ...){
 // ////////////////////////////////////////////////////////////////////////////
 void util_reverse(char s[])
 {
-  const int theLen = strlen(s);
+  const size_t theLen = strlen(s);
   int i = 0;
-  int j = theLen-1;
+  int j = (int)(theLen-1);
   while( i < j ) {
     const char c = s[i];
     s[i++] = s[j];

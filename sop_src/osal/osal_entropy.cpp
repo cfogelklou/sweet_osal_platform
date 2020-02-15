@@ -23,7 +23,7 @@ OsalShaEntropySrc::OsalShaEntropySrc()
   , mHashPrev()
   , mHashedKey()
   , mIncomingEntropyArr()
-  , mIncomingEntropyQ(mIncomingEntropyArr, ARRSZ(mIncomingEntropyArr))
+  , mIncomingEntropyQ(mIncomingEntropyArr, ARRSZN(mIncomingEntropyArr))
   , mUniqueEntropyReceived(false)
 {
   HashMoreText((uint8_t *)"OsalAes", 7);

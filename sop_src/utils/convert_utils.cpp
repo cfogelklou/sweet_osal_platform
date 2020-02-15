@@ -130,7 +130,7 @@ const uint8_t *CNV_AsciiHexToBinStr(
       nybblesReverse.push_back(n);
     }    
   }
-  int numNybbles = nybblesReverse.length();
+  int numNybbles = nybblesReverse.nlength();
   if (numNybbles & 1) {
     nybblesReverse.push_back(0);
     numNybbles += 1;
@@ -380,7 +380,7 @@ void CNV_EpochTimestampToDateStruct(const uint64_t ts2,
 
   // Calculate how many seconds disappear into entire leap cycles, and
   // compress that into years.
-  const int numDaysSinceStartYear = secondsSinceStartingTs / secondsPerDay;
+  const int numDaysSinceStartYear = (int)(secondsSinceStartingTs / secondsPerDay);
   pTm->weekday =
       (WeekdaysE)((STARTING_DAY_OF_WEEK + numDaysSinceStartYear) % 7);
 
@@ -395,7 +395,7 @@ void CNV_EpochTimestampToDateStruct(const uint64_t ts2,
              (secondsRemaining < numSecondsPerLeapCycle));
 
   // Calculate now based on how many days since last leap cycle...
-  const int daysSinceLastLeapCycle = secondsRemaining / secondsPerDay;
+  const int daysSinceLastLeapCycle = (int)(secondsRemaining / secondsPerDay);
   int daysRemaining = daysSinceLastLeapCycle;
 
   // Remove daysRemaining from secondsRemaining.
@@ -443,15 +443,15 @@ void CNV_EpochTimestampToDateStruct(const uint64_t ts2,
   pTm->day = daysRemaining; // 0..30
 
   LOG_ASSERT(secondsRemaining < secondsPerDay);
-  pTm->hour = secondsRemaining / (60 * 60);
+  pTm->hour = (int)(secondsRemaining / (60 * 60));
   LOG_ASSERT((pTm->hour >= 0) && (pTm->hour < 24));
 
   secondsRemaining -= (int64_t)pTm->hour * (60 * 60);
-  pTm->min = secondsRemaining / 60;
+  pTm->min = (int)(secondsRemaining / 60);
   LOG_ASSERT((pTm->min >= 0) && (pTm->min < 60));
 
   secondsRemaining -= (int64_t)pTm->min * 60;
-  pTm->sec = secondsRemaining;
+  pTm->sec = (int)(secondsRemaining);
   LOG_ASSERT((pTm->sec >= 0) && (pTm->sec < 60));
 }
 
@@ -563,7 +563,7 @@ uint64_t CNV_EpochDateStructToTimestamp(TimeAndDateT *const pTm) {
 uint32_t CNV_UTCTimeStringToTimestamp(const char * pC) {
   uint32_t ts = 0;
   sstring utc(pC);
-  const int len = utc.length();
+  const int len = utc.nlength();
   const unsigned int end0 = (unsigned int)utc.index_of('Z');
   const unsigned int end1 = (unsigned int)utc.index_of('.');
   unsigned int end = MIN(end0, end1);
@@ -609,7 +609,7 @@ uint32_t CNV_UTCTimeStringToTimestamp(const char * pC) {
   else {
     date.year += 2000;
   }
-  ts = CNV_EpochDateStructToTimestamp(&date);
+  ts = (uint32_t)(CNV_EpochDateStructToTimestamp(&date));
   return ts;
 }
 
