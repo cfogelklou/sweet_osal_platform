@@ -62,9 +62,10 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ..
-        make -j4
-        cd ..
+        cmake ../
+        echo "Preparing to build."
+        msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
+        cd ../
 
     - name: Run unit tests.
       if: (github.workflow != 'CD')
