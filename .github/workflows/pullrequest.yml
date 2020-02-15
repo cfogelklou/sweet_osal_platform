@@ -28,7 +28,7 @@ jobs:
     name: Build and run unit tests
     strategy:
       matrix:
-        platform: [ubuntu-latest] # , macos-latest
+        platform: [ubuntu-latest, windows-latest, macos-latest] # 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 15
     steps:
@@ -42,19 +42,30 @@ jobs:
         git submodule sync
         git submodule update --init --recursive 
 
-    - name: Build unit tests.
-      run: |
+    - name: Cleanup from last time
+      if: (matrix.platform == 'self-hosted') 
+      run: 
         rm -rf build
+
+    - name: Build unit tests (posix)
+      if: (matrix.platform != 'windows-latest')
+      run: |
         mkdir build
         pushd build
         cmake ..
         make -j4
         popd
 
+    # msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
+    - name: Build unit tests (windows)
+      if: (matrix.platform == 'windows-latest')
+      run: |
+        .\scripts\win_build.bat
+
     - name: Run unit tests.
       if: (github.workflow != 'CD')
       run: |
-        pushd build
+        cd build
         ctest -j4
-        popd        
+        cd ..
   
