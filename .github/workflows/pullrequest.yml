@@ -60,11 +60,12 @@ jobs:
     - name: Build unit tests (windows)
       if: (matrix.platform == 'windows-latest')
       run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
         mkdir build
         cd build
         cmake ../
         echo "Preparing to build."
-        msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
+        MSBuild.exe sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
         cd ../
 
     - name: Run unit tests.
