@@ -66,12 +66,10 @@ jobs:
         make -j4
         cd ..
 
-
-
     - name: Run unit tests.
       if: (github.workflow != 'CD')
       run: |
-        pushd build
+        cd build
         ctest -j4
-        popd        
+        cd ..
   
