@@ -28,7 +28,7 @@ jobs:
     name: Build and run unit tests
     strategy:
       matrix:
-        platform: [ubuntu-latest, windows-latest] # , macos-latest
+        platform: [ubuntu-latest, windows-latest, macos-latest] # 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 15
     steps:
