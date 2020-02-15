@@ -42,9 +42,13 @@ jobs:
         git submodule sync
         git submodule update --init --recursive 
 
+    - name: Cleanup from last time
+      if: (matrix.platform == 'self-hosted') 
+      run: 
+        rm -rf build
+
     - name: Build unit tests.
       run: |
-        rm -rf build
         mkdir build
         pushd build
         cmake ..
