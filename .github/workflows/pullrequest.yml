@@ -60,13 +60,7 @@ jobs:
     - name: Build unit tests (windows)
       if: (matrix.platform == 'windows-latest')
       run: |
-        "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
-        mkdir build
-        cd build
-        cmake ../
-        echo "Preparing to build."
-        "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe ./sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4"
-        cd ../
+        .\scripts\win_build.bat
 
     - name: Run unit tests.
       if: (github.workflow != 'CD')
