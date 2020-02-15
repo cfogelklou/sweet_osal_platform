@@ -60,7 +60,7 @@ jobs:
     - name: Build unit tests (windows)
       if: (matrix.platform == 'windows-latest')
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+        C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat
         mkdir build
         cd build
         cmake ../
