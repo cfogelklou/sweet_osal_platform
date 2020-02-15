@@ -47,13 +47,26 @@ jobs:
       run: 
         rm -rf build
 
-    - name: Build unit tests.
+    - name: Build unit tests (posix)
+      if: (matrix.platform != 'windows-latest')
       run: |
         mkdir build
         pushd build
         cmake ..
         make -j4
         popd
+
+    # msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
+    - name: Build unit tests (windows)
+      if: (matrix.platform == 'windows-latest')
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make -j4
+        cd ..
+
+
 
     - name: Run unit tests.
       if: (github.workflow != 'CD')
