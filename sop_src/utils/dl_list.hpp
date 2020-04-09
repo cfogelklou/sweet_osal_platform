@@ -29,6 +29,11 @@ public:
 
   void unlist( DLLNode * pNode );
 
+  void sorted_insert(
+    DLLNode &nNode, 
+    DLL_NodeCompareCbType* const pCb, 
+    void* const pParam = nullptr);
+
   void for_each( DLL_ForEachNodeCbType cb, void *pUserData );
 };
 

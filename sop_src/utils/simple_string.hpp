@@ -55,7 +55,11 @@ public:
   void assign(const char *const pBuf, const ssize_t len = -1);
 
   // //////////////////////////////////////////////////////////////////////////
-  void assign(const uint8_t *const pBuf, const ssize_t len);
+  void assign(
+    const uint8_t *const pBuf, 
+    const ssize_t len, 
+    const bool placeholder = false
+  );
 
   // //////////////////////////////////////////////////////////////////////////
   void assign_static(uint8_t *const pBuf, const ssize_t len);

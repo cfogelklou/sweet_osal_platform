@@ -121,7 +121,11 @@ void sstring::assign(const char *const pBuf, const ssize_t slen) {
 }
 
 // //////////////////////////////////////////////////////////////////////////
-void sstring::assign(const uint8_t *const pBuf, const ssize_t len) {
+void sstring::assign(
+  const uint8_t *const pBuf, 
+  const ssize_t len,
+  const bool placeholder
+  ) {
   clear();
   if (mMaxSize < len) {
     grow(len);
