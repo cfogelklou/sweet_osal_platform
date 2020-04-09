@@ -71,16 +71,6 @@ sstring::sstring(const char *const pBuf, const ssize_t len)
 }
 
 // //////////////////////////////////////////////////////////////////////////
-sstring::sstring(const char *const pBuf) 
-  : sstring()
-{
-  LOG_ASSERT_WARN(pBuf);
-  if (pBuf) {
-    assign(pBuf);    
-  }
-}
-
-// //////////////////////////////////////////////////////////////////////////
 sstring::sstring(const ssize_t size) 
   : sstring()
 {
@@ -104,9 +94,9 @@ void sstring::dtor() {
 // //////////////////////////////////////////////////////////////////////////
 void sstring::assign(const char *const pBuf, const ssize_t slen) {
   LOG_ASSERT(pBuf);
-  ssize_t len = slen;
+  int32_t len = (int32_t)(uint32_t)slen;
   if (len < 0) {
-    len = strlen(pBuf);
+    len = (int32_t)strlen(pBuf);
     len = MIN(2000, len);
   }
   // Make space for null termination

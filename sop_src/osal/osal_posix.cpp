@@ -53,6 +53,12 @@ LOG_MODNAME("osal.cpp");
 
 #define POSIX_OBJHDR 0x5432abcdu
 
+
+static int posix_mutexCount = 0;
+static uint32_t mInitializedTag = 0;
+class OSAL;
+
+// //////////////////////////////////////////////
 class posix_OsalBase {
 protected:
   uint32_t mHdr;
@@ -91,17 +97,20 @@ static uint32_t getMS(void) {
 class posix_OsalMutex : public posix_OsalBase {
 protected:
   std::recursive_mutex mMutex;
+  const int mMutexCnt;
 
 public:
   posix_OsalMutex()
   : posix_OsalBase()
-  , mMutex(){
+  , mMutex()
+  , mMutexCnt(posix_mutexCount++){
   }
 
   virtual ~posix_OsalMutex() {
     check();
     if (!lock(10000)) {
-      fprintf(stderr, "Unable to get lock in 10 seconds, destroying anyway\r\n");
+      fprintf(stderr, "Unable to get lock %d in 10 seconds, destroying anyway\r\n", mMutexCnt);
+      exit(-1);
     }
     else {
       unlock();
@@ -142,13 +151,21 @@ public:
   }
 };
 
-static uint32_t mInitializedTag = 0;
 
 class OSAL {
 public:
   static OSAL &inst() {
-    static OSAL inst;
-    return inst;
+    static OSAL *osalInstPtr = nullptr;
+    static std::recursive_mutex osalInitMutex;
+    if (osalInstPtr == nullptr){
+      osalInitMutex.lock();
+      if (osalInstPtr == nullptr){
+        static char instMemBuf[sizeof(OSAL)];
+        osalInstPtr = new (instMemBuf) OSAL();
+      }
+      osalInitMutex.unlock();
+    }
+    return *osalInstPtr;
   }
   
 #ifndef ccs
@@ -261,9 +278,8 @@ void OSALInit(void) {
         EOK == pthread_setschedparam(pthread_self(), SCHED_FIFO, &param));
 #endif
     init = true;
-    MemPoolsInitialize();
-    //LCAL_Init();
     (void)OSAL::inst();
+    MemPoolsInitialize();
     //OSALRandomInit("posix", 5);
   }
 }
