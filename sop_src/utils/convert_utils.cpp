@@ -172,15 +172,15 @@ void CNV_Uuidify(const char *inHex, sstring &out) {
   CNV_CleanupAsciiHex(inHex, tmp);
   const char *t = tmp.c_str();
   if (32 ==  tmp.length()){
-    out.append(&t[0], 8);
+    out.appendp(&t[0], 8);
     out.push_char('-');
-    out.append(&t[8], 4);
+    out.appendp(&t[8], 4);
     out.push_char('-');
-    out.append(&t[12], 4);
+    out.appendp(&t[12], 4);
     out.push_char('-');
-    out.append(&t[16], 4);
+    out.appendp(&t[16], 4);
     out.push_char('-');
-    out.append(&t[20], 12);
+    out.appendp(&t[20], 12);
   }
   out.push_back(0);
   out.trim_null();

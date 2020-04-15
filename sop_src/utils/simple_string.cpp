@@ -261,7 +261,7 @@ void sstring::append_str(const sstring &rhs) {
 
 // //////////////////////////////////////////////////////////////////////////
 // Character append.
-void sstring::append(
+void sstring::appendp(
   const char *rhs, 
   const bool nullTerminate) {
   trim_null();
@@ -283,7 +283,7 @@ void sstring::operator+=(const sstring &rhs) {
 
 // //////////////////////////////////////////////////////////////////////////
 void sstring::operator+=(const char *rhs) {
-  append(rhs, true);
+  appendp(rhs, true);
 }
 
 // //////////////////////////////////////////////////////////////////////////
@@ -292,7 +292,7 @@ uint8_t *sstring::u8DataPtr(const ssize_t amtToGrow,
   if (mMaxSize < amtToGrow) {
     grow(amtToGrow);
   }
-  if (setLenTo > 0) {
+  if ((int32_t)setLenTo >= 0) {
     set_len(setLenTo);
   }
   return mpBuf;
@@ -303,6 +303,54 @@ uint8_t *sstring::u8DataPtr(const ssize_t amtToGrow,
 char *sstring::c8DataPtr(const ssize_t amtToGrow,
                          const ssize_t setLenTo) {
   return (char *)u8DataPtr(amtToGrow, setLenTo);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+uint16_t* sstring::u16DataPtr(
+  const ssize_t amtToGrow,
+  const ssize_t setLenTo) {
+  const ssize_t slt = (setLenTo == (ssize_t)-1) ? (ssize_t)-1 : setLenTo * sizeof(uint16_t);
+  return (uint16_t*)u8DataPtr(amtToGrow * sizeof(uint16_t), slt);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+uint32_t* sstring::u32DataPtr(
+  const ssize_t amtToGrow,
+  const ssize_t setLenTo) {
+  const ssize_t slt = (setLenTo == (ssize_t)-1) ? (ssize_t)-1 : setLenTo * sizeof(uint32_t);
+  return (uint32_t*)u8DataPtr(amtToGrow * sizeof(uint32_t), slt);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+int16_t* sstring::s16DataPtr(
+  const ssize_t amtToGrow,
+  const ssize_t setLenTo) {
+  const ssize_t slt = (setLenTo == (ssize_t)-1) ? (ssize_t)-1 : setLenTo * sizeof(int16_t);
+  return (int16_t*)u8DataPtr(amtToGrow * sizeof(int16_t), slt);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+int32_t* sstring::s32DataPtr(
+  const ssize_t amtToGrow,
+  const ssize_t setLenTo) {
+  const ssize_t slt = (setLenTo == (ssize_t)-1) ? (ssize_t)-1 : setLenTo * sizeof(int32_t);
+  return (int32_t*)u8DataPtr(amtToGrow * sizeof(int32_t), slt);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+float* sstring::floatDataPtr(
+  const ssize_t amtToGrow,
+  const ssize_t setLenTo) {
+  const ssize_t slt = (setLenTo == (ssize_t)-1) ? (ssize_t)-1 : setLenTo * sizeof(float);
+  return (float*)u8DataPtr(amtToGrow * sizeof(float), slt);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+double* sstring::doubleDataPtr(
+  const ssize_t amtToGrow,
+  const ssize_t setLenTo) {
+  const ssize_t slt = (setLenTo == (ssize_t)-1) ? (ssize_t)-1 : setLenTo * sizeof(double);
+  return (double*)u8DataPtr(amtToGrow * sizeof(double), slt);
 }
 
 // //////////////////////////////////////////////////////////////////////////
