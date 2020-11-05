@@ -75,7 +75,7 @@ public:
   }
 
   size_t ForceWrite(const WordT * const pWrBuf, const size_t numWords) {
-    return toWords(ByteQForceWrite( &mByteQ, toPtr8(pWrBuf), toBytes(numWords)));
+    return toWords(ByteQForceWrite( &mByteQ, toPtr8((WordT * )pWrBuf), toBytes(numWords)));
   }
 
   // Get a pointer that can be used for advanced functions.
