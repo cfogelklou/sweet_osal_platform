@@ -37,10 +37,7 @@ public:
   sstring(const uint8_t *const pBuf, const ssize_t len);
 
   // //////////////////////////////////////////////////////////////////////////
-  sstring(const char *const pBuf, const ssize_t len);
-
-  // //////////////////////////////////////////////////////////////////////////
-  sstring(const char *const pBuf);
+  sstring(const char *const pBuf, const ssize_t len = (uint32_t)-1);
 
   // //////////////////////////////////////////////////////////////////////////
   sstring(const ssize_t size);
@@ -52,10 +49,14 @@ public:
   void dtor();
 
   // //////////////////////////////////////////////////////////////////////////
-  void assign(const char *const pBuf, const ssize_t len = -1);
+  void assign(const char *const pBuf, const ssize_t len = 1);
 
   // //////////////////////////////////////////////////////////////////////////
-  void assign(const uint8_t *const pBuf, const ssize_t len);
+  void assign(
+    const uint8_t *const pBuf, 
+    const ssize_t len, 
+    const bool placeholder = false
+  );
 
   // //////////////////////////////////////////////////////////////////////////
   void assign_static(uint8_t *const pBuf, const ssize_t len);
@@ -111,7 +112,7 @@ public:
 
   // //////////////////////////////////////////////////////////////////////////
   // Character append.
-  void append(const char *rhs, const bool nullTerminate = true);
+  void appendp(const char *rhs, const bool nullTerminate = true);
 
     // //////////////////////////////////////////////////////////////////////////
   void operator+=(const sstring &rhs);
@@ -128,13 +129,43 @@ public:
   // //////////////////////////////////////////////////////////////////////////
   uint8_t *u8DataPtr(
     const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE,
-    const ssize_t setLenTo  = -1);
+    const ssize_t setLenTo  = (ssize_t )-1);
+  
+  // //////////////////////////////////////////////////////////////////////////
+  uint16_t* u16DataPtr(
+    const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE / sizeof(uint16_t),
+    const ssize_t setLenTo = (ssize_t)-1);
+
+  // //////////////////////////////////////////////////////////////////////////
+  uint32_t* u32DataPtr(
+    const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE / sizeof(uint32_t),
+    const ssize_t setLenTo = (ssize_t)-1);
+
+  // //////////////////////////////////////////////////////////////////////////
+  int16_t* s16DataPtr(
+      const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE / sizeof(int16_t),
+      const ssize_t setLenTo = (ssize_t)-1);
+
+  // //////////////////////////////////////////////////////////////////////////
+  int32_t* s32DataPtr(
+    const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE / sizeof(int32_t),
+    const ssize_t setLenTo = (ssize_t)-1);
+
+  // //////////////////////////////////////////////////////////////////////////
+  float* floatDataPtr(
+    const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE / sizeof(float),
+    const ssize_t setLenTo = (ssize_t)-1);
+
+  // //////////////////////////////////////////////////////////////////////////
+  double* doubleDataPtr(
+    const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE / sizeof(double),
+    const ssize_t setLenTo = (ssize_t)-1);
 
   // //////////////////////////////////////////////////////////////////////////
   // Returns a writable buffer
   char *c8DataPtr(
     const ssize_t amtToGrow = SS_INITIAL_STRING_SIZE,
-    const ssize_t setLenTo  = -1);
+    const ssize_t setLenTo  = (ssize_t)-1);
 
   // //////////////////////////////////////////////////////////////////////////
   void clear();
