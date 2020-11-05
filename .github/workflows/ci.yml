@@ -6,7 +6,9 @@ name: CI
 on:
   push:
     branches:
-      - '**'
+      - 'master'
+      - 'main'
+      - 'devel'
     tags:        
       - '*'            # Test all pushed tags.
 
