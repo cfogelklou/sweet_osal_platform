@@ -509,7 +509,7 @@ bool OSALSemaphoreWait(OSALSemaphorePtrT const pPortSem,
 // Description - see the header file.
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 void OSALSleep(const uint32_t ms) {
-#ifndef OSAL_SINGLE_TASK
+#if 1 // ndef OSAL_SINGLE_TASK
   const uint32_t startTime = OSALGetMS();
   uint32_t now = startTime;
   uint32_t elapsed = (now - startTime);

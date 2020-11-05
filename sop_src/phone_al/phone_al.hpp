@@ -7,6 +7,18 @@
 // This abstract class shall be implemented by Android/iOS/Windows
 class PhoneAL {
 public:
+
+  typedef void (*onMonoAudioCbPtr)(
+    void *pCbData, const int fs, const float * const pMonoArr, const int numSamps);
+
+public:
+  PhoneAL()
+  : mpOnMonoAudioFn(nullptr)
+  , mpOnMonoAudioFnData(nullptr)
+  {
+
+  }
+
   virtual ~PhoneAL() {}
 
   typedef void (*PAKAL_RunnableCb)(void *pObj);
@@ -30,8 +42,27 @@ public:
     (void)pObjReturnedFromRunCall;
   }
 
+  virtual void StartAudioInputSrc(
+    const int fs = 48000,
+    onMonoAudioCbPtr cb = nullptr,
+    void *pCbData = nullptr
+  ){
+    mFs = fs;
+    mpOnMonoAudioFn = cb;
+    mpOnMonoAudioFnData = pCbData;
+  }
+
+  virtual void StopAudioInputSrc(){
+
+  }
+
   // Implement in Android/iOS/Windows/etc.
   static PhoneAL &inst();
+
+protected:
+  onMonoAudioCbPtr mpOnMonoAudioFn;
+  void *mpOnMonoAudioFnData;
+  int mFs;
 
 };
 
