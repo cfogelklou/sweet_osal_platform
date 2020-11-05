@@ -3255,7 +3255,7 @@
 #endif
 
 #include "osal/mempools.h"
-#ifdef MEMPOOLS_DEBUG
+#if (MEMPOOLS_DEBUG > 0)
 #define MBEDTLS_MEMORY_DEBUG
 #endif
 
