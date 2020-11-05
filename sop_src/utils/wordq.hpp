@@ -41,7 +41,7 @@ public:
     const bool lockOnWrites = false, bool lockOnReads = false) 
     : WordQ::WordQ()
   {
-    Init( pBuf, nBufSz, lockOnWrites, lockOnReads );
+    Init( pBuf, nBufWords, lockOnWrites, lockOnReads );
   }
 
   void Init(WordT * const pBuf, size_t nBufWords,
