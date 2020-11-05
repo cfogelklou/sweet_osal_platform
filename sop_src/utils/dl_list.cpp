@@ -405,6 +405,13 @@ bool list::isEmpty() const { return DLL_IsEmpty(&dll); }
 
 void list::unlist(DLLNode *pNode) { DLL_NodeUnlist(pNode); }
 
+void list::sorted_insert(
+  DLLNode& node, 
+  DLL_NodeCompareCbType* const pCb, 
+  void* const pParam) {
+  DLL_SortedInsert(&dll, &node, pCb, pParam);
+}
+
 void list::for_each(DLL_ForEachNodeCbType cb, void *pUserData) {
   DLL_ForEachNode(&dll, cb, pUserData);
 }

@@ -42,6 +42,8 @@ protected:
 TEST_F(TestTransport, test_txrx_huge) 
 {
   // TODO: Currently no tests, fill in
+  OSALSleep(5000);
+
 }
 
 
