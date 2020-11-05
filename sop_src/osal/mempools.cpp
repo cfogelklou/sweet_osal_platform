@@ -70,6 +70,11 @@ typedef struct MemChkHdrTag {
   DLLNode       listNode;
   align_mask_t  id;
   align_mask_t  magic;
+#if (MEMPOOLS_DEBUG_FILETRACE > 0)
+  const char  * pFile;
+  align_mask_t  line;
+  uint32_t      ts;
+#endif
 } MemChkHdr;
 
 typedef struct MemTag {
@@ -127,7 +132,7 @@ static Mem * mempools_GetHdr(void *pVoid) {
   if (mempools_IsWithinPool(pVoid)) {
     uint8_t * const pMem8 = (uint8_t *)pVoid;
     pRval = (Mem *)(pMem8 - sizeof(MemChkHdr));
-    LOG_ASSERT(pRval->hdr.magic == MEMPOOLS_MAGIC);
+    LOG_ASSERT_WARN(pRval->hdr.magic == MEMPOOLS_MAGIC);
   }
   return pRval;
 }
@@ -181,16 +186,17 @@ void *MemPoolsMallocWithId(
   if (!useHeap) {
     const size_t szWithMagic = sz + sizeof(MemChkHdr);
     Mem * const pMem = (Mem *)
-#if (MEMPOOLS_DEBUG_FILETRACE > 0)
-      _mbedtls_calloc(1, szWithMagic, CNV_stripSlash(pF), line);
-#else
       mbedtls_calloc(1, szWithMagic);
-#endif
     if (pMem) {
       LOG_ASSERT(mempools_IsWithinPool(pMem));
       memcpy(&pMem->hdr.magic, &MEMPOOLS_MAGIC, sizeof(pMem->hdr.magic));
       DLL_NodeInit(&pMem->hdr.listNode);
       pMem->hdr.id = id;
+#if (MEMPOOLS_DEBUG_FILETRACE > 0)
+      pMem->hdr.pFile = pF;
+      pMem->hdr.line = line;
+      pMem->hdr.ts = OSALGetMS();
+#endif
       {
         CSTaskLocker cs;
         mempools_allocatedList.push_back(&pMem->hdr.listNode);
@@ -269,7 +275,15 @@ void * MemPoolsHeapMallocWithId(const size_t sz, const uint8_t id) {
 
 // ////////////////////////////////////////////////////////////////////////////
 // Free the memory allocated in pVoid.
+#if (MEMPOOLS_DEBUG_FILETRACE > 0)
+void _MemPoolsFree(
+  void *pVoid,
+  const char * pFile,
+  const int line
+) {
+#else
 void MemPoolsFree(void *pVoid) {
+#endif
   MP_INIT();
   if (mempools_IsWithinPool(pVoid)){
 #if (!MEMPOOLS_DEBUG)
@@ -278,13 +292,28 @@ void MemPoolsFree(void *pVoid) {
     Mem * const pMem = mempools_GetHdr(pVoid);
     if (pMem){
       if (MEMPOOLS_MAGIC != pMem->hdr.magic){
-        LOG_TRACE(("Cannot free this memory.\r\n"));
+#if (MEMPOOLS_DEBUG_FILETRACE > 0)
+        if (~MEMPOOLS_MAGIC == pMem->hdr.magic) {
+          LOG_TRACE(("\r\n*****mempools.cpp::Memory was already freed at %s(%d)!\r\n", pMem->hdr.pFile, pMem->hdr.line));
+        }
+        else {
+          LOG_TRACE(("\r\n*****mempools.cpp::Cannot free this memory!\r\n"));
+        }
+#else
+      LOG_TRACE(("\r\n*****mempools.cpp::Cannot free this memory!\r\n"));
+      LOG_ASSERT(false);
+#endif
       }
       else {
         {
           CSTaskLocker cs;
           DLL_NodeUnlist(&pMem->hdr.listNode);
           pMem->hdr.magic = ~MEMPOOLS_MAGIC;
+#if (MEMPOOLS_DEBUG_FILETRACE > 0)
+          pMem->hdr.pFile = pFile; // Track where the block was freed now that it's freed.
+          pMem->hdr.line = line;
+          pMem->hdr.ts = OSALGetMS();
+#endif
         }
         mbedtls_free(pMem);
       }
@@ -299,7 +328,20 @@ void MemPoolsFree(void *pVoid) {
 // ////////////////////////////////////////////////////////////////////////////
 // Print all allocated memory.  Use for debugging memory leaks.
 void MemPoolsPrintAllocatedMemory(void) {
-#if defined(MBEDTLS_MEMORY_DEBUG)
+
+#if (MEMPOOLS_DEBUG_FILETRACE > 0)
+  {
+    CSTaskLocker cs;
+    DLLNode* pIter = mempools_allocatedList.begin();
+    DLLNode* const pEnd = mempools_allocatedList.end();
+    while (pIter != pEnd) {
+      DLLNode* const pNext = pIter->pNext;
+      Mem* pMem = (Mem*)pIter;
+      pIter = pNext;
+      LOG_TRACE(("\t%s(%d) with id:%d at ts %u\r\n", pMem->hdr.pFile, pMem->hdr.line, pMem->hdr.id, pMem->hdr.ts));
+    }
+  }
+#elif defined(MBEDTLS_MEMORY_DEBUG)
   mbedtls_memory_buffer_alloc_status();
 #endif
 }
