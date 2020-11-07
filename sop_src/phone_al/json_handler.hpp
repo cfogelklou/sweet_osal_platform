@@ -1,12 +1,8 @@
-#ifndef ANDROID_JSON_HANDLER_HPP
-#define ANDROID_JSON_HANDLER_HPP
+#ifndef MOBILE_JSON_HANDLER_HPP
+#define MOBILE_JSON_HANDLER_HPP
 
-//#include "al_ble_mobile/pak_abstraction_layer.h"
-//#include "pakp_sm/private/pakp_ble_responses.h"
-//#include "al_ble_mobile/pak_abstraction_layer.h"
 #include "utils/simple_string.hpp"
 #include "json_command/json_command.hpp"
-//#include "pakp_sm/pakp_ble_commands.h"
 
 #ifdef __cplusplus
 
@@ -22,7 +18,6 @@ public:
       void * const pUserData, const char * const pJsonEvent);
 
   void jsonCommand(const char * const jsonCommand);
-
 
 public:
 
