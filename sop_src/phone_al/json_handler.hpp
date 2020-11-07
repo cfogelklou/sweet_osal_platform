@@ -5,6 +5,7 @@
 //#include "pakp_sm/private/pakp_ble_responses.h"
 //#include "al_ble_mobile/pak_abstraction_layer.h"
 #include "utils/simple_string.hpp"
+#include "json_command/json_command.hpp"
 //#include "pakp_sm/pakp_ble_commands.h"
 
 #ifdef __cplusplus
@@ -18,7 +19,7 @@ public:
                  const int strLen);
 
   static void OnJsonCompletedCb(
-      void * const pUserData, const bool status, const char * const pJsonEvent);
+      void * const pUserData, const char * const pJsonEvent);
 
   void jsonCommand(const char * const jsonCommand);
 
@@ -26,7 +27,7 @@ public:
 public:
 
   JsonHandler();
-
+  jsoncmd::JsonCommandExec mExec;
 };
 
 #endif // __cplusplus

@@ -66,9 +66,6 @@ namespace jsoncmd {
     JsonCommand();
   };
 
-
-
-
   typedef struct CmdHandlerNodeDataTag {
     std::string cmd;
     int cmdId;
@@ -101,11 +98,8 @@ namespace jsoncmd {
     friend class JsonCommand;
     OnJsonCommandFn getNodeByCmd(std::string cmd);
 
-
-
   private:
     std::map<std::string, OnJsonCommandFn> mCommands;
-
 
   };
 
