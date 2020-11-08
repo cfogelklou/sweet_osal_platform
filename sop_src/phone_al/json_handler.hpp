@@ -1,11 +1,8 @@
-#ifndef ANDROID_JSON_HANDLER_HPP
-#define ANDROID_JSON_HANDLER_HPP
+#ifndef MOBILE_JSON_HANDLER_HPP
+#define MOBILE_JSON_HANDLER_HPP
 
-//#include "al_ble_mobile/pak_abstraction_layer.h"
-//#include "pakp_sm/private/pakp_ble_responses.h"
-//#include "al_ble_mobile/pak_abstraction_layer.h"
 #include "utils/simple_string.hpp"
-//#include "pakp_sm/pakp_ble_commands.h"
+#include "json_command/json_command.hpp"
 
 #ifdef __cplusplus
 
@@ -18,15 +15,14 @@ public:
                  const int strLen);
 
   static void OnJsonCompletedCb(
-      void * const pUserData, const bool status, const char * const pJsonEvent);
+      void * const pUserData, const char * const pJsonEvent);
 
   void jsonCommand(const char * const jsonCommand);
-
 
 public:
 
   JsonHandler();
-
+  jsoncmd::JsonCommandExec mExec;
 };
 
 #endif // __cplusplus
