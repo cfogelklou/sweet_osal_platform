@@ -11,7 +11,6 @@ on:
       - 'devel'
     tags:
       - '*' # Test all pushed tags.
-
   pull_request:
     types:
       - labeled
@@ -25,7 +24,7 @@ on:
   pull_request_review:
     types:
       - submitted
-  #status: {}
+  status: {}
 env:
   RELEASE: release
 
