@@ -9,7 +9,6 @@ on:
       - 'master'
       - 'main'
       - 'devel'
-      - 'feat/chfo/201106_mergeFft'
     tags:
       - '*' # Test all pushed tags.
   pull_request:
