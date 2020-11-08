@@ -9,9 +9,23 @@ on:
       - 'master'
       - 'main'
       - 'devel'
+      - 'feat/chfo/201106_mergeFft'
     tags:
       - '*' # Test all pushed tags.
-
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+      - synchronize
+      - opened
+      - edited
+      - ready_for_review
+      - reopened
+      - unlocked
+  pull_request_review:
+    types:
+      - submitted
+  status: {}
 env:
   RELEASE: release
 
