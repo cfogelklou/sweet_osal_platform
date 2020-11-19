@@ -1,17 +1,11 @@
-//#include <iostream>
-//#include <fstream>
-//using namespace std;
 
-#include "SimplePlot.h"
+
+#include "simple_plot.hpp"
 #include <string.h>
 
+#include "utils/platform_log.h"
 
-#if (1)
-#include <assert.h>
-#define SP_ASSERT(x) assert(x)
-#else
-#define SP_ASSERT(x)
-#endif
+#define SP_ASSERT LOG_ASSERT
 
 //---------------------------------------------
 typedef struct sp_DrawGridlinesDataTag

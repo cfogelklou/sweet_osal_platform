@@ -1,3 +1,9 @@
+/**
+
+  Code that I wrote many many moons ago.
+	Could be useful now.
+	Does not match coding style as it was originally a C/h module.
+*/
 #ifndef __SIMPLEPLOT_H__
 #define __SIMPLEPLOT_H__ 1
 
@@ -12,14 +18,6 @@
 
 #define SP_PATTERN_SOLID 0xffffffff
 
-#ifdef __WINDOWS__
-#ifndef WIN32
-#define WIN32
-#endif
-#endif
-
-//#ifdef WIN32
-// Platform specific defines
 
 typedef double 			SP_FloatT;
 typedef unsigned int	SP_UIntT;
@@ -203,7 +201,7 @@ void	SP_ForEachDataSet(SP_PlotT *pPlot, pFnForEachDataSetCallback pCB, void *pUs
 void 	SP_CopyAxis(SP_PlotT *pPlot, SPAxisPickerT nAxis, SP_AxisT *pSrcAxis);
 
 //---------------------------------------------
-void 	SP_SetAxisLabel(SP_PlotT *pPlot, SPAxisPickerT nAxis, SP_Int8T *szNewLabel);
+void 	SP_SetAxisLabel(SP_PlotT *pPlot, SPAxisPickerT nAxis, char *szNewLabel);
 
 //---------------------------------------------
 void 	SP_SetAxisScaleType(SP_PlotT *pPlot, SPAxisPickerT nAxis, SP_ScaleTypeT nScaleType);

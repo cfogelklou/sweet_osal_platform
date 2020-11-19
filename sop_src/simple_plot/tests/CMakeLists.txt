@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(test_simple_plot)
 
 set(CMAKE_CXX_STANDARD 11)
-set(SAU_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
-set(SOP_TOP_DIR ${SAU_TOP_DIR}/sop)
+set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
 include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
 
