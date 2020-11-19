@@ -1,8 +1,8 @@
 /**
+	Simple plotting tool
+  Copyright 2006 Chris Fogelklou
 
-	Code that I wrote many many moons ago.
-	Could be useful now.
-	Does not match coding style as it was originally a C/h module.
+	Note - was recently converted from C code and therefore needs a lot of cleanup to take advantage of CPP.
 */
 #ifndef __SIMPLEPLOT_H__
 #define __SIMPLEPLOT_H__ 1
