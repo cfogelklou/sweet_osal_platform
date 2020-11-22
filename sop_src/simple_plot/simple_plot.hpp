@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+
 #define SPLOT_SUCCESS   0
 #define SPLOT_ERROR	-1
 
@@ -246,8 +247,6 @@ public:
 	void* pUserData;
 
 };
-
-#include "simple_plot/simple_plot_interp.hpp"
 
 
 #endif // #define __SIMPLEPLOT_H__

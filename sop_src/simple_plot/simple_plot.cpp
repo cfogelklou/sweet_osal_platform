@@ -1,6 +1,8 @@
 
 
 #include "simple_plot.hpp"
+#include "simple_plot/simple_plot_interp.hpp"
+
 #include <string.h>
 
 #include "utils/platform_log.h"
@@ -167,7 +169,6 @@ void SimplePlot::CopyAxis(SPAxisPickerT nAxis, SP_AxisT* pSrcAxis)
   SetAxisScaleType(nAxis, pDestAxis->nScaleType);
 
 }
-
 
 
 //---------------------------------------------
