@@ -10,6 +10,7 @@
 
 #define SP_ASSERT LOG_ASSERT
 
+
 //---------------------------------------------
 typedef struct sp_DrawGridlinesDataTag
 {
@@ -24,9 +25,6 @@ typedef void (*pFnForEachGridLineCallback)(
   SPGridPickerT nGrid,
   SP_FloatT fGridValue,
   void* pUserData);
-
-
-
 
 static void    sp_DrawLine(SP_GfxApiT* pGP, SP_IntT nStartX, SP_IntT nStartY, SP_IntT nEndX, SP_IntT nEndY, SP_PenT* pPen);
 static void    sp_FillRegion(SP_GfxApiT* pGP, SP_BoundingBoxT* pBoundingBox, SP_ColourT nColour);
