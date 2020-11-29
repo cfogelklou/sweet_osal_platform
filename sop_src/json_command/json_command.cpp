@@ -205,7 +205,7 @@ JsonCommandExec::~JsonCommandExec() {
 // ////////////////////////////////////////////////////////////////////////////
 OnJsonCommandFn JsonCommandExec::getNodeByCmd(std::string cmd) {
   OnJsonCommandFn rval = nullptr;
-  LOG_TRACE(("JsonCommandExec::size=%d\r\n", mCommands.size()));
+  //LOG_TRACE(("JsonCommandExec::size=%d\r\n", mCommands.size()));
   auto f = mCommands.find(cmd);
   if (f != mCommands.end()) {
     rval = f->second;

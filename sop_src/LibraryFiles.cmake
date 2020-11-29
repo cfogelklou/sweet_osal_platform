@@ -147,6 +147,13 @@ file(GLOB MINI_SOCKET_SRC
         ${SOP_COMMON_SRC}/mini_socket/*.hpp
 )
 
+file(GLOB SIMPLE_PLOT_SRC
+        ${SOP_COMMON_SRC}/simple_plot/*.c
+        ${SOP_COMMON_SRC}/simple_plot/*.cpp
+        ${SOP_COMMON_SRC}/simple_plot/*.h
+        ${SOP_COMMON_SRC}/simple_plot/*.hpp
+)
+
 set(GTEST_SRC
         ${SOP_TOP_DIR}/ext/googletest/googletest/src/gtest-all.cc
         ${SOP_TOP_DIR}/ext/googletest/googlemock/src/gmock-all.cc
@@ -162,6 +169,7 @@ set(SOP_SRC
     ${UTILS_SRC}
     ${MINI_SOCKET_SRC}
     ${GTEST_SRC}
+    ${SIMPLE_PLOT_SRC}
     ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )
 
