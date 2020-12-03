@@ -56,7 +56,7 @@ BufAlloc::ba_t *BufAlloc::MallocWords(const size_t numWords) {
   const size_t availwords = AvailWords();
   if (numWords <= availwords) {
     rval = &mpWordBufAry[mBufIdx];
-    mBufIdx += numWords;
+    mBufIdx += (int)numWords;
   }
   LOG_ASSERT(rval);
   return rval;
