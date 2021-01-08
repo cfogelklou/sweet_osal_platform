@@ -66,7 +66,6 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 if (EMSCRIPTEN)
   #Skip threads.
 elseif (WIN32)
-  find_package(Threads REQUIRED)  
   target_link_libraries(${PROJECT_NAME} ws2_32)
 else (WIN32)
   find_package(Threads REQUIRED)    
