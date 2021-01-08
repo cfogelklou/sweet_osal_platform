@@ -41,6 +41,7 @@
 #define MemPoolsPrintUsage()  do{;}while(0)
 #define MemPoolsEnableNewOverride( ovr ) (true)
 #define MemPoolsDeInitNewOverride() do{;}while(0)
+#define MemPoolsForEachWithAllocId(a, b, c) do{;}while(0)
 
 #else // #if (NO_MEMPOOLS > 0)
 
