@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
-
-
 include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
 add_definitions(-DRUN_GTEST)
 
@@ -65,16 +63,15 @@ include_directories(
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-find_package(Threads REQUIRED)
-
-if (WIN32)
-    #target_link_libraries(${PROJECT_NAME} ws2_32 applicaudia_test_lib)
-    target_link_libraries(${PROJECT_NAME} ws2_32)
+if (EMSCRIPTEN)
+  #Skip threads.
+elseif (WIN32)
+  find_package(Threads REQUIRED)  
+  target_link_libraries(${PROJECT_NAME} ws2_32)
 else (WIN32)
-    find_package(Threads REQUIRED)
-    #target_link_libraries(${PROJECT_NAME} Threads::Threads applicaudia_test_lib)
-    target_link_libraries(${PROJECT_NAME} Threads::Threads)
-endif (WIN32)
+  find_package(Threads REQUIRED)    
+  target_link_libraries(${PROJECT_NAME} Threads::Threads)
+endif()
 
 enable_testing()
 add_test(${PROJECT_NAME} ${PROJECT_NAME})

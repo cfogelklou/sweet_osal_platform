@@ -16,7 +16,7 @@
 #include <stdbool.h>
 
 #if !defined(NO_MEMPOOLS)
-#if (TARGET_OS_IOS > 0)
+#if ((TARGET_OS_IOS > 0) || defined(EMSCRIPTEN))
 #define NO_MEMPOOLS 1
 #else
 #define NO_MEMPOOLS 0

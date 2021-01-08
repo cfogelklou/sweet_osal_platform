@@ -26,7 +26,7 @@ typedef struct EntropySrcEntryTag {
 class OsalEntropySrc {
 protected:
 
-#if (PLATFORM_EMBEDDED > 0)
+#if (PLATFORM_EMBEDDED > 0) && !defined(EMSCRIPTEN)
   const char * const dbgModId = "OsalEntropySrc";
 #endif
 
