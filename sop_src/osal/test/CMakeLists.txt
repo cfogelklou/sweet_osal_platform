@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(osal_test)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 

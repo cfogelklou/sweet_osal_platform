@@ -15,7 +15,7 @@
 
 #ifdef __cplusplus
 
-#if (PLATFORM_FULL_OS > 0)
+#if (PLATFORM_FULL_OS > 0) || defined(EMSCRIPTEN)
 // This takes care of checking for memory leaks.
 class GtestMempoolsWrapper : public ::testing::Test {
 private:
@@ -83,7 +83,7 @@ protected:
 // least started with entropy left over from last execution.
 // Instantiate it in the main() for the testapp, and the destructor will
 // ensure that a new random number is written to rand.bin.
-#if (PLATFORM_FULL_OS > 0)
+#if (PLATFORM_FULL_OS > 0) || defined(EMSCRIPTEN)
 #include <fstream>
 #endif
 class GTestRandomFileInitializer {
