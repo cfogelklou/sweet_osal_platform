@@ -27,16 +27,7 @@ elseif (EMSCRIPTEN)
 endif ()
 
 if (EMSCRIPTEN)
-  if (1)
-    # Optimized version of the build
-    add_definitions(-DEMSCRIPTEN -D__EMSCRIPTEN__ -DRANDOMBYTES_CUSTOM_IMPLEMENTATION -O2)
-  else()
-    # Unoptimized pure javascript.
-    add_definitions(-O0)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s WASM=0")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s WASM=0")
-    set(EMCC_LINKER_FLAGS "${EMCC_LINKER_FLAGS}" "-s WASM=0")  
-  endif()
+  add_definitions(-DEMSCRIPTEN -D__EMSCRIPTEN__ -DRANDOMBYTES_CUSTOM_IMPLEMENTATION)
 endif(EMSCRIPTEN)
 
 add_definitions(-DSODIUM_STATIC -DDEV_MODE -DCONFIGURED=1 -DDEBUG -D_CONSOLE)
@@ -185,7 +176,6 @@ set(SOP_SRC
     ${BUF_IO_SRC}
     ${UTILS_SRC}
     ${MINI_SOCKET_SRC}
-    ${GTEST_SRC}
     ${SIMPLE_PLOT_SRC}
     ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )
