@@ -9,6 +9,7 @@ on:
       - 'master'
       - 'main'
       - 'devel'
+      - 'feat/chfo/210108_emscripten'
     tags:
       - '*' # Test all pushed tags.
   pull_request:
@@ -48,6 +49,12 @@ jobs:
           git submodule sync
           git submodule update --init --recursive
 
+      - name: Emscripten build.
+        if: (matrix.platform == 'ubuntu-latest')
+        uses: mymindstorm/setup-emsdk@v7
+        run: |        
+          sh emscripten_build.sh
+
       - name: Cleanup from last time
         if: (matrix.platform == 'self-hosted')
         run: rm -rf build
@@ -73,3 +80,7 @@ jobs:
           cd build
           ctest -j4
           cd ..
+    
+
+          
+        
