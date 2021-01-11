@@ -49,9 +49,12 @@ jobs:
           git submodule sync
           git submodule update --init --recursive
 
-      - name: Emscripten build.
+      - name: Emscripten Install
         if: (matrix.platform == 'ubuntu-latest')
         uses: mymindstorm/setup-emsdk@v7
+
+      - name: Emscripten build
+        if: (matrix.platform == 'ubuntu-latest')
         run: |        
           sh emscripten_build.sh
 
