@@ -3,7 +3,7 @@
 /**
   @file     dl_list.h
   @brief    Doubly-linked list with C API.
-            The difference between this list and a "std::list" list element, and 
+            The difference between this list and a "std::list" list element, and
             the entire reason for this file to "be" is that it adds the possibility
             to make any object a list node by adding DL_LIST_NODE_MEMBERS to the front
             of its struct or including DLLNode at the front of its struct.
@@ -197,6 +197,9 @@ void DLL_AppendListToBack(DLL *const pList, DLL *const pDllToAppend);
 
 // Returns the size of the list in pList
 unsigned int DLL_Size(const DLL *const pList);
+
+// Returns the size of the list in pList as an integer
+int DLL_SizeN(const DLL *const pList);
 
 // Is the node listed?
 bool DLL_IsListed(const DLL *const pList, const DLLNode *const pNode);

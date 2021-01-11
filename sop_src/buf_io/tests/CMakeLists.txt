@@ -29,6 +29,8 @@ file(GLOB LOCAL_SRC
 
 set(SOURCE_FILES
         # Google Test / Mock
+        ${GTEST_SRC}
+
         ${SOP_SRC}
 
         # These main files.
@@ -40,6 +42,7 @@ set(SOURCE_FILES
 list(REMOVE_DUPLICATES SOURCE_FILES)
 
 include_directories(
+
        ${SOP_TOP_DIR}
 
        ${SOP_COMMON_SRC}

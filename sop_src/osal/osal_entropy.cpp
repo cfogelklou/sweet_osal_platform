@@ -140,8 +140,8 @@ OsalDrbgEntropySrc::OsalDrbgEntropySrc()
   mbedtls_drbg_init(&mCtrDrbg);
 
   // Note that this object is useless until Deserialize is called.
-  ByteQ seedQ((uint8_t *)zeroes, ARRSZ(zeroes));
-  seedQ.CommitWrite(ARRSZ(zeroes));
+  ByteQ seedQ((uint8_t *)zeroes, ARRSZN(zeroes));
+  seedQ.CommitWrite(ARRSZN(zeroes));
   this->mpSeedQ = &seedQ;
   mbedtls_drbg_seed( &mCtrDrbg,
 #ifndef OSALENTROPY_DRBG_CTR
