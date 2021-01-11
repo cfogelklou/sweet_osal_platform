@@ -114,7 +114,7 @@ void LOG_LargeStr(
 #define LOG_VERBOSE_ENABLED 1
 #endif
 
-#if (PLATFORM_EMBEDDED > 0)
+#if (PLATFORM_EMBEDDED > 0) && !defined(EMSCRIPTEN)
 // Used for debugging - Allows for a shorter string than __FILE__
 #define LOG_MODNAME(str) \
     static const char dbgModId[] = (str);
