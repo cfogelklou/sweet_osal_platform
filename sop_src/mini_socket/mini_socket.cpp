@@ -57,7 +57,7 @@ public:
       }
     }
     if (mSocket != INVALID_SOCKET){
-#ifndef WIN32
+#if !defined(WIN32) && !defined(EMSCRIPTEN)
       struct timeval tv;
       tv.tv_sec = 5;
       tv.tv_usec = 0;

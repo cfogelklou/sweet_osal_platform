@@ -22,11 +22,16 @@ elseif (APPLE)
     add_definitions(-DNATIVE_LITTLE_ENDIAN)
 elseif (UNIX)
     add_definitions(-DNATIVE_LITTLE_ENDIAN)
+elseif (EMSCRIPTEN)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)    
 endif ()
+
+if (EMSCRIPTEN)
+  add_definitions(-DEMSCRIPTEN -D__EMSCRIPTEN__ -DRANDOMBYTES_CUSTOM_IMPLEMENTATION)
+endif(EMSCRIPTEN)
 
 add_definitions(-DSODIUM_STATIC -DDEV_MODE -DCONFIGURED=1 -DDEBUG -D_CONSOLE)
 add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
-
 
 include_directories(
        .
@@ -66,6 +71,9 @@ list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/sodium
 list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-compress-ref.c)
 list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto_aead/aegis256/aesni/aead_aegis256_aesni.c)
 #list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/sodium/core.c)
+if (EMSCRIPTEN)
+list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/randombytes/randombytes.c)
+endif()
 
 file(GLOB MBEDTLS_BASICS_SRC
   ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/sha1.c
@@ -173,3 +181,5 @@ set(SOP_SRC
 )
 
 list(REMOVE_DUPLICATES SOP_SRC)
+
+
