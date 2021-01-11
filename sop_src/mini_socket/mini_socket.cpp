@@ -89,7 +89,7 @@ public:
       mSocket,
       (const char *)pTxTrans->pBuf8,
       pTxTrans->transactionLen,
-      0, mpAddrInfo->ai_addr, mpAddrInfo->ai_addrlen);
+      0, mpAddrInfo->ai_addr, (int)mpAddrInfo->ai_addrlen);
 
     // Verify send.
     ok = (stat == pTxTrans->transactionLen);
@@ -133,7 +133,7 @@ private:
     int rxBufLen = 0;
     th.LoadQueuedRxTransaction(pRxBuf, rxBufLen);
     if ((pRxBuf) && (rxBufLen > 0)) {
-      socklen_t alen = th.mpAddrInfo->ai_addrlen;
+      socklen_t alen = (socklen_t)th.mpAddrInfo->ai_addrlen;
       const int rx = recvfrom(th.mSocket, (char *)pRxBuf, rxBufLen, 0, th.mpAddrInfo->ai_addr, &alen);
       OSALEnterCritical();
       if (SOCKET_ERROR != rx) {
