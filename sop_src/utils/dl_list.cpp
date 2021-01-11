@@ -89,6 +89,11 @@ unsigned int DLL_Size(const DLL *const pList) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
+int DLL_SizeN(const DLL *const pList) {
+  return (int)DLL_Size(pList);
+}
+
+// ////////////////////////////////////////////////////////////////////////////
 /// Returns true if the node is in a list, otherwise returns false
 bool DLL_IsListed(const DLL *const pList, const DLLNode *const pNode) {
   DLLNode *pIter = DLL_Begin(pList);
@@ -406,8 +411,8 @@ bool list::isEmpty() const { return DLL_IsEmpty(&dll); }
 void list::unlist(DLLNode *pNode) { DLL_NodeUnlist(pNode); }
 
 void list::sorted_insert(
-  DLLNode& node, 
-  DLL_NodeCompareCbType* const pCb, 
+  DLLNode& node,
+  DLL_NodeCompareCbType* const pCb,
   void* const pParam) {
   DLL_SortedInsert(&dll, &node, pCb, pParam);
 }
