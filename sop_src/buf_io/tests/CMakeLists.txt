@@ -29,6 +29,8 @@ file(GLOB LOCAL_SRC
 
 set(SOURCE_FILES
         # Google Test / Mock
+        ${GTEST_SRC}
+
         ${SOP_SRC}
 
         # These main files.
@@ -40,6 +42,7 @@ set(SOURCE_FILES
 list(REMOVE_DUPLICATES SOURCE_FILES)
 
 include_directories(
+
        ${SOP_TOP_DIR}
 
        ${SOP_COMMON_SRC}
@@ -58,13 +61,14 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-find_package(Threads REQUIRED)
-if (WIN32)
+if (EMSCRIPTEN)
+  #Skip threads.
+elseif (WIN32)
     target_link_libraries(${PROJECT_NAME} ws2_32)
-else (WIN32)
+else ()
     find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} Threads::Threads)
-endif (WIN32)
+endif ()
 
 enable_testing()
 add_test(${PROJECT_NAME} ${PROJECT_NAME})

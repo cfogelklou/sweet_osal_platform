@@ -15,12 +15,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#if !defined(NO_MEMPOOLS)
-#if (TARGET_OS_IOS > 0)
+#if ((TARGET_OS_IOS > 0) || defined(EMSCRIPTEN))
+#undef NO_MEMPOOLS
 #define NO_MEMPOOLS 1
 #else
+#undef NO_MEMPOOLS
 #define NO_MEMPOOLS 0
-#endif
 #endif
 
 #if (NO_MEMPOOLS > 0)
@@ -29,18 +29,19 @@
 #undef MEMPOOLS_DEBUG_FILETRACE
 #define MEMPOOLS_DEBUG_FILETRACE 0
 
-
 #define MemPoolsMalloc(size) calloc(1, (size))
 #define _MemPoolsMalloc(size, u1, u2) calloc(1, (size))
 #define _MemPoolsMallocWithId(sz, id, ...) calloc(1, sz)
+
 #define MemPoolsMallocWithId(sz, id, ...) calloc(1, sz)
 #define MemPoolsFree(pVoid) free(pVoid)
 #define _MemPoolsFree(pVoid) free(pVoid) 
-#define MemPoolsHeapMalloc(sz) MemPoolsHeapMallocWithId(sz, 0)
+#define MemPoolsHeapMalloc(sz) calloc(1, (sz))
 #define MemPoolsPrintAllocatedMemory() do{;}while(0)
 #define MemPoolsPrintUsage()  do{;}while(0)
 #define MemPoolsEnableNewOverride( ovr ) (true)
 #define MemPoolsDeInitNewOverride() do{;}while(0)
+#define MemPoolsForEachWithAllocId(a, b, c) do{;}while(0)
 
 #else // #if (NO_MEMPOOLS > 0)
 

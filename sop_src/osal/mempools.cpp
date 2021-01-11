@@ -5,7 +5,7 @@
 #include "mempools.h"
 #include "utils/platform_log.h"
 
-#if (!NO_MEMPOOLS)
+#if (!(NO_MEMPOOLS > 0))
 #include "osal.h"
 #include "mbedtls/myconfig.h"
 #include "mbedtls/platform.h"

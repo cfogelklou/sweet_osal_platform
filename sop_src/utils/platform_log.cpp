@@ -531,7 +531,7 @@ void LOG_AssertionFailed(const char *szFile, const int line) {
     Logger::inst().AssertionFailed(szFile, line);
 #endif
 
-#if (PLATFORM_EMBEDDED > 0)
+#if ((PLATFORM_EMBEDDED > 0) && (!defined(EMSCRIPTEN)))
     // In an embedded system, we cannot simply "exit" the program.
 #ifdef __EMBEDDED_MCU_BE__
     OSALEnterTaskCritical();
