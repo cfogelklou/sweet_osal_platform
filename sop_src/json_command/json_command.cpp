@@ -34,10 +34,10 @@ using namespace nlohmann;
 
 // ////////////////////////////////////////////////////////////////////////////
 namespace jsoncmd {
-  
+
   class JsonHolder {
   public:
-    JsonHolder(const char * const pStr) 
+    JsonHolder(const char * const pStr)
     {
         __try {
         json j = json::parse(pStr);
@@ -88,7 +88,7 @@ void JsonCommand::OnSchedCb(void *pUserData, uint32_t timeOrTicks) {
 
 // ////////////////////////////////////////////////////////////////////////////
 static void bleCmdDefaultOnCompletedCbC(
-  void * const, 
+  void * const,
   const char * const) {
 }
 
@@ -97,7 +97,7 @@ JsonCommand::JsonCommand(
   const std::string pJson,
   JsonCommandExec& mExecutor,
   OnCompletedCb onCompleted,
-  void *pUserData,  
+  void *pUserData,
   const bool executeImmediately
                        )
   : hdr()
@@ -205,6 +205,7 @@ JsonCommandExec::~JsonCommandExec() {
 // ////////////////////////////////////////////////////////////////////////////
 OnJsonCommandFn JsonCommandExec::getNodeByCmd(std::string cmd) {
   OnJsonCommandFn rval = nullptr;
+  //LOG_TRACE(("JsonCommandExec::size=%d\r\n", mCommands.size()));
   auto f = mCommands.find(cmd);
   if (f != mCommands.end()) {
     rval = f->second;
