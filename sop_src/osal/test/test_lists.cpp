@@ -1,4 +1,4 @@
-#ifdef RUN_GTEST
+//#ifdef RUN_GTEST
 
 #include <stdint.h>
 #include "osal/mempools.h"
@@ -11,6 +11,23 @@
 #include <stdlib.h>
 
 LOG_MODNAME("test_lists.cpp")
+
+
+class Test1 {
+  public:
+  virtual void doSomething(){
+
+  }
+};
+
+class Test2: public Test1 {
+public:
+  // See if this compiles.
+  void doSomething() override {
+
+  }
+};
+
 
 
 class TestLists : public GtestMempoolsWrapper {
@@ -636,4 +653,4 @@ TEST_F(TestLists, SLLFrontThenBack) {
   EXPECT_TRUE(SLL_Size(&list0) == 0);
 }
 
-#endif
+//#endif

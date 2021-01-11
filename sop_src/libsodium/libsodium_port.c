@@ -10,7 +10,7 @@
 
 LOG_MODNAME("sodium_misuse");
 
-#if (PLATFORM_EMBEDDED > 0)
+#if ((PLATFORM_EMBEDDED > 0) && !defined(EMSCRIPTEN))
 void sodium_misuse(void){
   LOG_ASSERT(0);
 }
