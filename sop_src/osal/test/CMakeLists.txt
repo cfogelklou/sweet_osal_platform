@@ -33,6 +33,8 @@ file(GLOB LOCAL_SRC
 set(SOURCE_FILES
 
         # Google Test / Mock
+        ${GTEST_SRC}
+
         ${SOP_SRC}
 
         # These main files.

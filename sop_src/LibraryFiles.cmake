@@ -168,7 +168,6 @@ set(SOP_SRC
     ${BUF_IO_SRC}
     ${UTILS_SRC}
     ${MINI_SOCKET_SRC}
-    ${GTEST_SRC}
     ${SIMPLE_PLOT_SRC}
     ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )
