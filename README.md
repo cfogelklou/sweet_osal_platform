@@ -8,16 +8,4 @@ Many of these source files originated in embedded projects 20 years ago, so are 
 
 The goal with open sourcing these is to ensure their use continues in all future projects while simultaneously refactoring them, modernizing them, and building upon them. (as opposed to the typical process of picking, choosing, and rewriting as the needs arise)
 
-Unit tests can be built and run using cmake:
-
-```bash
-
-git submodule update --init --recursive
-
-mkdir build
-cd build
-cmake ../
-make
-ctest
-
-```
+Please refer to [Github Actions](https://github.com/cfogelklou/sweet_osal_platform/actions/workflows/ci_pr.yml) for a cookbook to build the OSAL.
