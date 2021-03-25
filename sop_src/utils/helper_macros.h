@@ -8,6 +8,10 @@
 #ifndef UTILS_SRC_HELPERMACROS_H_
 #define UTILS_SRC_HELPERMACROS_H_
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include <math.h>
 // Use to exclude default values when a header file is included from C source code.
 #ifndef __cplusplus
 #define PRMVAL_DEFAULT(x)
