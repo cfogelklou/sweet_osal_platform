@@ -2,8 +2,8 @@
 #define BYTEQ_HPP__
 
 #ifdef __cplusplus
-#include "utils/byteq.h"
 #include "buf_io/buf_io.hpp"
+#include "utils/byteq.h"
 
 #ifdef ccs
 #define override
@@ -11,57 +11,58 @@
 
 class ByteQ : public BufIO {
 public:
-
   // Constructor
   explicit ByteQ()
-    : mByteQ()
-  {
+    : mByteQ() {
   }
 
   // Constructor
-  explicit ByteQ(bq_t * const pBuf, unsigned int nBufSz,
-    const bool lockOnWrites = false, bool lockOnReads = false) 
-    : ByteQ::ByteQ()
-  {
-    Init( pBuf, nBufSz, lockOnWrites, lockOnReads );
+  explicit ByteQ(
+    bq_t* const pBuf, unsigned int nBufSz,
+    const bool lockOnWrites = false, bool lockOnReads = false)
+    : ByteQ::ByteQ() {
+    Init(pBuf, nBufSz, lockOnWrites, lockOnReads);
   }
 
-  void Init(bq_t * const pBuf, unsigned int nBufSz,
+  void Init(
+    bq_t* const pBuf, unsigned int nBufSz,
     const bool lockOnWrites = false, bool lockOnReads = false) {
     ByteQCreate(&mByteQ, pBuf, nBufSz, lockOnWrites, lockOnReads);
   }
 
   // Destructor
-  virtual ~ByteQ(){
-    ByteQDestroy( &mByteQ );
+  virtual ~ByteQ() {
+    ByteQDestroy(&mByteQ);
   }
 
   // Write function, returns amount written.  Typically uses a FIFO.
-  int Write(const uint8_t *const pBytes, const int numBytes) override {
-    return ByteQWrite( &mByteQ, pBytes, numBytes );
+  int Write(const uint8_t* const pBytes, const int numBytes) override {
+    return ByteQWrite(&mByteQ, pBytes, numBytes);
   }
 
   // Get Write Ready.  Returns amount that can be written.
-  int GetWriteReady() override{
-    return ByteQGetWriteReady( &mByteQ );
+  int GetWriteReady() const override {
+    ByteQ_t* c = const_cast<ByteQ_t*>(&mByteQ);
+    return ByteQGetWriteReady(c);
   }
 
   // Read function - returns amount available.  Typically uses an internal FIFO.
-  int Read(uint8_t *const pBytes, const int numBytes) override {
-    return ByteQRead( &mByteQ, pBytes, numBytes );
+  int Read(uint8_t* const pBytes, const int numBytes) override {
+    return ByteQRead(&mByteQ, pBytes, numBytes);
   }
 
   // Get the number of bytes that can be read.
-  int GetReadReady() override {
-    return ByteQGetReadReady( &mByteQ );
+  int GetReadReady() const override {
+    ByteQ_t* c = const_cast<ByteQ_t*>(&mByteQ);
+    return ByteQGetReadReady(c);
   }
 
-  int ForceWrite(const bq_t * const pWrBuf, const int nLen) {
-    return ByteQForceWrite( &mByteQ, pWrBuf, nLen);
+  int ForceWrite(const bq_t* const pWrBuf, const int nLen) {
+    return ByteQForceWrite(&mByteQ, pWrBuf, nLen);
   }
 
   // Get a pointer that can be used for advanced functions.
-  ByteQ_t *GetByteQPtr(){
+  ByteQ_t* GetByteQPtr() {
     return &mByteQ;
   }
 
@@ -79,7 +80,6 @@ public:
 
 private:
   ByteQ_t mByteQ;
-
 };
 
 #endif // __cplusplus

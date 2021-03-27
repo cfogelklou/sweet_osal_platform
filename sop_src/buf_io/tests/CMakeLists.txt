@@ -13,9 +13,12 @@ if (WIN32)
     add_definitions(-DMBEDTLS_NO_SOCKETS)
 elseif (APPLE)
     set(CMAKE_BUILD_TYPE Debug)
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")    
+
 elseif (UNIX)
     set(CMAKE_BUILD_TYPE Debug)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c11")
 
     #TODO the following definition is only needed on BASH under windows.
     add_definitions(-DMBEDTLS_NO_SOCKETS)
