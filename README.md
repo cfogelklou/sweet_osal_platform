@@ -2,6 +2,11 @@
 
 [![CI or PR](https://github.com/cfogelklou/sweet_osal_platform/actions/workflows/ci_pr.yml/badge.svg?branch=master)](https://github.com/cfogelklou/sweet_osal_platform/actions/workflows/ci_pr.yml)
 
+<a href="https://scan.coverity.com/projects/cfogelklou-sweet_osal_platform">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/22874/badge.svg"/>
+</a>
+
 An easily portable abstraction layer for Windows, Linux, Free-RTOS, Android, and iOS platforms containing OS abstractions and utilities that have been proven useful over my career.
 
 Many of these source files originated in embedded projects 20 years ago, so are lightweight but also not "modern" and might be closer to C than C++ (utils/byteq for example) but correctness trumps modernity. For example, I recently replaced the "mutex" in the osal with a std::recursivemutex, as C++11 is now mostly implemented even in the embedded world.
