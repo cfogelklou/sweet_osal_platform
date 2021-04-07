@@ -1,7 +1,5 @@
 /**
  * COPYRIGHT    (c)	Applicaudia 2018
- * @file        tone_ble_crypto.cpp
- * @brief       Test of BLE Cryptography Primitives.
  */
 #include <gtest/gtest.h>
 
