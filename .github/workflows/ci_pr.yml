@@ -9,6 +9,7 @@ on:
       - 'master'
       - 'main'
       - 'devel'
+      - 'feat/chfo/210423_msbuild'
     tags:
       - '*' # Test all pushed tags.
   pull_request:
@@ -68,6 +69,10 @@ jobs:
         if: (matrix.platform == 'self-hosted')
         run: rm -rf build
 
+    - name: Add msbuild to PATH (windows).
+      if: (matrix.platform == 'windows-latest')
+      uses: microsoft/setup-msbuild@v1.0.2
+
       - name: Build unit tests (posix)
         if: (matrix.platform != 'windows-latest')
         run: |
@@ -78,10 +83,12 @@ jobs:
           popd
 
       # msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
-      - name: Build unit tests (windows)
-        if: (matrix.platform == 'windows-latest')
-        run: |
-          .\scripts\win_build.bat
+    - name: Build unit tests (windows).
+      if: (matrix.platform == 'windows-latest')
+      run: |
+        pushd build
+        msbuild sweet_osal_platform.sln /property:Configuration=Debug
+        popd
 
       - name: Run unit tests.
         if: (github.workflow != 'CD')
