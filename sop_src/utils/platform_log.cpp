@@ -570,8 +570,21 @@ void LOG_AssertionFailed(const char *szFile, const int line) {
   }
 }
 
+
+static int log_ignoreWarnings = 0;
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////
+void LOG_AssertSetIgnoreWarnings(const int numToAdd){
+  log_ignoreWarnings = numToAdd;
+}
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 void LOG_AssertionWarningFailed(const char *szFile, const int line) {
+  CSTaskLocker cs;
+  if (log_ignoreWarnings > 0){
+    --log_ignoreWarnings;
+    return;
+  }
   if (!assertWarn.pFile) {
     assertWarn.pFile = szFile;
     assertWarn.line = line;
