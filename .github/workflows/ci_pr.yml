@@ -73,12 +73,17 @@ jobs:
         if: (matrix.platform == 'windows-latest')
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Build unit tests (posix)
-        if: (matrix.platform != 'windows-latest')
+      - name: Run cmake
         run: |
           mkdir build
           pushd build
           cmake ..
+          popd
+
+      - name: Build unit tests
+        if: (matrix.platform != 'windows-latest')
+        run: |
+          pushd build
           make -j4
           popd
 
@@ -87,7 +92,7 @@ jobs:
         if: (matrix.platform == 'windows-latest')
         run: |
           pushd build
-          msbuild sweet_osal_platform.sln /property:Configuration=Debug
+          msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
           popd
 
       - name: Run unit tests.
