@@ -9,7 +9,7 @@ on:
       - "master"
       - "main"
       - "devel"
-      - "feat/chfo/210423_msbuild"
+
     tags:
       - "*" # Test all pushed tags.
   pull_request:
