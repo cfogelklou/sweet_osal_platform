@@ -92,7 +92,7 @@ jobs:
         if: (matrix.platform == 'windows-latest')
         run: |
           pushd build
-          msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
+          msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:6
           popd
 
       - name: Run unit tests.
