@@ -1,4 +1,4 @@
-#ifdef RUN_GTEST
+//#ifdef RUN_GTEST
 
 #include "osal/mempools.h"
 #include "osal/osal.h"
@@ -14,6 +14,20 @@
 LOG_MODNAME("test_lists.cpp")
 
 
+class Test1 {
+public:
+  virtual void doSomething() {
+  }
+};
+
+class Test2 : public Test1 {
+public:
+  // See if this compiles.
+  void doSomething() override {
+  }
+};
+
+
 class TestLists : public GtestMempoolsWrapper {
 protected:
   TestLists() {
@@ -23,7 +37,7 @@ protected:
 };
 
 
-#if defined(__SPC5__)
+#if defined(__EMBEDDED_MCU_BE__)
 #define OSALRandom(p, l) _OSALRandom(p, l)
 void _OSALRandom(uint8_t* ptmp, int len) {
   for (int i = 0; i < len; i++) {
@@ -51,9 +65,7 @@ typedef struct {
 #endif
 
 static int bgosal_TestDllNodeCompareCb(
-  void* pParam,
-  const DLLNode* const pNode0,
-  const DLLNode* const pNode1) {
+  void* pParam, const DLLNode* const pNode0, const DLLNode* const pNode1) {
   myNode_t* node0 = (myNode_t*)pNode0;
   myNode_t* node1 = (myNode_t*)pNode1;
   (void)pParam;
@@ -638,4 +650,4 @@ TEST_F(TestLists, SLLFrontThenBack) {
   EXPECT_TRUE(SLL_Size(&list0) == 0);
 }
 
-#endif
+//#endif
