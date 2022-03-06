@@ -40,14 +40,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v1
-
-      - name: Checkout submodules
-        run: |
-          echo Checkout submodules
-          #git fetch origin
-          git submodule sync
-          git submodule update --init --recursive
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
 
       - name: Emscripten Install
         if: (matrix.platform == 'ubuntu-latest')
