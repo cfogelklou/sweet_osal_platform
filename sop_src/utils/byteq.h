@@ -88,9 +88,6 @@ void* ByteQGetReadPtr(ByteQ_t* const pQ);
  * into the internal buffer. */
 void ByteQSetRdIdxFromPointer(ByteQ_t* const pQ, void* pRdPtr);
 
-/** [Declaration] "Unreads" some data */
-unsigned int ByteQUnread(ByteQ_t* const pQ, unsigned int nLen);
-
 /** [Declaration] Forces the write of some data.  Advances the read pointer
 in the case that the buffer would have filled. */
 unsigned int

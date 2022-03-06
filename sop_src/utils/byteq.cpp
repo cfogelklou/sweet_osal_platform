@@ -375,84 +375,49 @@ void* ByteQGetReadPtr(ByteQ_t* const pQ) {
   return pRVal;
 }
 
+//-------------------------------------------------------------------------------------------------
+// The pointer manipulation functions only work if uint8_t is 8 bits. Check this.
+void ByteQVerifySizes() {
+  ASSERT_AT_COMPILE_TIME(sizeof(uint8_t) == 1);
+  ASSERT_AT_COMPILE_TIME(sizeof(uint32_t) != sizeof(uint8_t));
+}
 
 //-------------------------------------------------------------------------------------------------
 void ByteQSetRdIdxFromPointer(ByteQ_t* const pQ, void* pRdPtr) {
   if (pQ->rdCntProt) {
     OSALEnterCritical();
   }
-  {
-    const bq_t* const pRd8 = (const bq_t*)pRdPtr;
 
-    int newRdIdx = pRd8 - pQ->pfBuf; // lint !e946
+  const auto pRd8 = (const uint8_t*)pRdPtr;
 
-    // Check for within range.
-    if ((newRdIdx >= 0) && (newRdIdx <= (int)pQ->nBufSz)) // lint !e574 !e737
-    {
-      int newCount;
+  // Force int here because we want this to be signed.
+  intptr_t newRdIdx = pRd8 - pQ->pfBuf;
 
-      // If last read advanced pointer to end of buffer,
-      // this is OK, just set to beginning.
-      if (newRdIdx == (int)pQ->nBufSz) // lint !e737
-      {
-        newRdIdx = 0;
-      }
-
-      // New count is amount write is ahead of read.
-      newCount = (int)(pQ->nWrIdx - newRdIdx);
-
-      // Assume we are being called from consumer, so wr==rd
-      // results in zero count
-      if (newCount < 0) {
-        //(Lint):Info 737: Loss of sign in promotion from int to unsigned int
-        //(Lint):Info 713: Loss of precision (assignment) (unsigned int to int)
-        newCount += pQ->nBufSz; // lint !e713 !e737
-      }
-
-      // Set read index and count.
-      pQ->nRdIdx = (unsigned int)newRdIdx;
-      pQ->nCount = (unsigned int)newCount;
+  // Check for within range.
+  if ((newRdIdx >= 0) && (newRdIdx <= (int)pQ->nBufSz)) {
+    // If last read advanced pointer to end of buffer,
+    // this is OK, just set to beginning.
+    if (newRdIdx == (int)pQ->nBufSz) {
+      newRdIdx = 0;
     }
+
+    // New count is amount write is ahead of read.
+    int newCount = (int)(pQ->nWrIdx - newRdIdx);
+
+    // Assume we are being called from consumer, so wr==rd
+    // results in zero count
+    if (newCount < 0) {
+      newCount += pQ->nBufSz; // lint !e713 !e737
+    }
+
+    // Set read index and count.
+    pQ->nRdIdx = (unsigned int)newRdIdx;
+    pQ->nCount = (unsigned int)newCount;
   }
+
   if (pQ->rdCntProt) {
     OSALExitCritical();
   }
-}
-
-//-------------------------------------------------------------------------------------------------
-unsigned int ByteQUnread(ByteQ_t* const pQ, unsigned int nLen) {
-  unsigned int bytesUnread = 0;
-  LOG_ASSERT(nullptr != pQ);
-
-  if (nLen) {
-    // Calculate how many bytes can be read from the RdBuffer.
-    unsigned int BytesToUnRead = 0;
-    int nReadIdx               = 0;
-
-
-    // No count MUTEX needed because count is native integer (single cycle write
-    // or read)
-    // and can only get larger if a process writes while we are reading.
-    BytesToUnRead = MIN((pQ->nBufSz - pQ->nCount), nLen);
-
-    // We can definitely read BytesToRead bytes.
-    nReadIdx = (int)pQ->nRdIdx - BytesToUnRead; // lint !e713 !e737
-    if (nReadIdx < 0) {
-      nReadIdx += pQ->nBufSz; // lint !e713 !e737
-    }
-    pQ->nRdIdx = (unsigned int)nReadIdx;
-
-    // Decrement the count.
-    if (pQ->rdCntProt) {
-      OSALEnterCritical();
-    }
-    pQ->nCount = pQ->nCount + BytesToUnRead;
-    if (pQ->rdCntProt) {
-      OSALExitCritical();
-    }
-    bytesUnread = BytesToUnRead;
-  }
-  return bytesUnread;
 }
 
 //-------------------------------------------------------------------------------------------------

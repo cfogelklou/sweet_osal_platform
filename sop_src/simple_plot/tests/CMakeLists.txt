@@ -12,8 +12,8 @@ if (WIN32)
     add_definitions(-DMBEDTLS_NO_SOCKETS)
 elseif (APPLE)
     set(CMAKE_BUILD_TYPE Debug)
-    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")    
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG}")    
 
 elseif (UNIX)
     set(CMAKE_BUILD_TYPE Debug)
@@ -42,11 +42,11 @@ set(SOURCE_FILES
     ${BUF_IO_SRC}
     ${UTILS_SRC}
 
-    # These main files.
-    ${LOCAL_SRC}
-
     ${GTEST_SRC}
     ${SOP_COMMON_SRC}/LibraryFiles.cmake
+
+    # These main files.
+    ${LOCAL_SRC}
 
 )
 
