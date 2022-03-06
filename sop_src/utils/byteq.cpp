@@ -126,12 +126,8 @@ unsigned int ByteQCommitWrite(ByteQ_t* const pQ, unsigned int nLen) {
   LOG_ASSERT(nullptr != pQ);
 
   if (nLen) {
-    // Circular buffering without mod for deep embedded implementation.
-    pQ->nWrIdx += nLen;
-    if (pQ->nWrIdx >= pQ->nBufSz) {
-      pQ->nWrIdx -= pQ->nBufSz;
-    }
-    LOG_ASSERT(pQ->nWrIdx < pQ->nBufSz);
+    //  Circular buffering. Note, kinda unsafe - don't write more than buffer size.
+    inc_buf_idx(pQ->nWrIdx, pQ->nBufSz, nLen);
 
     // Increment the number of bytes written.
     bytesWritten += nLen;
@@ -158,10 +154,10 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
 
   if (nLen) {
     // Calculate how many bytes can be read from the RdBuffer.
-    unsigned int toRead       = 0;
-    const unsigned int nBufSz = pQ->nBufSz;
-    unsigned int nRdIdx       = pQ->nRdIdx;
-    const bq_t* const pBuf    = pQ->pfBuf;
+    unsigned int toRead    = 0;
+    const auto nBufSz      = pQ->nBufSz;
+    auto nRdIdx            = pQ->nRdIdx;
+    const bq_t* const pBuf = pQ->pfBuf;
 
 
     // No count MUTEX needed because count is native integer (single cycle write
@@ -172,16 +168,13 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
     // We can definitely read BytesToRead bytes.
     while (toRead > 0) {
       // Calculate how many contiguous bytes to the end of the buffer
-      unsigned int nBytes = MIN(toRead, (nBufSz - nRdIdx));
+      auto nBytes = MIN(toRead, (nBufSz - nRdIdx));
 
       // Copy that many bytes.
       memcpy(&pRdBuf[ bytesRead ], &pBuf[ nRdIdx ], nBytes * sizeof(bq_t));
 
-      // Circular buffering.
-      nRdIdx += nBytes;
-      if (nRdIdx >= nBufSz) {
-        nRdIdx -= nBufSz;
-      }
+      //  Circular buffering. Note, kinda unsafe - don't write more than buffer size.
+      inc_buf_idx(nRdIdx, nBufSz, nBytes);
 
       // Increment the number of bytes read.
       bytesRead += nBytes;
