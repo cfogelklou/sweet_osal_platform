@@ -28,6 +28,42 @@ void inc_buf_idx(T1& idx, const T2 bufSz, const T2 nBytes) {
   LOG_ASSERT(idx < bufSz);
 }
 
+static inline void rd_enter_critical(ByteQ_t* const pQ) {
+  if (pQ->rdCntProt) {
+    OSALEnterCritical();
+  }
+}
+
+static inline void rd_exit_critical(ByteQ_t* const pQ) {
+  if (pQ->rdCntProt) {
+    OSALExitCritical();
+  }
+}
+
+static inline void wr_enter_critical(ByteQ_t* const pQ) {
+  if (pQ->wrCntProt) {
+    OSALEnterCritical();
+  }
+}
+
+static inline void wr_exit_critical(ByteQ_t* const pQ) {
+  if (pQ->wrCntProt) {
+    OSALExitCritical();
+  }
+}
+
+static inline void rdwr_enter_critical(ByteQ_t* const pQ) {
+  if ((pQ->wrCntProt) || (pQ->rdCntProt)) {
+    OSALEnterCritical();
+  }
+}
+
+static inline void rdwr_exit_critical(ByteQ_t* const pQ) {
+  if ((pQ->wrCntProt) || (pQ->rdCntProt)) {
+    OSALExitCritical();
+  }
+}
+
 //-------------------------------------------------------------------------------------------------
 // Insert in the queue without mutex protection
 static unsigned int ByteQUnprotectedInsert(
@@ -184,13 +220,9 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
     pQ->nRdIdx = nRdIdx;
 
     // Decrement the count.
-    if (pQ->rdCntProt) {
-      OSALEnterCritical();
-    }
+    rd_enter_critical(pQ);
     pQ->nCount = pQ->nCount - bytesRead;
-    if (pQ->rdCntProt) {
-      OSALExitCritical();
-    }
+    rd_exit_critical(pQ);
   }
   return bytesRead;
 }
@@ -216,13 +248,9 @@ unsigned int ByteQCommitRead(ByteQ_t* const pQ, const unsigned int nLen) {
     bytesRead += nBytes;
 
     // Decrement the count.
-    if (pQ->rdCntProt) {
-      OSALEnterCritical();
-    }
+    rd_enter_critical(pQ);
     pQ->nCount = pQ->nCount - nLen;
-    if (pQ->rdCntProt) {
-      OSALExitCritical();
-    }
+    rd_exit_critical(pQ);
   }
   return bytesRead;
 }
@@ -249,16 +277,11 @@ unsigned int ByteQGetWriteReady(ByteQ_t* const pQ) {
 unsigned int ByteQGetContiguousWriteReady(ByteQ_t* const pQ) {
   LOG_ASSERT(nullptr != pQ);
 
-  if (pQ->wrCntProt) {
-    OSALEnterCritical();
-  }
-
+  wr_enter_critical(pQ);
   unsigned int bytesReady = (pQ->nBufSz - pQ->nCount);
   bytesReady = MIN(bytesReady, pQ->nBufSz - pQ->nWrIdx);
+  wr_exit_critical(pQ);
 
-  if (pQ->wrCntProt) {
-    OSALExitCritical();
-  }
   return bytesReady;
 }
 
@@ -266,15 +289,9 @@ unsigned int ByteQGetContiguousWriteReady(ByteQ_t* const pQ) {
 unsigned int ByteQGetReadReady(ByteQ_t* const pQ) {
   LOG_ASSERT(nullptr != pQ);
 
-  if (pQ->rdCntProt) {
-    OSALEnterCritical();
-  }
-
+  rd_enter_critical(pQ);
   const unsigned int bytesReady = pQ->nCount;
-
-  if (pQ->rdCntProt) {
-    OSALExitCritical();
-  }
+  rd_exit_critical(pQ);
 
   return bytesReady;
 }
@@ -283,14 +300,10 @@ unsigned int ByteQGetReadReady(ByteQ_t* const pQ) {
 unsigned int ByteQGetContiguousReadReady(ByteQ_t* const pQ) {
   LOG_ASSERT(nullptr != pQ);
 
-  if (pQ->rdCntProt) {
-    OSALEnterCritical();
-  }
+  rd_enter_critical(pQ);
   const unsigned int bytesReady =
     MIN(pQ->nCount, pQ->nBufSz - pQ->nRdIdx);
-  if (pQ->rdCntProt) {
-    OSALExitCritical();
-  }
+  rd_exit_critical(pQ);
 
   return bytesReady;
 }
@@ -302,17 +315,10 @@ void ByteQFlush(ByteQ_t* const pQ) {
 
   LOG_ASSERT(nullptr != pQ);
 
-  // delete the single count mutex
-  if ((pQ->rdCntProt) || (pQ->wrCntProt)) {
-    OSALEnterCritical();
-  }
-
+  rdwr_enter_critical(pQ);
   pQ->nCount = 0;
   pQ->nRdIdx = pQ->nWrIdx = 0;
-
-  if ((pQ->rdCntProt) || (pQ->wrCntProt)) {
-    OSALExitCritical();
-  }
+  rdwr_exit_critical(pQ);
 }
 
 
@@ -351,26 +357,17 @@ unsigned int ByteQPeek(ByteQ_t* const pQ, bq_t* pRdBuf, const unsigned int nLen)
 
 //-------------------------------------------------------------------------------------------------
 void* ByteQGetWritePtr(ByteQ_t* const pQ) {
-  if (pQ->wrCntProt) {
-    OSALEnterCritical();
-  }
+  wr_enter_critical(pQ);
   void* const pRVal = (void*)&pQ->pfBuf[ pQ->nWrIdx ];
-  if (pQ->wrCntProt) {
-    OSALExitCritical();
-  }
-
+  wr_exit_critical(pQ);
   return pRVal;
 }
 
 //-------------------------------------------------------------------------------------------------
 void* ByteQGetReadPtr(ByteQ_t* const pQ) {
-  if (pQ->rdCntProt) {
-    OSALEnterCritical();
-  }
+  rd_enter_critical(pQ);
   void* const pRVal = (void*)&pQ->pfBuf[ pQ->nRdIdx ];
-  if (pQ->rdCntProt) {
-    OSALExitCritical();
-  }
+  rd_exit_critical(pQ);
 
   return pRVal;
 }
@@ -383,10 +380,9 @@ void ByteQVerifySizes() {
 }
 
 //-------------------------------------------------------------------------------------------------
+// Danger will robinson
 void ByteQSetRdIdxFromPointer(ByteQ_t* const pQ, void* pRdPtr) {
-  if (pQ->rdCntProt) {
-    OSALEnterCritical();
-  }
+  rd_enter_critical(pQ);
 
   const auto pRd8 = (const uint8_t*)pRdPtr;
 
@@ -415,28 +411,24 @@ void ByteQSetRdIdxFromPointer(ByteQ_t* const pQ, void* pRdPtr) {
     pQ->nCount = (unsigned int)newCount;
   }
 
-  if (pQ->rdCntProt) {
-    OSALExitCritical();
-  }
+  rd_exit_critical(pQ);
 }
 
 //-------------------------------------------------------------------------------------------------
+// Note, only handles single producer.
 unsigned int
   ByteQForceWrite(ByteQ_t* const pQ, const bq_t* const pWrBuf, unsigned int nLen) {
   unsigned int bytes = 0;
   LOG_ASSERT(nullptr != pQ);
 
   if (nLen) {
-    int diff                    = 0;
-    unsigned int writeableBytes = 0;
-    unsigned int newWrIdx       = 0;
+    unsigned int newWrIdx = 0;
 
-    // Lock both read and write mutexes
-
+    LOG_ASSERT(pQ->nCount <= pQ->nBufSz);
 
     // Calculate the number of bytes that can be written
-    writeableBytes = pQ->nBufSz - pQ->nCount;
-    diff = nLen - writeableBytes; // lint !e713 !e737
+    unsigned int writeableBytes = pQ->nBufSz - pQ->nCount;
+    const int diff              = nLen - writeableBytes;
 
     // If more bytes should be written than there is space
     // for, force the read pointer forward
@@ -446,26 +438,18 @@ unsigned int
         pQ->nRdIdx -= pQ->nBufSz;
       }
 
-      if (pQ->rdCntProt) {
-        OSALEnterCritical();
-      }
+      rd_enter_critical(pQ);
       pQ->nCount -= diff; // lint !e713 !e737
-      if (pQ->rdCntProt) {
-        OSALExitCritical();
-      }
+      rd_exit_critical(pQ);
     }
 
     // Insert the data in the buffer.
     LOG_ASSERT_FN(nLen == ByteQUnprotectedInsert(pQ, pWrBuf, nLen, &newWrIdx));
     pQ->nWrIdx = newWrIdx;
 
-    if (pQ->wrCntProt) {
-      OSALEnterCritical();
-    }
+    wr_enter_critical(pQ);
     pQ->nCount += nLen;
-    if (pQ->wrCntProt) {
-      OSALExitCritical();
-    }
+    wr_exit_critical(pQ);
 
     bytes = nLen;
   }
@@ -473,60 +457,14 @@ unsigned int
 }
 
 //-------------------------------------------------------------------------------------------------
-unsigned int ByteQForceWriteUnprotected(
-  ByteQ_t* const pQ, const bq_t* const pWrBuf, const int nLen) {
-  LOG_ASSERT(nullptr != pQ);
-
-  if (nLen > 0) {
-    // Advance read pointer if the buffer is full.
-    {
-      const unsigned int writeableBytes = pQ->nBufSz - pQ->nCount;
-      const int diff = nLen - writeableBytes;
-      if (diff > 0) {
-        pQ->nRdIdx += diff;
-        while (pQ->nRdIdx >= pQ->nBufSz) {
-          pQ->nRdIdx -= pQ->nBufSz;
-        }
-        pQ->nCount -= diff;
-      }
-    }
-
-    // Write into the buffer.
-    {
-      int remaining = nLen;
-      int written   = 0;
-      while (remaining > 0) {
-        const int contig = pQ->nBufSz - pQ->nWrIdx;
-        const int bytes  = MIN(remaining, contig);
-
-        memcpy(&pQ->pfBuf[ pQ->nWrIdx ], &pWrBuf[ written ], bytes);
-
-        pQ->nWrIdx += bytes;
-        if (pQ->nWrIdx >= pQ->nBufSz) {
-          pQ->nWrIdx -= pQ->nBufSz;
-        }
-
-        written += bytes;
-        remaining -= bytes;
-      }
-      pQ->nCount += nLen;
-    }
-  }
-  return nLen;
-}
-
-
 unsigned int ByteQForceCommitWrite(ByteQ_t* const pQ, unsigned int nLen) {
   unsigned int bytes = 0;
   LOG_ASSERT(nullptr != pQ);
 
   if (nLen) {
-    int diff                    = 0;
-    unsigned int writeableBytes = 0;
-
     // Calculate the number of bytes that can be written
-    writeableBytes = pQ->nBufSz - pQ->nCount;
-    diff = nLen - writeableBytes; // lint !e713 !e737
+    unsigned int writeableBytes = pQ->nBufSz - pQ->nCount;
+    int diff = nLen - writeableBytes; // lint !e713 !e737
 
     // If more bytes should be written than there is space
     // for, force the read pointer forward
@@ -536,28 +474,17 @@ unsigned int ByteQForceCommitWrite(ByteQ_t* const pQ, unsigned int nLen) {
         pQ->nRdIdx -= pQ->nBufSz;
       }
 
-      if (pQ->rdCntProt) {
-        OSALEnterCritical();
-      }
+      rd_enter_critical(pQ);
       pQ->nCount -= diff; // lint !e713 !e737
-      if (pQ->rdCntProt) {
-        OSALExitCritical();
-      }
+      rd_exit_critical(pQ);
     }
 
     // Circular buffering.
-    pQ->nWrIdx += nLen;
-    if (pQ->nWrIdx >= pQ->nBufSz) {
-      pQ->nWrIdx -= pQ->nBufSz;
-    }
+    inc_buf_idx(pQ->nWrIdx, pQ->nBufSz, nLen);
 
-    if (pQ->wrCntProt) {
-      OSALEnterCritical();
-    }
+    wr_enter_critical(pQ);
     pQ->nCount += nLen;
-    if (pQ->wrCntProt) {
-      OSALExitCritical();
-    }
+    wr_exit_critical(pQ);
 
     bytes = nLen;
   }
@@ -565,92 +492,83 @@ unsigned int ByteQForceCommitWrite(ByteQ_t* const pQ, unsigned int nLen) {
 }
 
 //-------------------------------------------------------------------------------------------------
+// Retrieves data from the buffer at a random spot.
+// Unprotected, so lock critical sections externally.
 unsigned int ByteQPeekRandom(
   ByteQ_t* const pQ, bq_t* pRdBuf,
-  unsigned int bytesFromRdIdx, unsigned int nLen) {
-  unsigned int BytesRead = 0;
+  const unsigned int bytesFromRdIdx, const unsigned int nLen) {
+  unsigned int bytesRead = 0;
 
   LOG_ASSERT(nullptr != pQ);
   if (nLen) {
-    unsigned int BytesToRead;
-    int nCount;
-
     unsigned int nRdIdx = pQ->nRdIdx + bytesFromRdIdx;
     if (nRdIdx >= pQ->nBufSz) {
       nRdIdx -= pQ->nBufSz;
     }
-    nCount = (pQ->nCount - bytesFromRdIdx); // lint !e713 !e737
+    int nCount = (pQ->nCount - bytesFromRdIdx); // lint !e713 !e737
     nCount = (nCount < 0) ? 0 : nCount;
 
     // Calculate how many bytes can be read from the RdBuffer.
-    BytesToRead = MIN(((unsigned int)nCount), nLen);
+    auto bytesToRead = MIN(((unsigned int)nCount), nLen);
 
     // We can definitely read BytesToRead bytes.
-    while (BytesToRead > 0) {
+    while (bytesToRead > 0) {
       // Calculate how many contiguous bytes to the end of the buffer
-      unsigned int Bytes = MIN(BytesToRead, (pQ->nBufSz - nRdIdx));
+      unsigned int nBytes = MIN(bytesToRead, (pQ->nBufSz - nRdIdx));
 
       // Copy that many bytes.
-      memcpy(&pRdBuf[ BytesRead ], &pQ->pfBuf[ nRdIdx ], Bytes * sizeof(bq_t));
+      memcpy(&pRdBuf[ bytesRead ], &pQ->pfBuf[ nRdIdx ], nBytes * sizeof(bq_t));
 
       // Circular buffering.
-      nRdIdx += Bytes;
-      if (nRdIdx >= pQ->nBufSz) {
-        nRdIdx -= pQ->nBufSz;
-      }
+      inc_buf_idx(nRdIdx, pQ->nBufSz, nBytes);
 
       // Increment the number of bytes read.
-      BytesRead += Bytes;
-      BytesToRead -= Bytes;
+      bytesRead += nBytes;
+      bytesToRead -= nBytes;
     }
   }
-  return BytesRead;
+  return bytesRead;
 }
 
-/** [Declaration] Inserts data somewhere into the buffer */
+//-------------------------------------------------------------------------------------------------
+// Inserts data somewhere into the buffer
+// Unprotected, so lock critical sections externally.
 unsigned int ByteQPokeRandom(
   ByteQ_t* const pQ, bq_t* pWrBuf,
   unsigned int bytesFromStart, unsigned int nLen) {
-  unsigned int BytesWritten = 0;
+  unsigned int bytesWritten = 0;
 
   LOG_ASSERT(nullptr != pQ);
   if (nLen) {
-    unsigned int nWrIdx;
-    unsigned int BytesToWrite;
-    int nCount;
+    auto nWrIdx = pQ->nWrIdx;
 
-    nWrIdx = pQ->nWrIdx + bytesFromStart;
-    if (nWrIdx >= pQ->nBufSz) {
-      nWrIdx -= pQ->nBufSz;
-    }
+    inc_buf_idx(nWrIdx, pQ->nBufSz, bytesFromStart);
 
     // Can only write if it will fit within nCount
-    nCount = pQ->nCount - bytesFromStart; // lint !e713 !e737
+    int nCount = pQ->nCount - bytesFromStart; // lint !e713 !e737
     nCount = (nCount < 0) ? 0 : nCount;
 
     // Calculate how many bytes can be written to the WrBuffer.
-    BytesToWrite = MIN(((unsigned int)nCount), nLen);
+    unsigned int bytesToWrite = MIN(((unsigned int)nCount), nLen);
 
     // We can definitely read BytesToRead bytes.
-    while (BytesToWrite > 0) {
+    while (bytesToWrite > 0) {
       // Calculate how many contiguous bytes to the end of the buffer
-      unsigned int Bytes = MIN(BytesToWrite, (pQ->nBufSz - nWrIdx));
+      const unsigned int bytes =
+        MIN(bytesToWrite, (pQ->nBufSz - nWrIdx));
 
       // Copy that many bytes.
-      memcpy(&pQ->pfBuf[ nWrIdx ], &pWrBuf[ BytesWritten ], Bytes * sizeof(bq_t));
+      memcpy(&pQ->pfBuf[ nWrIdx ], &pWrBuf[ bytesWritten ], bytes * sizeof(bq_t));
 
       // Circular buffering.
-      nWrIdx += Bytes;
-      if (nWrIdx >= pQ->nBufSz) {
-        nWrIdx -= pQ->nBufSz;
-      }
+      inc_buf_idx(nWrIdx, pQ->nBufSz, bytes);
 
       // Increment the number of bytes read.
-      BytesWritten += Bytes;
-      BytesToWrite -= Bytes;
+      bytesWritten += bytes;
+      bytesToWrite -= bytes;
     }
   }
-  return BytesWritten;
+  return bytesWritten;
 }
 
 /** [Declaration] Reads the last nLen bytes from the buffer */

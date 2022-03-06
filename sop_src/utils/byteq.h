@@ -28,10 +28,6 @@ typedef struct _ByteQ_t {
 } ByteQ_t;
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** [Declaration] Initialize a queue */
 bool ByteQCreate(
   ByteQ_t* const pQ, bq_t* pBuf, unsigned int nBufSz,
@@ -111,9 +107,5 @@ unsigned int ByteQPokeRandom(
 
 /** [Declaration] Reads the last nLen words from the buffer */
 int ByteQDoReadFromEnd(ByteQ_t* const pQ, bq_t* pRdBuf, int nLen);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
