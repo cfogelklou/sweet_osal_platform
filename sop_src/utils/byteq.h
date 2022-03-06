@@ -67,15 +67,16 @@ unsigned int ByteQGetContiguousReadReady(ByteQ_t* const pQ);
 void ByteQFlush(ByteQ_t* const pQ);
 
 /** [Declaration] Generic queue peek function */
-unsigned int ByteQPeek(ByteQ_t* const pObj, bq_t* pRdBuf, unsigned int nLen);
+unsigned int
+  ByteQPeek(ByteQ_t* const pObj, bq_t* pRdBuf, const unsigned int nLen);
 
 /** [Declaration] Commit an external write to the queue
  * (simply increments the pointers and counters) */
-unsigned int ByteQCommitWrite(ByteQ_t* const pQ, unsigned int nLen);
+unsigned int ByteQCommitWrite(ByteQ_t* const pQ, const unsigned int nLen);
 
 /** [Declaration] Commit an external read to the queue
  * (simply increments the pointers and counters) */
-unsigned int ByteQCommitRead(ByteQ_t* const pQ, unsigned int nLen);
+unsigned int ByteQCommitRead(ByteQ_t* const pQ, const unsigned int nLen);
 
 /** [Declaration] Gets the write pointer */
 void* ByteQGetWritePtr(ByteQ_t* const pQ);

@@ -78,15 +78,13 @@ unsigned int
   LOG_ASSERT(nullptr != pQ);
 
   if (nLen) {
-    bq_t* const pBuf = pQ->pfBuf;
-    // Write nothing if there isn't room in the buffer.
-    unsigned int toWrite = 0;
-    auto nWrIdx          = pQ->nWrIdx;
-    const auto nBufSz    = pQ->nBufSz;
+    bq_t* const pBuf  = pQ->pfBuf;
+    auto nWrIdx       = pQ->nWrIdx;
+    const auto nBufSz = pQ->nBufSz;
 
     LOG_ASSERT(pQ->nWrIdx < nBufSz);
 
-    toWrite = (nLen <= (nBufSz - pQ->nCount)) ? nLen : 0;
+    auto toWrite = (nLen <= (nBufSz - pQ->nCount)) ? nLen : 0;
 
     // We can definitely read BytesToWrite bytes.
     while (toWrite > 0) {
@@ -120,7 +118,7 @@ unsigned int
 
 //-------------------------------------------------------------------------------------------------
 // Commit a previous write
-unsigned int ByteQCommitWrite(ByteQ_t* const pQ, unsigned int nLen) {
+unsigned int ByteQCommitWrite(ByteQ_t* const pQ, const unsigned int nLen) {
   unsigned int bytesWritten = 0;
 
   LOG_ASSERT(nullptr != pQ);
@@ -154,7 +152,6 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
 
   if (nLen) {
     // Calculate how many bytes can be read from the RdBuffer.
-    unsigned int toRead    = 0;
     const auto nBufSz      = pQ->nBufSz;
     auto nRdIdx            = pQ->nRdIdx;
     const bq_t* const pBuf = pQ->pfBuf;
@@ -163,12 +160,12 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
     // No count MUTEX needed because count is native integer (single cycle write
     // or read)
     // and can only get larger if a process writes while we are reading.
-    toRead = MIN(pQ->nCount, nLen);
+    auto toRead = MIN(pQ->nCount, nLen);
 
     // We can definitely read BytesToRead bytes.
     while (toRead > 0) {
       // Calculate how many contiguous bytes to the end of the buffer
-      auto nBytes = MIN(toRead, (nBufSz - nRdIdx));
+      const auto nBytes = MIN(toRead, (nBufSz - nRdIdx));
 
       // Copy that many bytes.
       memcpy(&pRdBuf[ bytesRead ], &pBuf[ nRdIdx ], nBytes * sizeof(bq_t));
@@ -184,12 +181,10 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
     pQ->nRdIdx = nRdIdx;
 
     // Decrement the count.
-    // ByteQ_LOCKIFDEFINED( pQ->rdCntMutex );
     if (pQ->rdCntProt) {
       OSALEnterCritical();
     }
     pQ->nCount = pQ->nCount - bytesRead;
-    // ByteQ_UNLOCK_IFDEFINED( pQ->rdCntMutex );
     if (pQ->rdCntProt) {
       OSALExitCritical();
     }
@@ -197,19 +192,9 @@ unsigned int ByteQRead(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
   return bytesRead;
 }
 
-/*
-**=============================================================================
-**  Abstract:
-**  Read function that lacks protection from multiple threads trying to read
-**  at the same time.  Use this function if only one thread/task will read
-**  from the queue at a time.
-**  Parameters:
-**
-**  Return values:
-**
-**=============================================================================
-*/
-unsigned int ByteQCommitRead(ByteQ_t* const pQ, unsigned int nLen) {
+//-------------------------------------------------------------------------------------------------
+// Commit a read.
+unsigned int ByteQCommitRead(ByteQ_t* const pQ, const unsigned int nLen) {
   unsigned int bytesRead = 0;
   LOG_ASSERT(nullptr != pQ);
 
@@ -217,15 +202,13 @@ unsigned int ByteQCommitRead(ByteQ_t* const pQ, unsigned int nLen) {
     // No count MUTEX needed because count is native integer (single cycle write
     // or read)
     // and can only get larger if a process writes while we are reading.
-    nLen = MIN(pQ->nCount, nLen);
+    const auto nBytes = MIN(pQ->nCount, nLen);
 
-    pQ->nRdIdx += nLen;
-    if (pQ->nRdIdx >= pQ->nBufSz) {
-      pQ->nRdIdx -= pQ->nBufSz;
-    }
+    //  Circular buffering. Note, kinda unsafe - don't write more than buffer size.
+    inc_buf_idx(pQ->nRdIdx, pQ->nBufSz, nBytes);
 
     // Increment the number of bytes read.
-    bytesRead += nLen;
+    bytesRead += nBytes;
 
     // Decrement the count.
     if (pQ->rdCntProt) {
@@ -382,7 +365,7 @@ void ByteQFlush(ByteQ_t* const pQ) {
 *
 **=============================================================================
 */
-unsigned int ByteQPeek(ByteQ_t* const pQ, bq_t* pRdBuf, unsigned int nLen) {
+unsigned int ByteQPeek(ByteQ_t* const pQ, bq_t* pRdBuf, const unsigned int nLen) {
   unsigned int bytesRead = 0;
 
   LOG_ASSERT(nullptr != pQ);
