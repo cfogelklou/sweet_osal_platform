@@ -39,15 +39,9 @@ jobs:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 15
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v1
-
-      - name: Checkout submodules
-        run: |
-          echo Checkout submodules
-          #git fetch origin
-          git submodule sync
-          git submodule update --init --recursive
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - name: Emscripten Install
         if: (matrix.platform == 'ubuntu-latest')
@@ -60,7 +54,7 @@ jobs:
           #  so make sure it doesn't conflict with anything!
           actions-cache-folder: "emsdk-cache"
 
-      - name: Emscripten build
+      - name: Emscripten build and test
         if: (matrix.platform == 'ubuntu-latest')
         run: |
           sh emscripten_build.sh
