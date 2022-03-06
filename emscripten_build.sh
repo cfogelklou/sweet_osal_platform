@@ -5,6 +5,10 @@ emcmake cmake ..
 emmake make -j8
 
 # Run node unit tests on all generated .js files.
-find . -name "*.js" -exec node {} \;
+# find . -name "*.js" -exec node {} \;
+for FILE in `find ./ -name "*.js"`
+do
+  node ${FILE}
+done
 
 
