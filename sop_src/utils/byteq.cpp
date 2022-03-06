@@ -65,6 +65,31 @@ static inline void rdwr_exit_critical(ByteQ_t* const pQ) {
 }
 
 //-------------------------------------------------------------------------------------------------
+// Public function to initialize the ByteQ_t structure.
+bool ByteQCreate(
+  ByteQ_t* const pQ, bq_t* pBuf, unsigned int nBufSz,
+  bool lockOnWrites, bool lockOnReads) {
+  LOG_ASSERT((nullptr != pQ) && (nullptr != pBuf));
+
+  memset(pQ, 0, sizeof(ByteQ_t));
+
+  pQ->pfBuf  = pBuf;
+  pQ->nBufSz = nBufSz;
+
+  pQ->wrCntProt = lockOnWrites;
+  pQ->rdCntProt = lockOnReads;
+
+  return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+// Deallocate the things in the Q that were allocated.
+bool ByteQDestroy(ByteQ_t* const pQ) {
+  LOG_ASSERT(nullptr != pQ);
+  return true;
+}
+
+//-------------------------------------------------------------------------------------------------
 // Insert in the queue without mutex protection
 static unsigned int ByteQUnprotectedInsert(
   ByteQ_t* const pQ, const bq_t* pWrBuf, unsigned int nLen,
@@ -98,12 +123,6 @@ static unsigned int ByteQUnprotectedInsert(
   return bytesWritten;
 }
 
-//-------------------------------------------------------------------------------------------------
-// Deallocate the things in the Q that were allocated.
-bool ByteQDestroy(ByteQ_t* const pQ) {
-  LOG_ASSERT(nullptr != pQ);
-  return true;
-}
 
 //-------------------------------------------------------------------------------------------------
 // Write, but protect only the count variable.  Don't use if multiple threads might be writing.
@@ -604,32 +623,4 @@ int ByteQDoReadFromEnd(ByteQ_t* const pQ, bq_t* pRdBuf, int nLen) {
     }
   }
   return bytesRead;
-}
-
-
-/*
-**=============================================================================
-**  Abstract:
-**    Public function to initialize the ByteQ_t structure.
-**
-**  Parameters:
-**
-**  Return values:
-**
-**=============================================================================
-*/
-bool ByteQCreate(
-  ByteQ_t* const pQ, bq_t* pBuf, unsigned int nBufSz,
-  bool lockOnWrites, bool lockOnReads) {
-  LOG_ASSERT((nullptr != pQ) && (nullptr != pBuf));
-
-  memset(pQ, 0, sizeof(ByteQ_t));
-
-  pQ->pfBuf  = pBuf;
-  pQ->nBufSz = nBufSz;
-
-  pQ->wrCntProt = lockOnWrites;
-  pQ->rdCntProt = lockOnReads;
-
-  return true;
 }

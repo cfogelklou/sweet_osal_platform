@@ -89,16 +89,13 @@ in the case that the buffer would have filled. */
 unsigned int
   ByteQForceWrite(ByteQ_t* const pQ, const bq_t* const pWrBuf, unsigned int nLen);
 
-/** [Declaration] Unprotected (no mutex) fast write of data. */
-unsigned int ByteQForceWriteUnprotected(
-  ByteQ_t* const pQ, const bq_t* const pWrBuf, const int nLen);
 
 unsigned int ByteQForceCommitWrite(ByteQ_t* const pQ, unsigned int nLen);
 
 /** [Declaration] Peeks at data that resides somewhere inside the buffer */
 unsigned int ByteQPeekRandom(
   ByteQ_t* const pQ, bq_t* pRdBuf,
-  unsigned int bytesFromStart, unsigned int nLen);
+  const unsigned int bytesFromStart, const unsigned int nLen);
 
 /** [Declaration] Inserts data somewhere into the buffer */
 unsigned int ByteQPokeRandom(

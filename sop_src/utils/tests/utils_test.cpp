@@ -97,32 +97,18 @@ TEST_F(UtilsTest, Q2) {
 
 #include <thread>
 
-static volatile bool main_done = false;
+
 int main(int argc, char** argv) {
   OSALInit();
   TaskSchedInit();
-
-  static const auto idleFn = [](void* p) {
-    while (!main_done) {
-      TaskSchedPollIdle();
-      OSALSleep(20);
-    }
-  };
-
-  static std::thread t(idleFn, nullptr);
-  t.detach();
 
   // The following line must be executed to initialize
   // Google Mock (and Google Test) before running the tests.
   ::testing::InitGoogleMock(&argc, argv);
   auto gtest_rval = RUN_ALL_TESTS();
 
-  OSALSleep(10000);
-  main_done = true;
-  OSALSleep(100);
 
   TaskSchedQuit();
-  OSALSleep(100);
 
   return gtest_rval;
 }
