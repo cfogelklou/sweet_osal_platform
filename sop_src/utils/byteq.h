@@ -89,6 +89,8 @@ in the case that the buffer would have filled. */
 unsigned int
   ByteQForceWrite(ByteQ_t* const pQ, const bq_t* const pWrBuf, unsigned int nLen);
 
+unsigned int ByteQForceWriteUnprotected(
+  ByteQ_t* const pQ, const bq_t* const pWrBuf, const int nLen);
 
 unsigned int ByteQForceCommitWrite(ByteQ_t* const pQ, unsigned int nLen);
 

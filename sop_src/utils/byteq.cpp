@@ -476,6 +476,50 @@ unsigned int
 }
 
 //-------------------------------------------------------------------------------------------------
+unsigned int ByteQForceWriteUnprotected(
+  ByteQ_t* const pQ, const bq_t* const pWrBuf, const int nLen) {
+  LOG_ASSERT(NULL != pQ);
+
+  if (nLen > 0) {
+    // Advance read pointer if the buffer is full.
+    {
+      const unsigned int writeableBytes = pQ->nBufSz - pQ->nCount;
+      const int diff = nLen - writeableBytes;
+      if (diff > 0) {
+        pQ->nRdIdx += diff;
+        while (pQ->nRdIdx >= pQ->nBufSz) {
+          pQ->nRdIdx -= pQ->nBufSz;
+        }
+        pQ->nCount -= diff;
+      }
+    }
+
+    // Write into the buffer.
+    {
+      int remaining = nLen;
+      int written   = 0;
+      while (remaining > 0) {
+        const int contig = pQ->nBufSz - pQ->nWrIdx;
+        const int bytes  = MIN(remaining, contig);
+
+        memcpy(&pQ->pfBuf[ pQ->nWrIdx ], &pWrBuf[ written ], bytes);
+
+        // inc_buf_idx(pQ->nWrIdx, pQ->nBufSz, bytes);
+        pQ->nWrIdx += bytes;
+        if (pQ->nWrIdx >= pQ->nBufSz) {
+          pQ->nWrIdx -= pQ->nBufSz;
+        }
+
+        written += bytes;
+        remaining -= bytes;
+      }
+      pQ->nCount += nLen;
+    }
+  }
+  return nLen;
+}
+
+//-------------------------------------------------------------------------------------------------
 unsigned int ByteQForceCommitWrite(ByteQ_t* const pQ, unsigned int nLen) {
   unsigned int bytes = 0;
   LOG_ASSERT(nullptr != pQ);
