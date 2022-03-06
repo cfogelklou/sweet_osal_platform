@@ -596,7 +596,7 @@ int ByteQDoReadFromEnd(ByteQ_t* const pQ, bq_t* pRdBuf, int nLen) {
       memcpy(&pRdBuf[ bytesRead ], &pQ->pfBuf[ nRdIdx ], bytes * sizeof(bq_t));
 
       // Circular buffering.
-      inc_buf_idx(nRdIdx, pQ->nBufSz, bytes);
+      inc_buf_idx(nRdIdx, (int)pQ->nBufSz, bytes);
 
       // Increment the number of shorts read.
       bytesRead += bytes;
