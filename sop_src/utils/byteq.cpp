@@ -571,40 +571,39 @@ unsigned int ByteQPokeRandom(
   return bytesWritten;
 }
 
-/** [Declaration] Reads the last nLen bytes from the buffer */
+//-------------------------------------------------------------------------------------------------
+// Reads the last nLen bytes from the buffer */
 int ByteQDoReadFromEnd(ByteQ_t* const pQ, bq_t* pRdBuf, int nLen) {
-  int shortsRead = 0;
+  int bytesRead = 0;
 
   if (nLen > 0) {
     // Calculate how many shorts can be read from the RdBuffer.
-    int shortsToRead = 0;
-    int nRdIdx       = pQ->nWrIdx - nLen;
+    int bytesToRead = 0;
+    int nRdIdx      = pQ->nWrIdx - nLen;
     if (nRdIdx < 0) {
       nRdIdx += pQ->nBufSz;
     }
 
-    shortsToRead = nLen;
+    bytesToRead = nLen;
 
     // We can definitely read ShortsToRead shorts.
-    while (shortsToRead > 0) {
+    while (bytesToRead > 0) {
       // Calculate how many contiguous shorts to the end of the buffer
-      int Shorts = MIN(shortsToRead, (int)((pQ->nBufSz - nRdIdx)));
+      const int bytes =
+        MIN(bytesToRead, (int)((pQ->nBufSz - nRdIdx)));
 
       // Copy that many shorts.
-      memcpy(&pRdBuf[ shortsRead ], &pQ->pfBuf[ nRdIdx ], Shorts * sizeof(bq_t));
+      memcpy(&pRdBuf[ bytesRead ], &pQ->pfBuf[ nRdIdx ], bytes * sizeof(bq_t));
 
       // Circular buffering.
-      nRdIdx += Shorts;
-      if (nRdIdx >= (int)pQ->nBufSz) {
-        nRdIdx -= pQ->nBufSz;
-      }
+      inc_buf_idx(nRdIdx, pQ->nBufSz, bytes);
 
       // Increment the number of shorts read.
-      shortsRead += Shorts;
-      shortsToRead -= Shorts;
+      bytesRead += bytes;
+      bytesToRead -= bytes;
     }
   }
-  return shortsRead;
+  return bytesRead;
 }
 
 
