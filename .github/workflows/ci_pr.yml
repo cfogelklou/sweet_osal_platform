@@ -54,7 +54,7 @@ jobs:
           #  so make sure it doesn't conflict with anything!
           actions-cache-folder: "emsdk-cache"
 
-      - name: Emscripten build
+      - name: Emscripten build and test
         if: (matrix.platform == 'ubuntu-latest')
         run: |
           sh emscripten_build.sh
