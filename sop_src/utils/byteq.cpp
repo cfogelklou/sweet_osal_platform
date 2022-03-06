@@ -96,11 +96,8 @@ unsigned int
       // Copy that many bytes.
       memcpy(&pBuf[ nWrIdx ], &pWrBuf[ bytesWritten ], nBytes * sizeof(bq_t));
 
-      // Circular buffering.
-      nWrIdx += nBytes;
-      if (nWrIdx >= nBufSz) {
-        nWrIdx -= nBufSz;
-      }
+      //  Circular buffering. Note, kinda unsafe - don't write more than buffer size.
+      inc_buf_idx(nWrIdx, nBufSz, nBytes);
 
       // Increment the number of bytes written.
       bytesWritten += nBytes;
