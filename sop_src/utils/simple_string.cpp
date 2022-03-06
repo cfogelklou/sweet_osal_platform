@@ -3,8 +3,8 @@
  * @file        simple_string.cpp
  * @brief       A simple string class for building up PaK
  * messages without too many lines of code.  Uses mempools
- * instead of heap, so grows by powers of 2 to match standard
- * pool sizes.
+ * instead of heap, so grows by powers of 2 to match
+ * standard pool sizes.
  */
 #include "simple_string.hpp"
 
