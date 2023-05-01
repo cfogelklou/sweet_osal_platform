@@ -6,10 +6,12 @@
 #if defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)
 #ifndef TARGET_OS_IOS
 #define TARGET_OS_IOS 1
+#define TARGET_OS_ANDROID 0
 #endif
 #elif !TARGET_OS_IPHONE
 #ifndef TARGET_OS_OSX
 #define TARGET_OS_OSX 1
+#define TARGET_OS_ANDROID 0
 #endif
 #endif
 #endif
