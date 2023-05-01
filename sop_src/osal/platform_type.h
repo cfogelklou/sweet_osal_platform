@@ -20,7 +20,7 @@
 #define TARGET_OS_ANDROID 1
 #endif
 
-#if defined(WIN32) || defined(__linux__) || defined(unix) || defined(__unix__) || defined(__unix) || defined(ANDROID) || defined(__APPLE__)
+#if (defined(WIN32) || defined(__linux__) || defined(unix) || defined(__unix__) || defined(__unix) || defined(ANDROID) || defined(__APPLE__)) && !defined(EMSCRIPTEN)
 #define PLATFORM_FULL_OS 1
 #define PLATFORM_EMBEDDED 0
 #else

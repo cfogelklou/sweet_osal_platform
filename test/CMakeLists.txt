@@ -11,6 +11,9 @@ add_definitions(-DRUN_GTEST)
 if (WIN32)
 elseif (APPLE)
     set(CMAKE_BUILD_TYPE Debug)
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")    
+
 elseif (UNIX)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
@@ -64,13 +67,14 @@ include_directories(
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-# target_link_libraries(${PROJECT_NAME} curl)
-if (WIN32)
+if (EMSCRIPTEN)
+  #Skip threads.
+elseif (WIN32)
     target_link_libraries(${PROJECT_NAME} ws2_32)
-else (WIN32)
+else ()
     find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} Threads::Threads)
-endif (WIN32)
+endif ()
 
 enable_testing()
 add_test(${PROJECT_NAME} ${PROJECT_NAME})

@@ -22,11 +22,16 @@ elseif (APPLE)
     add_definitions(-DNATIVE_LITTLE_ENDIAN)
 elseif (UNIX)
     add_definitions(-DNATIVE_LITTLE_ENDIAN)
+elseif (EMSCRIPTEN)
+    add_definitions(-DNATIVE_LITTLE_ENDIAN)    
 endif ()
+
+if (EMSCRIPTEN)
+  add_definitions(-DEMSCRIPTEN -D__EMSCRIPTEN__ -DRANDOMBYTES_CUSTOM_IMPLEMENTATION)
+endif(EMSCRIPTEN)
 
 add_definitions(-DSODIUM_STATIC -DDEV_MODE -DCONFIGURED=1 -DDEBUG -D_CONSOLE)
 add_definitions(-DMBEDTLS_CONFIG_FILE="sop_src/mbedtls/myconfig.h")
-
 
 include_directories(
        .
@@ -66,6 +71,9 @@ list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/sodium
 list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-compress-ref.c)
 list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/crypto_aead/aegis256/aesni/aead_aegis256_aesni.c)
 #list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/sodium/core.c)
+if (EMSCRIPTEN)
+list(REMOVE_ITEM LIBSODIUM_SRC ${SOP_EXTERN_LIBS}/libsodium/src/libsodium/randombytes/randombytes.c)
+endif()
 
 file(GLOB MBEDTLS_BASICS_SRC
   ${SOP_EXTERN_LIBS}/mbedtls/crypto/library/sha1.c
@@ -147,6 +155,13 @@ file(GLOB MINI_SOCKET_SRC
         ${SOP_COMMON_SRC}/mini_socket/*.hpp
 )
 
+file(GLOB SIMPLE_PLOT_SRC
+        ${SOP_COMMON_SRC}/simple_plot/*.c
+        ${SOP_COMMON_SRC}/simple_plot/*.cpp
+        ${SOP_COMMON_SRC}/simple_plot/*.h
+        ${SOP_COMMON_SRC}/simple_plot/*.hpp
+)
+
 set(GTEST_SRC
         ${SOP_TOP_DIR}/ext/googletest/googletest/src/gtest-all.cc
         ${SOP_TOP_DIR}/ext/googletest/googlemock/src/gmock-all.cc
@@ -161,8 +176,10 @@ set(SOP_SRC
     ${BUF_IO_SRC}
     ${UTILS_SRC}
     ${MINI_SOCKET_SRC}
-    ${GTEST_SRC}
+    ${SIMPLE_PLOT_SRC}
     ${SOP_COMMON_SRC}/LibraryFiles.cmake
 )
 
 list(REMOVE_DUPLICATES SOP_SRC)
+
+

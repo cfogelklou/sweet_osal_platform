@@ -6,11 +6,12 @@ name: CI or PR
 on:
   push:
     branches:
-      - 'master'
-      - 'main'
-      - 'devel'
+      - "master"
+      - "main"
+      - "devel"
+
     tags:
-      - '*' # Test all pushed tags.
+      - "*" # Test all pushed tags.
   pull_request:
     types:
       - labeled
@@ -38,34 +39,54 @@ jobs:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 15
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
-      - name: Checkout submodules
+      - name: Emscripten Install
+        if: (matrix.platform == 'ubuntu-latest')
+        uses: mymindstorm/setup-emsdk@v7
+        with:
+          # Make sure to set a version number!
+          version: 2.0.12
+          # This is the name of the cache folder.
+          # The cache folder will be placed in the build directory,
+          #  so make sure it doesn't conflict with anything!
+          actions-cache-folder: "emsdk-cache"
+
+      - name: Emscripten build and test
+        if: (matrix.platform == 'ubuntu-latest')
         run: |
-          echo Checkout submodules
-          #git fetch origin
-          git submodule sync
-          git submodule update --init --recursive
+          sh emscripten_build.sh
 
       - name: Cleanup from last time
         if: (matrix.platform == 'self-hosted')
         run: rm -rf build
 
-      - name: Build unit tests (posix)
-        if: (matrix.platform != 'windows-latest')
+      - name: Add msbuild to PATH (windows).
+        if: (matrix.platform == 'windows-latest')
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Run cmake
         run: |
           mkdir build
           pushd build
           cmake ..
+          popd
+
+      - name: Build unit tests
+        if: (matrix.platform != 'windows-latest')
+        run: |
+          pushd build
           make -j4
           popd
 
-      # msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
-      - name: Build unit tests (windows)
+      - name: Build unit tests (windows).
         if: (matrix.platform == 'windows-latest')
         run: |
-          .\scripts\win_build.bat
+          pushd build
+          msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
+          popd
 
       - name: Run unit tests.
         if: (github.workflow != 'CD')

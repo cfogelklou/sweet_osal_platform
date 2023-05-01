@@ -1,20 +1,16 @@
 # sweet_osal_platform (SOP)
-An abstraction layer for Windows, Linux, Android, and iOS platforms containing OS abstractions and utilities that have been proven useful over my career.
 
-Many of these source files originated in embedded projects 20 years ago, so are lightweight but also not "modern" and might be closer to C than C++ (utils/byteq for example) but correctness trumps modernity.  For example, I recently replaced the "mutex" in the osal with a std::recursivemutex, as C++11 is now mostly implemented even in the embedded world.
+[![CI or PR](https://github.com/cfogelklou/sweet_osal_platform/actions/workflows/ci_pr.yml/badge.svg?branch=master)](https://github.com/cfogelklou/sweet_osal_platform/actions/workflows/ci_pr.yml)
 
-The goal with open sourcing these is to ensure their use continues in all future projects while simultaneously refactoring them, modernizing them, and building upon them.  (as opposed to the typical process of picking, choosing, and rewriting as the needs arise)
+<a href="https://scan.coverity.com/projects/cfogelklou-sweet_osal_platform">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/22874/badge.svg"/>
+</a>
 
-Unit tests can be built and run using cmake:
+An easily portable abstraction layer for Windows, Linux, Free-RTOS, Android, and iOS platforms containing OS abstractions and utilities that have been proven useful over my career.
 
-```bash
+Many of these source files originated in embedded projects 20 years ago, so are lightweight but also not "modern" and might be closer to C than C++ (utils/byteq for example) but correctness trumps modernity. For example, I recently replaced the "mutex" in the osal with a std::recursivemutex, as C++11 is now mostly implemented even in the embedded world.
 
-git submodule update --init --recursive
+The goal with open sourcing these is to ensure their use continues in all future projects while simultaneously refactoring them, modernizing them, and building upon them. (as opposed to the typical process of picking, choosing, and rewriting as the needs arise)
 
-mkdir build
-cd build
-cmake ../
-make
-ctest
-
-```
+Please refer to [Github Actions](https://github.com/cfogelklou/sweet_osal_platform/actions/workflows/ci_pr.yml) for a cookbook to build the OSAL.

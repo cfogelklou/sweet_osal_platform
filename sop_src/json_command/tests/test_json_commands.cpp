@@ -21,7 +21,8 @@ using namespace testing;
 
 
 TEST(TestJsonCommands, TestJsonCommands) {
-  // TODO: Right now, just tests that it compiles.
+  // TODO: Currently no tests, fill in
+  OSALSleep(5000);
 }
 
 

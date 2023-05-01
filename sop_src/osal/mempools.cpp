@@ -5,7 +5,7 @@
 #include "mempools.h"
 #include "utils/platform_log.h"
 
-#if (!NO_MEMPOOLS)
+#if (!(NO_MEMPOOLS > 0))
 #include "osal.h"
 #include "mbedtls/myconfig.h"
 #include "mbedtls/platform.h"
@@ -64,7 +64,7 @@ dll::list mempools_allocatedList;
 
 
 #if (MEMPOOLS_DEBUG > 0)
-// We use a magic number to ensure that 
+// We use a magic number to ensure that
 typedef struct MemChkHdrTag {
 
   DLLNode       listNode;
@@ -106,7 +106,7 @@ static void mempools_DynamicInit(){
     MemPoolsInitialize();
   }
 }
-  
+
 #define MP_INIT() if (!mInitialized) do {mempools_DynamicInit();} while(0)
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ static bool mempools_IsWithinPool(void *pVoid) {
   }
   return isWithinPool;
 }
-  
+
 #if (MEMPOOLS_DEBUG > 0)
 // ////////////////////////////////////////////////////////////////////////////
 // Free the memory allocated in pVoid.
@@ -173,10 +173,10 @@ void *_MemPoolsMallocWithId(
 void *MemPoolsMallocWithId(
 #endif
   const size_t sz,
-  const uint8_t id, 
+  const uint8_t id,
   const bool useHeap
 #if (MEMPOOLS_DEBUG_FILETRACE > 0)
-  ,const char * const pF, 
+  ,const char * const pF,
   const int line
 #endif
 )
@@ -234,9 +234,9 @@ bool MemPoolsCheckMem(void *MemPtr) {
 
 // ////////////////////////////////////////////////////////////////////////////
 void MemPoolsForEachWithAllocId(
-  const uint8_t id, 
-  MemPoolsForEachWithAllocIdFnT pFn, 
-  void *pData) 
+  const uint8_t id,
+  MemPoolsForEachWithAllocIdFnT pFn,
+  void *pData)
 {
   MP_INIT();
   if (pFn) {
@@ -384,7 +384,7 @@ void MemPoolsPrintUsage(void) {
   }
 #endif
 }
-                            
+
 // ////////////////////////////////////////////////////////////////////////////
 void MemPoolsGetUsage(
   size_t *pcur_used,
@@ -405,7 +405,7 @@ void MemPoolsGetUsage(
   if (pmax_used) *pmax_used = max_used;
   if (pmax_blocks) *pmax_blocks = max_blocks;
 }
-                            
+
 // ////////////////////////////////////////////////////////////////////////////
 // Override new/delete
 // Enable this after platform startup on an embedded system so that strings, etc, will use mempools
@@ -421,7 +421,7 @@ bool MemPoolsEnableNewOverride(const bool enable) {
 // ////////////////////////////////////////////////////////////////////////////
 // Completely disable new/delete overrides.
 void MemPoolsDeInitNewOverride(void) {
-  
+
   mNewDeleteOverride = false;
 }
 
@@ -430,7 +430,7 @@ void MemPoolsDeInitNewOverride(void) {
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // Override new and delete in the embedded platform, or any non-apple platform
-#if (PLATFORM_EMBEDDED > 0) || (!defined(APPLE) && !defined(__APPLE__))
+#if (PLATFORM_EMBEDDED > 0) || (!defined(APPLE) && !defined(__APPLE__) && !defined(ANDROID))
 void* operator new     (size_t size) {
   if (mNewDeleteOverride) {
     return MemPoolsMalloc(size);
@@ -461,7 +461,7 @@ void* operator new[](size_t size) {
 }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
-void  operator delete (void* ptr) 
+void  operator delete (void* ptr)
 {
   if (mInitialized) {
     MemPoolsFree(ptr);

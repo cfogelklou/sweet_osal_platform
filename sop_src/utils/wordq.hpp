@@ -24,6 +24,10 @@ private:
     return (uint8_t*)p;
   }
 
+  static constexpr const uint8_t* toConstPtr8(WordT* p) {
+    return (uint8_t*)p;
+  }
+
   static constexpr WordT* toPtrW(uint8_t * p) {
     return (WordT*)p;
   }
@@ -46,7 +50,8 @@ public:
 
   void Init(WordT * const pBuf, size_t nBufWords,
     const bool lockOnWrites = false, bool lockOnReads = false) {
-    ByteQCreate(&mByteQ, (uint8_t *)pBuf, toBytes(nBufWords), lockOnWrites, lockOnReads);
+    const unsigned int numBytes = static_cast<unsigned int>(toBytes(nBufWords));
+    ByteQCreate(&mByteQ, (uint8_t *)pBuf, numBytes, lockOnWrites, lockOnReads);
   }
 
   // Destructor
@@ -75,7 +80,8 @@ public:
   }
 
   size_t ForceWrite(const WordT * const pWrBuf, const size_t numWords) {
-    return toWords(ByteQForceWrite( &mByteQ, toPtr8((WordT * )pWrBuf), toBytes(numWords)));
+    const unsigned int numBytes = static_cast<unsigned int>(toBytes(numWords));
+    return toWords(ByteQForceWrite( &mByteQ, toConstPtr8((WordT * )pWrBuf), numBytes));
   }
 
   // Get a pointer that can be used for advanced functions.

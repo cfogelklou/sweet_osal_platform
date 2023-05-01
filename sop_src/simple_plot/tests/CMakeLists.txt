@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-project(transport_test)
+project(test_simple_plot)
 
 set(CMAKE_CXX_STANDARD 11)
-
 set(SOP_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
 include(${SOP_TOP_DIR}/sop_src/LibraryFiles.cmake)
@@ -13,39 +12,47 @@ if (WIN32)
     add_definitions(-DMBEDTLS_NO_SOCKETS)
 elseif (APPLE)
     set(CMAKE_BUILD_TYPE Debug)
-    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")    
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG}")    
 
 elseif (UNIX)
     set(CMAKE_BUILD_TYPE Debug)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c11")
-
+    
     #TODO the following definition is only needed on BASH under windows.
     add_definitions(-DMBEDTLS_NO_SOCKETS)
 endif()
 
 file(GLOB LOCAL_SRC
+
         ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/../*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../*.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../*.hpp
 )
 
 set(SOURCE_FILES
-        # Google Test / Mock
-        ${GTEST_SRC}
+    # SOP src
+    ${MBEDTLS_BASICS_SRC}
+    ${TASK_SCHED_SRC}
+    ${OSAL_SRC}
+    ${BUF_IO_SRC}
+    ${UTILS_SRC}
 
-        ${SOP_SRC}
+    ${GTEST_SRC}
+    ${SOP_COMMON_SRC}/LibraryFiles.cmake
 
-        # These main files.
-        ${LOCAL_SRC}
-
+    # These main files.
+    ${LOCAL_SRC}
 
 )
 
 list(REMOVE_DUPLICATES SOURCE_FILES)
 
 include_directories(
-
        ${SOP_TOP_DIR}
 
        ${SOP_COMMON_SRC}

@@ -14,6 +14,9 @@ if (WIN32)
     #set(FREERTOS_PORT 1)
 elseif (APPLE)
     set(CMAKE_BUILD_TYPE Debug)
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")    
+
 elseif (UNIX)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
@@ -33,6 +36,8 @@ file(GLOB LOCAL_SRC
 set(SOURCE_FILES
 
         # Google Test / Mock
+        ${GTEST_SRC}
+
         ${SOP_SRC}
 
         # These main files.
@@ -65,16 +70,14 @@ include_directories(
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-find_package(Threads REQUIRED)
-
-if (WIN32)
-    #target_link_libraries(${PROJECT_NAME} ws2_32 applicaudia_test_lib)
-    target_link_libraries(${PROJECT_NAME} ws2_32)
+if (EMSCRIPTEN)
+  #Skip threads.
+elseif (WIN32)
+  target_link_libraries(${PROJECT_NAME} ws2_32)
 else (WIN32)
-    find_package(Threads REQUIRED)
-    #target_link_libraries(${PROJECT_NAME} Threads::Threads applicaudia_test_lib)
-    target_link_libraries(${PROJECT_NAME} Threads::Threads)
-endif (WIN32)
+  find_package(Threads REQUIRED)    
+  target_link_libraries(${PROJECT_NAME} Threads::Threads)
+endif()
 
 enable_testing()
 add_test(${PROJECT_NAME} ${PROJECT_NAME})

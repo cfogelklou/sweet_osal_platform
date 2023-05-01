@@ -1,30 +1,47 @@
-#ifdef RUN_GTEST
+//#ifdef RUN_GTEST
 
-#include <stdint.h>
 #include "osal/mempools.h"
 #include "osal/osal.h"
-#include "utils/platform_log.h"
-#include "utils/dl_list.h"
-#include "utils/sl_list.h"
-#include "gtest/gtest.h"
 #include "tests/gtest_test_wrapper.hpp"
+#include "utils/dl_list.h"
+#include "utils/platform_log.h"
+#include "utils/sl_list.h"
+
+#include "gtest/gtest.h"
+#include <stdint.h>
 #include <stdlib.h>
 
 LOG_MODNAME("test_lists.cpp")
 
 
+class Test1 {
+public:
+  virtual void doSomething() {
+  }
+};
+
+class Test2 : public Test1 {
+public:
+  // See if this compiles.
+  void doSomething() override {
+  }
+};
+
+
 class TestLists : public GtestMempoolsWrapper {
 protected:
-  TestLists() {}
-  virtual ~TestLists() {}
+  TestLists() {
+  }
+  virtual ~TestLists() {
+  }
 };
 
 
 #if defined(__EMBEDDED_MCU_BE__)
-#define OSALRandom(p,l) _OSALRandom(p,l)
-void _OSALRandom( uint8_t *ptmp, int len ){
-  for (int i = 0; i < len; i++){
-    ptmp[i] = rand() & 0xff;
+#define OSALRandom(p, l) _OSALRandom(p, l)
+void _OSALRandom(uint8_t* ptmp, int len) {
+  for (int i = 0; i < len; i++) {
+    ptmp[ i ] = rand() & 0xff;
   }
 }
 #endif
@@ -47,10 +64,10 @@ typedef struct {
 #define NUM_ELEMENTS 10
 #endif
 
-static int bgosal_TestDllNodeCompareCb(void *pParam, const DLLNode * const pNode0,
-                                       const DLLNode * const pNode1) {
-  myNode_t *node0 = (myNode_t *)pNode0;
-  myNode_t *node1 = (myNode_t *)pNode1;
+static int bgosal_TestDllNodeCompareCb(
+  void* pParam, const DLLNode* const pNode0, const DLLNode* const pNode1) {
+  myNode_t* node0 = (myNode_t*)pNode0;
+  myNode_t* node1 = (myNode_t*)pNode1;
   (void)pParam;
   return (node0->value - node1->value);
 }
@@ -68,11 +85,11 @@ TEST_F(TestLists, dll1) {
   LOG_Log("Creating nodes\r\n");
   // Create nodes
   for (i = 0; i < NUM_ELEMENTS; i++) {
-    myNode_t *p = (myNode_t *)MemPoolsHeapMalloc(sizeof(myNode_t));
+    myNode_t* p = (myNode_t*)MemPoolsHeapMalloc(sizeof(myNode_t));
     DLL_NodeInit(&p->listNode);
     uint16_t tmp;
-    OSALRandom((uint8_t *)&tmp, sizeof(tmp));
-    p->value = tmp % 20;
+    OSALRandom((uint8_t*)&tmp, sizeof(tmp));
+    p->value         = tmp % 20;
     p->creationOrder = i;
     // LOG_Log("%d\r\n", p->value);
     DLL_PushBack(&list0, &p->listNode);
@@ -83,13 +100,12 @@ TEST_F(TestLists, dll1) {
   LOG_Log("Sorting...\r\n");
   // test sorted insert
   {
-    myNode_t *p = 0;
-    i = 0;
+    myNode_t* p = 0;
+    i           = 0;
     do {
-      p = (myNode_t *)DLL_PopFront(&list0);
+      p = (myNode_t*)DLL_PopFront(&list0);
       if (p != NULL) {
-        DLL_SortedInsert(&sortedList, &p->listNode,
-                               bgosal_TestDllNodeCompareCb, NULL);
+        DLL_SortedInsert(&sortedList, &p->listNode, bgosal_TestDllNodeCompareCb, NULL);
         ++i;
       }
     } while (p != 0);
@@ -111,10 +127,10 @@ TEST_F(TestLists, dll1) {
   LOG_Log("Pop, Push from list1 to list0...\r\n");
   // test poplast, pushfront
   {
-    myNode_t *p = 0;
-    i = 0;
+    myNode_t* p = 0;
+    i           = 0;
     do {
-      p = (myNode_t *)DLL_PopBack(&list1);
+      p = (myNode_t*)DLL_PopBack(&list1);
       if (p != NULL) {
         // LOG_Log("%d\r\n", p->value);
         DLL_PushBack(&list0, &p->listNode);
@@ -129,10 +145,10 @@ TEST_F(TestLists, dll1) {
   LOG_Log("Pop, Push from list0 to list1...\r\n");
   // test popfront, pushback
   {
-    myNode_t *p = 0;
-    i = 0;
+    myNode_t* p = 0;
+    i           = 0;
     do {
-      p = (myNode_t *)DLL_PopFront(&list0);
+      p = (myNode_t*)DLL_PopFront(&list0);
       if (p != NULL) {
         // LOG_Log("%d\r\n", p->value);
         DLL_PushFront(&list1, &p->listNode);
@@ -147,10 +163,10 @@ TEST_F(TestLists, dll1) {
   LOG_Log("Checking list still sorted...\r\n");
   // Check that all elements are sorted
   {
-    bool sorted = true;
-    myNode_t *pIter = (myNode_t *)DLL_Begin(&list1);
-    myNode_t *pEnd = (myNode_t *)DLL_End(&list1);
-    myNode_t *pLast = NULL;
+    bool sorted     = true;
+    myNode_t* pIter = (myNode_t*)DLL_Begin(&list1);
+    myNode_t* pEnd  = (myNode_t*)DLL_End(&list1);
+    myNode_t* pLast = NULL;
     while (pIter != pEnd) {
       if (pLast) {
         if (pIter->value < pLast->value) {
@@ -165,7 +181,7 @@ TEST_F(TestLists, dll1) {
         }
       }
       pLast = pIter;
-      pIter = (myNode_t *)pIter->listNode.pNext;
+      pIter = (myNode_t*)pIter->listNode.pNext;
     }
 
     EXPECT_TRUE(sorted);
@@ -173,10 +189,10 @@ TEST_F(TestLists, dll1) {
 
   // Free buffers
   {
-    myNode_t *p = 0;
-    i = 0;
+    myNode_t* p = 0;
+    i           = 0;
     do {
-      p = (myNode_t *)DLL_PopFront(&list1);
+      p = (myNode_t*)DLL_PopFront(&list1);
       if (p != NULL) {
         MemPoolsFree(p);
         ++i;
@@ -198,11 +214,11 @@ TEST_F(TestLists, dll2) {
   LOG_Log("Creating nodes\r\n");
   // Create nodes
   for (i = 0; i < NUM_ELEMENTS; i++) {
-    myNode_t *p = (myNode_t *)MemPoolsHeapMalloc(sizeof(myNode_t));
+    myNode_t* p = (myNode_t*)MemPoolsHeapMalloc(sizeof(myNode_t));
     DLL_NodeInit(&p->listNode);
     uint16_t tmp;
-    OSALRandom((uint8_t *)&tmp, sizeof(tmp));
-    p->value = tmp % 20;
+    OSALRandom((uint8_t*)&tmp, sizeof(tmp));
+    p->value         = tmp % 20;
     p->creationOrder = i;
     // LOG_Log("%d\r\n", p->value);
     DLL_PushBack(&list0, &p->listNode);
@@ -213,13 +229,12 @@ TEST_F(TestLists, dll2) {
   LOG_Log("Sorting...\r\n");
   // test sorted insert
   {
-    myNode_t *p = 0;
-    i = 0;
+    myNode_t* p = 0;
+    i           = 0;
     do {
-      p = (myNode_t *)DLL_PopFront(&list0);
+      p = (myNode_t*)DLL_PopFront(&list0);
       if (p != NULL) {
-        DLL_SortedInsertFromBack(&sortedList, &p->listNode,
-                                       bgosal_TestDllNodeCompareCb, NULL);
+        DLL_SortedInsertFromBack(&sortedList, &p->listNode, bgosal_TestDllNodeCompareCb, NULL);
         ++i;
       }
     } while (p != 0);
@@ -231,10 +246,10 @@ TEST_F(TestLists, dll2) {
   LOG_Log("Checking list still sorted...\r\n");
   // Check that all elements are sorted
   {
-    bool sorted = true;
-    myNode_t *pIter = (myNode_t *)DLL_Begin(&sortedList);
-    myNode_t *pEnd = (myNode_t *)DLL_End(&sortedList);
-    myNode_t *pLast = NULL;
+    bool sorted     = true;
+    myNode_t* pIter = (myNode_t*)DLL_Begin(&sortedList);
+    myNode_t* pEnd  = (myNode_t*)DLL_End(&sortedList);
+    myNode_t* pLast = NULL;
     while (pIter != pEnd) {
       if (pLast) {
         if (pIter->value < pLast->value) {
@@ -249,7 +264,7 @@ TEST_F(TestLists, dll2) {
         }
       }
       pLast = pIter;
-      pIter = (myNode_t *)pIter->listNode.pNext;
+      pIter = (myNode_t*)pIter->listNode.pNext;
     }
 
     EXPECT_TRUE(sorted);
@@ -257,10 +272,10 @@ TEST_F(TestLists, dll2) {
 
   // Free buffers
   {
-    myNode_t *p = 0;
-    i = 0;
+    myNode_t* p = 0;
+    i           = 0;
     do {
-      p = (myNode_t *)DLL_PopFront(&sortedList);
+      p = (myNode_t*)DLL_PopFront(&sortedList);
       if (p != NULL) {
         MemPoolsFree(p);
         ++i;
@@ -270,11 +285,12 @@ TEST_F(TestLists, dll2) {
   EXPECT_TRUE(i == NUM_ELEMENTS);
 }
 
-static int bgosal_TestSllNodeCompareCb(void *const pParam,
-                                       const SLLNode *const pNode0,
-                                       const SLLNode *const pNode1) {
-  mySllNode_t *node0 = (mySllNode_t *)pNode0;
-  mySllNode_t *node1 = (mySllNode_t *)pNode1;
+static int bgosal_TestSllNodeCompareCb(
+  void* const pParam,
+  const SLLNode* const pNode0,
+  const SLLNode* const pNode1) {
+  mySllNode_t* node0 = (mySllNode_t*)pNode0;
+  mySllNode_t* node1 = (mySllNode_t*)pNode1;
   (void)pParam;
   return (node0->value - node1->value);
 }
@@ -283,7 +299,7 @@ static int bgosal_TestSllNodeCompareCb(void *const pParam,
    Description: See the prototype at the top of the file.
 ******************************************************************************/
 TEST_F(TestLists, sll0) {
-  const int numElements = NUM_ELEMENTS/3;
+  const int numElements = NUM_ELEMENTS / 3;
   for (int test = 0; test < 3; test++) {
     LOG_Log("test %d\r\n", test);
     int i;
@@ -298,18 +314,13 @@ TEST_F(TestLists, sll0) {
     LOG_Log("Creating nodes\r\n");
     // Create nodes
     for (i = 0; i < numElements; i++) {
-      mySllNode_t *p = (mySllNode_t *)MemPoolsHeapMalloc(sizeof(mySllNode_t));
+      mySllNode_t* p =
+        (mySllNode_t*)MemPoolsHeapMalloc(sizeof(mySllNode_t));
       SLL_NodeInit(&p->listNode);
       switch (test) {
-      case 0:
-        p->value = i;
-        break;
-      case 1:
-        p->value = numElements - i;
-        break;
-      default:
-        p->value = 1;
-        break;
+      case 0: p->value = i; break;
+      case 1: p->value = numElements - i; break;
+      default: p->value = 1; break;
       }
       p->creationOrder = i;
       SLL_PushBack(&list0, &p->listNode);
@@ -320,13 +331,12 @@ TEST_F(TestLists, sll0) {
     LOG_Log("Sorting...\r\n");
     // test sorted insert
     {
-      mySllNode_t *p = 0;
-      i = 0;
+      mySllNode_t* p = 0;
+      i              = 0;
       do {
-        p = (mySllNode_t *)SLL_PopFront(&list0);
+        p = (mySllNode_t*)SLL_PopFront(&list0);
         if (p != NULL) {
-          SLL_SortedInsert(&sortedList, &p->listNode,
-                           bgosal_TestSllNodeCompareCb, NULL);
+          SLL_SortedInsert(&sortedList, &p->listNode, bgosal_TestSllNodeCompareCb, NULL);
           ++i;
         }
       } while (p != 0);
@@ -350,10 +360,10 @@ TEST_F(TestLists, sll0) {
     LOG_Log("Pop, Push from list1 to list0...\r\n");
     // test poplast, pushfront
     {
-      mySllNode_t *p = 0;
-      i = 0;
+      mySllNode_t* p = 0;
+      i              = 0;
       do {
-        p = (mySllNode_t *)SLL_PopBack(&list1);
+        p = (mySllNode_t*)SLL_PopBack(&list1);
         if (p != NULL) {
           // LOG_Log("%d\r\n", p->value);
           SLL_PushBack(&list0, &p->listNode);
@@ -368,10 +378,10 @@ TEST_F(TestLists, sll0) {
     LOG_Log("Pop, Push from list0 to list1...\r\n");
     // test popfront, pushback
     {
-      mySllNode_t *p = 0;
-      i = 0;
+      mySllNode_t* p = 0;
+      i              = 0;
       do {
-        p = (mySllNode_t *)SLL_PopFront(&list0);
+        p = (mySllNode_t*)SLL_PopFront(&list0);
         if (p != NULL) {
           // LOG_Log("%d\r\n", p->value);
           SLL_PushFront(&list1, &p->listNode);
@@ -386,10 +396,10 @@ TEST_F(TestLists, sll0) {
     LOG_Log("Checking list still sorted...\r\n");
     // Check that all elements are sorted
     {
-      bool sorted = true;
-      mySllNode_t *pIter = (mySllNode_t *)SLL_Begin(&list1);
-      mySllNode_t *pEnd = (mySllNode_t *)SLL_End(&list1);
-      mySllNode_t *pLast = NULL;
+      bool sorted        = true;
+      mySllNode_t* pIter = (mySllNode_t*)SLL_Begin(&list1);
+      mySllNode_t* pEnd  = (mySllNode_t*)SLL_End(&list1);
+      mySllNode_t* pLast = NULL;
       while (pIter != pEnd) {
         if (pLast) {
           if (pIter->value < pLast->value) {
@@ -404,7 +414,7 @@ TEST_F(TestLists, sll0) {
           }
         }
         pLast = pIter;
-        pIter = (mySllNode_t *)pIter->listNode.pNext;
+        pIter = (mySllNode_t*)pIter->listNode.pNext;
       }
 
       EXPECT_TRUE(sorted);
@@ -412,10 +422,10 @@ TEST_F(TestLists, sll0) {
 
     // Free buffers
     {
-      mySllNode_t *p = 0;
-      i = 0;
+      mySllNode_t* p = 0;
+      i              = 0;
       do {
-        p = (mySllNode_t *)SLL_PopFront(&list1);
+        p = (mySllNode_t*)SLL_PopFront(&list1);
         if (p != NULL) {
           MemPoolsFree(p);
           ++i;
@@ -442,11 +452,12 @@ TEST_F(TestLists, sll1) {
   LOG_Log("Creating nodes\r\n");
   // Create nodes
   for (i = 0; i < NUM_ELEMENTS; i++) {
-    mySllNode_t *p = (mySllNode_t *)MemPoolsHeapMalloc(sizeof(mySllNode_t));
+    mySllNode_t* p =
+      (mySllNode_t*)MemPoolsHeapMalloc(sizeof(mySllNode_t));
     SLL_NodeInit(&p->listNode);
     uint16_t tmp;
-    OSALRandom((uint8_t *)&tmp, sizeof(tmp));
-    p->value = tmp % 20;
+    OSALRandom((uint8_t*)&tmp, sizeof(tmp));
+    p->value         = tmp % 20;
     p->creationOrder = i;
     // LOG_Log("%d\r\n", p->value);
     SLL_PushBack(&list0, &p->listNode);
@@ -457,13 +468,12 @@ TEST_F(TestLists, sll1) {
   LOG_Log("Sorting...\r\n");
   // test sorted insert
   {
-    mySllNode_t *p = 0;
-    i = 0;
+    mySllNode_t* p = 0;
+    i              = 0;
     do {
-      p = (mySllNode_t *)SLL_PopFront(&list0);
+      p = (mySllNode_t*)SLL_PopFront(&list0);
       if (p != NULL) {
-        SLL_SortedInsert(&sortedList, &p->listNode, bgosal_TestSllNodeCompareCb,
-                         NULL);
+        SLL_SortedInsert(&sortedList, &p->listNode, bgosal_TestSllNodeCompareCb, NULL);
         ++i;
       }
     } while (p != 0);
@@ -487,10 +497,10 @@ TEST_F(TestLists, sll1) {
   LOG_Log("Pop, Push from list1 to list0...\r\n");
   // test poplast, pushfront
   {
-    mySllNode_t *p = 0;
-    i = 0;
+    mySllNode_t* p = 0;
+    i              = 0;
     do {
-      p = (mySllNode_t *)SLL_PopBack(&list1);
+      p = (mySllNode_t*)SLL_PopBack(&list1);
       if (p != NULL) {
         // LOG_Log("%d\r\n", p->value);
         SLL_PushBack(&list0, &p->listNode);
@@ -505,10 +515,10 @@ TEST_F(TestLists, sll1) {
   LOG_Log("Pop, Push from list0 to list1...\r\n");
   // test popfront, pushback
   {
-    mySllNode_t *p = 0;
-    i = 0;
+    mySllNode_t* p = 0;
+    i              = 0;
     do {
-      p = (mySllNode_t *)SLL_PopFront(&list0);
+      p = (mySllNode_t*)SLL_PopFront(&list0);
       if (p != NULL) {
         // LOG_Log("%d\r\n", p->value);
         SLL_PushFront(&list1, &p->listNode);
@@ -523,10 +533,10 @@ TEST_F(TestLists, sll1) {
   LOG_Log("Checking list still sorted...\r\n");
   // Check that all elements are sorted
   {
-    bool sorted = true;
-    mySllNode_t *pIter = (mySllNode_t *)SLL_Begin(&list1);
-    mySllNode_t *pEnd = (mySllNode_t *)SLL_End(&list1);
-    mySllNode_t *pLast = NULL;
+    bool sorted        = true;
+    mySllNode_t* pIter = (mySllNode_t*)SLL_Begin(&list1);
+    mySllNode_t* pEnd  = (mySllNode_t*)SLL_End(&list1);
+    mySllNode_t* pLast = NULL;
     while (pIter != pEnd) {
       if (pLast) {
         if (pIter->value < pLast->value) {
@@ -541,7 +551,7 @@ TEST_F(TestLists, sll1) {
         }
       }
       pLast = pIter;
-      pIter = (mySllNode_t *)pIter->listNode.pNext;
+      pIter = (mySllNode_t*)pIter->listNode.pNext;
     }
 
     EXPECT_TRUE(sorted);
@@ -549,10 +559,10 @@ TEST_F(TestLists, sll1) {
 
   // Free buffers
   {
-    mySllNode_t *p = 0;
-    i = 0;
+    mySllNode_t* p = 0;
+    i              = 0;
     do {
-      p = (mySllNode_t *)SLL_PopFront(&list1);
+      p = (mySllNode_t*)SLL_PopFront(&list1);
       if (p != NULL) {
         MemPoolsFree(p);
         ++i;
@@ -572,7 +582,8 @@ TEST_F(TestLists, SLLBackThenFront) {
 
   // PushBack
   {
-    mySllNode_t *p = (mySllNode_t *) MemPoolsHeapMalloc(sizeof(mySllNode_t));
+    mySllNode_t* p =
+      (mySllNode_t*)MemPoolsHeapMalloc(sizeof(mySllNode_t));
     SLL_NodeInit(&p->listNode);
     SLL_PushBack(&list0, &p->listNode);
   }
@@ -580,7 +591,8 @@ TEST_F(TestLists, SLLBackThenFront) {
 
   // PushFront
   {
-    mySllNode_t *p = (mySllNode_t *) MemPoolsHeapMalloc(sizeof(mySllNode_t));
+    mySllNode_t* p =
+      (mySllNode_t*)MemPoolsHeapMalloc(sizeof(mySllNode_t));
     SLL_NodeInit(&p->listNode);
     SLL_PushFront(&list0, &p->listNode);
   }
@@ -588,9 +600,9 @@ TEST_F(TestLists, SLLBackThenFront) {
 
   // Free buffers
   {
-    mySllNode_t *p = 0;
+    mySllNode_t* p = 0;
     do {
-      p = (mySllNode_t *)SLL_PopFront(&list0);
+      p = (mySllNode_t*)SLL_PopFront(&list0);
       if (p != NULL) {
         MemPoolsFree(p);
       }
@@ -609,7 +621,8 @@ TEST_F(TestLists, SLLFrontThenBack) {
 
   // PushFront
   {
-    mySllNode_t *p = (mySllNode_t *) MemPoolsHeapMalloc(sizeof(mySllNode_t));
+    mySllNode_t* p =
+      (mySllNode_t*)MemPoolsHeapMalloc(sizeof(mySllNode_t));
     SLL_NodeInit(&p->listNode);
     SLL_PushFront(&list0, &p->listNode);
   }
@@ -617,7 +630,8 @@ TEST_F(TestLists, SLLFrontThenBack) {
 
   // PushBack
   {
-    mySllNode_t *p = (mySllNode_t *) MemPoolsHeapMalloc(sizeof(mySllNode_t));
+    mySllNode_t* p =
+      (mySllNode_t*)MemPoolsHeapMalloc(sizeof(mySllNode_t));
     SLL_NodeInit(&p->listNode);
     SLL_PushBack(&list0, &p->listNode);
   }
@@ -625,9 +639,9 @@ TEST_F(TestLists, SLLFrontThenBack) {
 
   // Free buffers
   {
-    mySllNode_t *p = 0;
+    mySllNode_t* p = 0;
     do {
-      p = (mySllNode_t *)SLL_PopFront(&list0);
+      p = (mySllNode_t*)SLL_PopFront(&list0);
       if (p != NULL) {
         MemPoolsFree(p);
       }
@@ -636,4 +650,4 @@ TEST_F(TestLists, SLLFrontThenBack) {
   EXPECT_TRUE(SLL_Size(&list0) == 0);
 }
 
-#endif
+//#endif

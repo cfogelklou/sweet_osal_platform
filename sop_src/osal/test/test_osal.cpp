@@ -569,8 +569,8 @@ TEST_F(OSALTest, scheduler) {
 
     for (int direction = 0; direction <= 1; direction++) {
 
-      const int start = (direction) ? ARRSZ(schedulables) - 1 : 0;
-      const int end = (direction) ? -1 : ARRSZ(schedulables);
+      const int start = (direction) ? ARRSZN(schedulables) - 1 : 0;
+      const int end = (direction) ? -1 : ARRSZN(schedulables);
       const int inc = (direction) ? -1 : 1;
       for (int i = start; i != end; i += inc) {
         TaskSchedInitSched(&schedulables[i].sched, test_scheduler_cb,
@@ -662,8 +662,8 @@ TEST_F(OSALTest, scheduler_events) {
 
     for (int direction = 0; direction <= 1; direction++) {
 
-      const int start = (direction) ? ARRSZ(schedulables) - 1 : 0;
-      const int end = (direction) ? -1 : ARRSZ(schedulables);
+      const int start = (direction) ? ARRSZN(schedulables) - 1 : 0;
+      const int end = (direction) ? -1 : ARRSZN(schedulables);
       const int inc = (direction) ? -1 : 1;
       for (int i = start; i != end; i += inc) {
         TaskSchedInitSched(&schedulables[i].sched, test_scheduler_events_cb,

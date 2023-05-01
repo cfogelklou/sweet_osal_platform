@@ -1584,6 +1584,7 @@
 */
 //#define MBEDTLS_SSL_TRUNCATED_HMAC_COMPAT
 
+#if !defined(EMSCRIPTEN)
 /**
 * \def MBEDTLS_THREADING_ALT
 *
@@ -1594,6 +1595,7 @@
 * Uncomment this to allow your own alternate threading implementation.
 */
 #define MBEDTLS_THREADING_ALT
+#endif
 
 /**
 * \def MBEDTLS_THREADING_PTHREAD
@@ -3038,7 +3040,7 @@
 #define MBEDTLS_ENTROPY_NV_SEED
 #endif
 
-#if (PLATFORM_EMBEDDED > 0)
+#if (PLATFORM_EMBEDDED > 0) && (!defined(EMSCRIPTEN))
 #include "libcrypto_al/libcrypto_al.h"
 /* Platform options */
 //#define MBEDTLS_PLATFORM_STD_MEM_HDR   <stdlib.h> /**< Header to include if MBEDTLS_PLATFORM_NO_STD_FUNCTIONS is defined. Don't define if no header is needed. */

@@ -1,4 +1,4 @@
-#ifdef RUN_GTEST
+
 #include <string.h>
 #include "gtest/gtest.h"
 #include "osal/osal.h"
@@ -6,8 +6,10 @@
 #include "utils/util_vsnprintf.h"
 #include "utils/helper_macros.h"
 #include "utils/convert_utils.h"
+#include "utils/simple_string.hpp"
 #include "tests/gtest_test_wrapper.hpp"
 #include <string.h>
+
 LOG_MODNAME("test_sstring.cpp");
 
 class TestSstring : public GtestMempoolsWrapper {
@@ -76,4 +78,13 @@ TEST_F(TestSstring, cnv_atoi) {
 
 }
 
-#endif
+TEST_F(TestSstring, cnv_uuidify) {
+  const char hexIn[] = "0123456789ABCDEF0123456789ABCDEF";  
+  const char out[] = "01234567-89AB-CDEF-0123-456789ABCDEF";
+  
+  sstring s;
+  CNV_Uuidify(hexIn, s);
+  ASSERT_TRUE(0 == strncmp(s.c_str(), out, strlen(out)));
+
+}
+
