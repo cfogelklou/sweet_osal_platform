@@ -1034,7 +1034,7 @@
 *
 * Enable functions that use the filesystem.
 */
-#define MBEDTLS_FS_IO
+//#define MBEDTLS_FS_IO
 #endif
 
 #if (PLATFORM_EMBEDDED > 0)
