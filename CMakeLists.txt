@@ -7,7 +7,7 @@ if(NOT DEFINED SOP_TOP_DIR)
     set(SOP_TOP_DIR ${CMAKE_SOURCE_DIR})
 endif()
 
-if (EMSCRIPTEN)
+if (TRUE)
   # skip
 elseif(DEFINED ENV{GITHUB_WORKFLOW})
   # Skip
