@@ -287,6 +287,9 @@ bool log_VerboseEnabled = false;
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 void LOG_Init(LOG_LoggingFn logFn, void* pUserData) {
   auto& inst = Logger::inst();
+  if (!logFn) {
+    log_TraceEnabled = false;
+  }
   inst.Init(logFn, pUserData);
 }
 
