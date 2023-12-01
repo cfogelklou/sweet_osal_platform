@@ -3,11 +3,6 @@
 #include "platform_log.h"
 #include "utils/file_utils.hpp"
 
-std::string getPathToFile(const char* name) {
-  std::string s = std::string("sau_src/test_data/") + name;
-  return FileUtils::getPathToFile(s.c_str());
-}
-
 
 MyFile::MyFile(const char* name, const char* mode)
   : f(nullptr) {

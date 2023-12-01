@@ -3,8 +3,6 @@
 #include <map>
 #include <string>
 
-std::string getPathToFile(const char* name);
-
 class MyFile {
 public:
   MyFile(const char* name, const char* mode);

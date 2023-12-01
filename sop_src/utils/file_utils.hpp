@@ -36,16 +36,17 @@ public:
   }
 
   typedef void (*ChunkFileCb)(void* p, int16_t samps[], const size_t numSamps);
-  static void
-    chunkRawFile(const std::string fileName, const size_t chunkSamps16Le, ChunkFileCb cb, void* p) {
+  static void chunkRawFile(
+    const std::string fileName, const size_t chunkSamps16Le,
+    ChunkFileCb cb, void* p) {
     const std::string path = getPathToFile(fileName.c_str());
-    auto size              = getFilesize(path.c_str());
+    auto size = getFilesize(path.c_str());
     std::fstream input(path, std::ios_base::in | std::ios_base::binary);
     if (input.is_open()) {
       int16_t* buf          = new int16_t[ chunkSamps16Le ];
       size_t remainingSamps = size / 2;
       while (remainingSamps > 0) {
-        const size_t s     = MIN(remainingSamps, chunkSamps16Le);
+        const size_t s = MIN(remainingSamps, chunkSamps16Le);
         const size_t bytes = s * sizeof(int16_t);
 
         // Read in from the file.
