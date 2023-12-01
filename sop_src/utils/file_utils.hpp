@@ -5,6 +5,8 @@
 #include "utils/helper_macros.h"
 
 #include <fstream>
+#include <cstring>
+
 class FileUtils {
 public:
   // //////////////////////////////////////////////////////////////////////////
