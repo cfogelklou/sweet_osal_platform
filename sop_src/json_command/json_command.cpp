@@ -5,18 +5,19 @@
  */
 #include "json_command/json_command.hpp"
 
-#include "utils/helper_macros.h"
-#include "task_sched/task_sched.h"
 #include "osal/platform_type.h"
+#include "task_sched/task_sched.h"
+#include "utils/helper_macros.h"
+
 #include <iostream>
 #include <string>
 
 #if (TARGET_OS_ANDROID > 0)
 #ifndef __try
-#define __try if(true)
+#define __try if (true)
 #endif
 #ifndef __catch
-#define __catch(e) if(false)
+#define __catch(e) if (false)
 #endif
 #endif
 
@@ -24,7 +25,7 @@
 #define __try try
 #endif
 #ifndef __catch
-#define __catch(e) catch(e)
+#define __catch(e) catch (e)
 #endif
 
 LOG_MODNAME("jsoncommands.cpp");
@@ -35,50 +36,50 @@ using namespace nlohmann;
 // ////////////////////////////////////////////////////////////////////////////
 namespace jsoncmd {
 
-  class JsonHolder {
-  public:
-    JsonHolder(const char * const pStr)
-    {
-        __try {
-        json j = json::parse(pStr);
-        if (j.size() > 0){
-          mJson = j;
-          LOG_VERBOSE(("Got JSON of size %d\r\n", mJson.size()));
-        }
-        else {
-          LOG_VERBOSE(("JSON size was zero!"));
-        }
+class JsonHolder {
+public:
+  JsonHolder(const char* const pStr) {
+    __try {
+      json j = json::parse(pStr);
+      if (j.size() > 0) {
+        mJson = j;
+        LOG_VERBOSE(("Got JSON of size %d\r\n", mJson.size()));
+      } else {
+        LOG_VERBOSE(("JSON size was zero!"));
       }
-      __catch (std::exception& e) {
+    }
+    __catch(std::exception & e) {
 #ifndef ANDROID
-        (void)e;
+      (void)e;
 #endif
-        std::cerr << "ERROR in construction of JsonHolder " << std::endl;
-        LOG_ASSERT_WARN(false);
-      }
-        __catch (...) {
-        std::cerr << "ERROR in construction of JsonHolder: Unknown exception caught." << std::endl;
-        LOG_ASSERT_WARN(false);
-      }
+      std::cerr << "ERROR in construction of JsonHolder " << std::endl;
+      LOG_ASSERT_WARN(false);
     }
-
-    ~JsonHolder() {
-      mJson.clear();
+    __catch(...) {
+      std::cerr << "ERROR in construction of JsonHolder: "
+                   "Unknown exception caught."
+                << std::endl;
+      LOG_ASSERT_WARN(false);
     }
+  }
 
-    json &get() {
-      return mJson;
-    }
+  ~JsonHolder() {
+    mJson.clear();
+  }
 
-  protected:
-    json mJson;
+  json& get() {
+    return mJson;
+  }
 
-  };
-}
+protected:
+  json mJson;
+};
+} // namespace jsoncmd
 
 // ////////////////////////////////////////////////////////////////////////////
-void JsonCommand::OnSchedCb(void *pUserData, uint32_t timeOrTicks) {
-  JsonCommand::JsonCommandCStruct *pC = (JsonCommand::JsonCommandCStruct *)pUserData;
+void JsonCommand::OnSchedCb(void* pUserData, uint32_t timeOrTicks) {
+  JsonCommand::JsonCommandCStruct* pC =
+    (JsonCommand::JsonCommandCStruct*)pUserData;
   (void)timeOrTicks;
   if (pC->pThis) {
     pC->pThis->exec();
@@ -87,9 +88,7 @@ void JsonCommand::OnSchedCb(void *pUserData, uint32_t timeOrTicks) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-static void bleCmdDefaultOnCompletedCbC(
-  void * const,
-  const char * const) {
+static void bleCmdDefaultOnCompletedCbC(void* const, const char* const) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -97,44 +96,40 @@ JsonCommand::JsonCommand(
   const std::string pJson,
   JsonCommandExec& mExecutor,
   OnCompletedCb onCompleted,
-  void *pUserData,
-  const bool executeImmediately
-                       )
+  void* pUserData,
+  const bool executeImmediately)
   : hdr()
   , mpJsonHolder(nullptr)
   , mpOnCompletedCb((onCompleted) ? onCompleted : bleCmdDefaultOnCompletedCbC)
   , mpUserData(pUserData)
   , mC()
-  , mpExec(&mExecutor)
-{
-  hdr.cmd = "invalid";
-  hdr.cmdId = 0;
+  , mpExec(&mExecutor) {
+  hdr.cmd      = "invalid";
+  hdr.cmdId    = 0;
   mpJsonHolder = new JsonHolder(pJson.c_str());
   LOG_ASSERT(mpJsonHolder);
-  json &j = mpJsonHolder->get();
-  hdr.cmd = j["cmd"].get<std::string>();
-  hdr.cmdId = j["cmdId"].get<int>();
-  mC.pThis = this;
+  json& j   = mpJsonHolder->get();
+  hdr.cmd   = j[ "cmd" ].get<std::string>();
+  hdr.cmdId = j[ "cmdId" ].get<int>();
+  mC.pThis  = this;
   mC.pSched = new TaskSchedulable(OnSchedCb, &mC);
-  if (!executeImmediately){
+  if (!executeImmediately) {
     TaskSchedAddTimerFn(TS_PRIO_APP_EVENTS, mC.pSched, 0, 0);
-  }
-  else {
+  } else {
     OnSchedCb(&mC, OSALGetMS());
   }
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-JsonCommand::~JsonCommand()
-{
+JsonCommand::~JsonCommand() {
   delete mC.pSched;
   delete mpJsonHolder;
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-static bool OnUnhandledCmd(CmdHandlerNodeData * const pCmdData) {
-  const json &jIn = pCmdData->jsonIn;
-  json &jOut = pCmdData->jsonOut;
+static bool OnUnhandledCmd(CmdHandlerNodeData* const pCmdData) {
+  const json& jIn = pCmdData->jsonIn;
+  json& jOut      = pCmdData->jsonOut;
   (void)jIn;
   (void)jOut;
   std::cerr << "Unhandled command!" << std::endl;
@@ -148,54 +143,44 @@ static const CmdHandlerNode CmdHandlerNodeAry[] = {
 
 // ////////////////////////////////////////////////////////////////////////////
 void JsonCommand::exec() {
-  json& j = mpJsonHolder->get();
-  json cmdRsp = json::object();
+  json& j                   = mpJsonHolder->get();
+  json cmdRsp               = json::object();
   OnJsonCommandFn handlerFn = mpExec->getNodeByCmd(hdr.cmd);
-  bool replyNow = false;
+  bool replyNow             = false;
   __try {
     if (handlerFn) {
-      CmdHandlerNodeData data = {
-        hdr.cmd,
-        hdr.cmdId,
-        j["cmdData"],
-        cmdRsp
-      };
-      replyNow = handlerFn(&data);
+      CmdHandlerNodeData data = { hdr.cmd, hdr.cmdId,
+                                  j[ "cmdData" ], cmdRsp };
+      replyNow                = handlerFn(&data);
     }
   }
-  __catch(std::exception & e) {
-#ifndef ANDROID
-    (void)e;
-#endif
-    std::cerr << "ERROR in JsonCommand::exec() " << std::endl;
-    LOG_ASSERT(false);
-  }
-  __catch(...) {
-    std::cerr << "ERROR in JsonCommand::exec() Unknown exception caught." << std::endl;
+  __catch(std::exception & e1) {
+    std::cerr << "ERROR in JsonCommand::exec():" << e1.what()
+              << std::endl;
     LOG_ASSERT(false);
   }
 
   if ((replyNow) && (mpOnCompletedCb)) {
-    json reply = json::object();
-    reply["status"] = true;
-    reply["cmdId"] = hdr.cmdId;
-    reply["cmd"] = hdr.cmd;
-    reply["cmdRsp"] = cmdRsp;
-    std::string sz = reply.dump();
+    json reply        = json::object();
+    reply[ "status" ] = true;
+    reply[ "cmdId" ]  = hdr.cmdId;
+    reply[ "cmd" ]    = hdr.cmd;
+    reply[ "cmdRsp" ] = cmdRsp;
+    std::string sz    = reply.dump();
     mpOnCompletedCb(mpUserData, sz.c_str());
-  }
-  else {
+  } else {
     if (!replyNow) {
       // Todo: Implement reply for command that cannot reply immediately.
-      LOG_WARNING(("A json handler has specified that reply will happen later, but this must be implemented in JsonCommand()\r\n"));
+      LOG_WARNING(("A json handler has specified that "
+                   "reply will happen later, but this must "
+                   "be implemented in JsonCommand()\r\n"));
     }
   }
 }
 
 // ////////////////////////////////////////////////////////////////////////////
 JsonCommandExec::JsonCommandExec()
-: mCommands()
-{
+  : mCommands() {
 }
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -205,7 +190,7 @@ JsonCommandExec::~JsonCommandExec() {
 // ////////////////////////////////////////////////////////////////////////////
 OnJsonCommandFn JsonCommandExec::getNodeByCmd(std::string cmd) {
   OnJsonCommandFn rval = nullptr;
-  //LOG_TRACE(("JsonCommandExec::size=%d\r\n", mCommands.size()));
+  // LOG_TRACE(("JsonCommandExec::size=%d\r\n", mCommands.size()));
   auto f = mCommands.find(cmd);
   if (f != mCommands.end()) {
     rval = f->second;
@@ -215,23 +200,23 @@ OnJsonCommandFn JsonCommandExec::getNodeByCmd(std::string cmd) {
 
 // ////////////////////////////////////////////////////////////////////////////
 void JsonCommandExec::addCommand(const std::string cmd, OnJsonCommandFn OnCommand) {
-  mCommands[cmd] = OnCommand;
+  mCommands[ cmd ] = OnCommand;
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-void JsonCommandExec::addCommand(const CmdHandlerNode &cmd) {
+void JsonCommandExec::addCommand(const CmdHandlerNode& cmd) {
   addCommand(cmd.cmd, cmd.OnCommand);
 }
 
 // ////////////////////////////////////////////////////////////////////////////
 void JsonCommandExec::addCommands(const CmdHandlerNode ary[], const int numCommands) {
   for (int i = 0; i < numCommands; i++) {
-    addCommand(ary[i]);
+    addCommand(ary[ i ]);
   }
 }
 
 // ////////////////////////////////////////////////////////////////////////////
-void JsonCommandExec::removeCommand(const std::string  cmd) {
+void JsonCommandExec::removeCommand(const std::string cmd) {
   mCommands.erase(cmd);
 }
 
@@ -243,8 +228,6 @@ void JsonCommandExec::removeCommand(const CmdHandlerNode& cmd) {
 // ////////////////////////////////////////////////////////////////////////////
 void JsonCommandExec::removeCommands(const CmdHandlerNode ary[], const int numCommands) {
   for (int i = 0; i < numCommands; i++) {
-    removeCommand(ary[i]);
+    removeCommand(ary[ i ]);
   }
 }
-
-
