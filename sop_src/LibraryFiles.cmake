@@ -141,13 +141,6 @@ file(GLOB UTILS_SRC
         ${SOP_COMMON_SRC}/utils/*.hpp
 )
 
-file(GLOB PHONE_AL_SRC
-        ${SOP_COMMON_SRC}/phone_al/*.cpp
-        ${SOP_COMMON_SRC}/phone_al/*.c
-        ${SOP_COMMON_SRC}/phone_al/*.h
-        ${SOP_COMMON_SRC}/phone_al/*.hpp
-)
-
 file(GLOB MINI_SOCKET_SRC
         ${SOP_COMMON_SRC}/mini_socket/*.c
         ${SOP_COMMON_SRC}/mini_socket/*.cpp
@@ -172,7 +165,6 @@ set(SOP_SRC
     ${MBEDTLS_BASICS_SRC}
     ${TASK_SCHED_SRC}
     ${OSAL_SRC}
-    ${PHONE_AL_SRC}
     ${BUF_IO_SRC}
     ${UTILS_SRC}
     ${MINI_SOCKET_SRC}
