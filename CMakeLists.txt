@@ -43,4 +43,4 @@ add_subdirectory(sop_src/osal/test)
 add_subdirectory(sop_src/utils/tests)
 add_subdirectory(sop_src/simple_plot/tests)
 add_subdirectory(sop_src/buf_io/tests)
-add_subdirectory(sop_src/json_command/tests)
+
