@@ -1,8 +1,12 @@
+/**
+ * COPYRIGHT	(c)	Applicaudia 2020
+ * @file     task_rescheduler.hpp
+ * @brief    This helper class allows tasks to safely be rescheduled only once.
+ */
 #ifndef TASK_RESCHEDULER_HPP
 #define TASK_RESCHEDULER_HPP
 
 #include "task_sched/task_sched.h"
-
 
 
 #ifdef WIN32
@@ -12,8 +16,7 @@
 
 #include "utils/pack_push.h"
 #include "utils/packed.h"
-typedef struct PACKED1 TaskSchedFlagsTag
-{
+typedef struct PACKED1 TaskSchedFlagsTag {
   unsigned int mIsEnabled : 1;
   unsigned int mIsScheduled : 1;
   unsigned int mLocks : 4;
@@ -28,11 +31,9 @@ typedef struct PACKED1 TaskSchedFlagsTag
 // ////////////////////////////////////////////////////////////////////////////
 // This helper class allows tasks to safely be rescheduled only once.
 // If the task is already scheduled, it will not be scheduled again.
-class TaskRescheduler
-{
+class TaskRescheduler {
 private:
-  typedef struct CObjTag
-  {
+  typedef struct CObjTag {
     TaskSchedulable sched;
     TaskRescheduler* const pThis;
     CObjTag(TaskRescheduler* pT)
@@ -43,13 +44,15 @@ private:
     //}
   private:
     CObjTag()
-    : pThis(nullptr)
-    {}
+      : pThis(nullptr) {
+    }
   } CObj;
 
 public:
-  TaskRescheduler(const char* const pFile, const int line, RunnableFnPtr pAppFn,
-                  void* const pAppParam = NULL, const TaskSchedPriority prio = TS_PRIO_APP_EVENTS);
+  TaskRescheduler(
+    const char* const pFile, const int line,
+    RunnableFnPtr pAppFn, void* const pAppParam = NULL,
+    const TaskSchedPriority prio = TS_PRIO_APP_EVENTS);
 
   // Destructor - try to avoid this, and use queueDeletion() instead.
   ~TaskRescheduler();
@@ -60,17 +63,31 @@ public:
   // Reschedules the task, even if it is already scheduled.
   void forceReschedule(const uint32_t delay = 0);
 
+  // disables the task so it won't run.
+  // unschedules the task if it is scheduled.
   void disable();
-  void enable();
-  void cancel();
-  inline bool isEnabled() const { return (flags.mIsEnabled) ? true : false; }
 
-  inline bool isScheduled() const { return flags.mIsScheduled ? true : false; }
+  // enables the task so it will run if it is scheduled.
+  void enable();
+
+  // Unschedules the task from the task scheduler
+  void cancel();
+
+  // Returns true if the task is enabled.
+  inline bool isEnabled() const {
+    return (flags.mIsEnabled) ? true : false;
+  }
+
+  // Returns true if the task is scheduled.
+  inline bool isScheduled() const {
+    return flags.mIsScheduled ? true : false;
+  }
 
 private:
   static void OnSchedCallbackC(void* p, uint32_t timeOrTicks);
   void OnSchedCallback(uint32_t timeOrTicks);
-  static void OnDummyCallback(void*, uint32_t) {}
+  static void OnDummyCallback(void*, uint32_t) {
+  }
 
 private:
   uint32_t mChk;

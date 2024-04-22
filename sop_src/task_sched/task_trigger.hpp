@@ -1,61 +1,55 @@
+/**
+ * COPYRIGHT	(c)	Applicaudia 2020
+ * @file     task_trigger.hpp
+ * @brief    Helper class which allows for triggering callbacks with built-in Trigger() functions.
+ */
 #if !defined(TASK_TRIGGER_HPP) && defined(__cplusplus)
 #define TASK_TRIGGER_HPP
 
 #include "task_sched/task_sched.h"
 
-/**
-Helper class which allows for triggering callbacks with built-in Trigger()
-functions.
-*/
-class TaskTrigger
-{
+class TaskTrigger {
 public:
   // Constructor
-  TaskTrigger(const TaskSchedPriority prio, RunnableFnPtr const pSchedulableFn,
-              void* const pUserData)
+  TaskTrigger(const TaskSchedPriority prio, RunnableFnPtr const pSchedulableFn, void* const pUserData)
     : mEnabled(true)
-    , mTrig(0)
-  {
+    , mTrig(0) {
     mTrig = TaskSchedAddEventFn(prio, pSchedulableFn, pUserData, mTrig);
   }
 
   // Trigger the task
-  void Trigger()
-  {
+  void Trigger() {
     if (mEnabled) {
       TaskSchedTriggerEvent(mTrig);
     }
   }
 
   // Trigger the task from an ISR. Doesn't enter critical sections.
-  void TriggerFromIsr()
-  {
+  void TriggerFromIsr() {
     if (mEnabled) {
       TaskSchedTriggerEventFromIsr(mTrig);
     }
   }
 
   // Enables the trigger
-  bool Enable()
-  {
+  bool Enable() {
     const bool oldVal = mEnabled;
-    mEnabled = true;
+    mEnabled          = true;
     return oldVal;
   }
 
   // Disables the trigger.
-  bool Disable()
-  {
+  bool Disable() {
     const bool oldVal = mEnabled;
-    mEnabled = false;
+    mEnabled          = false;
     return oldVal;
   }
 
 private:
   TaskTrigger()
     : mEnabled(true)
-    , mTrig()  
-  {}
+    , mTrig() {
+  }
 
 private:
   bool mEnabled;
