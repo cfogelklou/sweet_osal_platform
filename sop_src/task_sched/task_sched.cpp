@@ -20,6 +20,14 @@
 
 LOG_MODNAME("task_sched")
 
+#ifndef TARGET_OS_ANDROID
+#define TARGET_OS_ANDROID 0
+#endif
+
+#ifndef TARGET_OS_IOS
+#define TARGET_OS_IOS 0
+#endif
+
 #if (TARGET_OS_ANDROID > 0) || (TARGET_OS_IOS > 0)
 // This must be implemented by the mobile application
 extern void UiTSchedDoSchedule(const uint32_t delay);
