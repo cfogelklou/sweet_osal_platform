@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <map>
 #include <string>
-#include <cstdint>
 
 class MyFile {
 public:

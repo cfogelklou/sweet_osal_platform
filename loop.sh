@@ -339,6 +339,7 @@ CONVERT_PROMPT
 
     # Use Claude to convert
     local temp_output=$(mktemp)
+    # Wrap Claude call to handle non-zero exit with set -e
     if cat "$temp_prompt" | $CLAUDE_CMD -p > "$temp_output" 2>&1; then
         # Extract just the converted content (skip any preamble)
         # Look for markdown content starting with # or - [ ]
@@ -709,15 +710,21 @@ run_loop() {
         local exit_code=0
         if [ "$VERBOSE" -eq 1 ]; then
             log_info "--- Claude Output (verbose mode) ---"
-            cat "$temp_prompt" | $CLAUDE_CMD -p
-            exit_code=$?
+            if cat "$temp_prompt" | $CLAUDE_CMD -p; then
+                exit_code=0
+            else
+                exit_code=$?
+            fi
             log_info "--- End Claude Output ---"
         else
             log_info "(Use -v flag to see Claude output in real-time)"
             local temp_output
             temp_output="$(mktemp)"
-            cat "$temp_prompt" | $CLAUDE_CMD -p > "$temp_output" 2>&1
-            exit_code=$?
+            if cat "$temp_prompt" | $CLAUDE_CMD -p > "$temp_output" 2>&1; then
+                exit_code=0
+            else
+                exit_code=$?
+            fi
 
             # Show output if failed
             if [ -f "$temp_output" ]; then

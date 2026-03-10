@@ -72,7 +72,7 @@ msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
 ## Directory Structure
 
 ```
-sop/
+./
 ├── sop_src/                    # Main SOP source code
 │   ├── osal/                   # OS Abstraction Layer
 │   │   ├── osal.h              # Main OSAL interface
@@ -151,8 +151,8 @@ OSALTaskPtrT OSALTaskCreate(OSALTaskFuncPtrT pTaskFunc, void* pParam, OSALPrioT 
 **Location**: `sop_src/utils/`
 
 **Purpose**: General-purpose utilities:
-- **Logging**: `platform_log()` with severity levels (PL_MEDIUM, PL_HIGH, etc.)
-- **Byte Queue**: `byteq_t` - lightweight circular buffer for byte streams
+- **Logging**: `LOG_Log()` with severity levels (LOG_TRACE, LOG_DEBUG, LOG_INFO, etc.)
+- **Byte Queue**: `ByteQ_t` - lightweight circular buffer for byte streams
 - **Linked Lists**: Single and double-linked list implementations
 - **CRC**: CRC-16 and CRC-32 calculations
 - **UUID**: RFC 4122 UUID generation
@@ -163,11 +163,11 @@ OSALTaskPtrT OSALTaskCreate(OSALTaskFuncPtrT pTaskFunc, void* pParam, OSALPrioT 
 #include "utils/platform_log.h"
 #include "utils/byteq.h"
 
-platform_log(PL_MEDIUM, "Processing %d items", count);
+LOG_Log("Processing %d items", count);
 
-byteq_t queue;
-byteq_init(&queue, buffer, sizeof(buffer));
-byteq_write(&queue, data, len);
+ByteQ_t queue;
+ByteQCreate(&queue, buffer, sizeof(buffer));
+ByteQCommitWrite(&queue, len);
 ```
 
 ### Task Scheduler
