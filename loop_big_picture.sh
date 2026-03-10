@@ -342,11 +342,16 @@ add_learning() {
     section_line=$(grep -n "^## Learnings Log" "${journey_file}" | cut -d: -f1)
 
     if [[ -n "${section_line}" ]]; then
-        # Insert after the section header
+        # Insert after the section header using portable temp file approach
         local insert_line=$((section_line + 2))
-        sed -i '' "${insert_line}i\\
-- ${timestamp}: ${learning}
-" "${journey_file}"
+        local entry="- ${timestamp}: ${learning}"
+        # Use a temp file for portable insertion
+        local temp_file
+        temp_file=$(mktemp)
+        head -n "${insert_line}" "${journey_file}" > "${temp_file}"
+        echo "${entry}" >> "${temp_file}"
+        tail -n +$((insert_line + 1)) "${journey_file}" >> "${temp_file}"
+        mv "${temp_file}" "${journey_file}"
     fi
 }
 

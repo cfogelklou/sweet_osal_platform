@@ -46,15 +46,17 @@ add_subdirectory(sop_src/buf_io/tests)
 
 # Add clang-format targets
 add_custom_target(format
-    COMMAND find ${CMAKE_SOURCE_DIR}/sop_src -name "*.cpp" -o -name "*.hpp" -o -name "*.h"
-        | xargs clang-format -i
+    COMMAND find ${CMAKE_SOURCE_DIR}/sop_src
+        \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" \)
+        -exec clang-format -i {} +
     COMMENT "Formatting code with clang-format"
 )
 
 # Add format-check target for CI
 add_custom_target(format-check
-    COMMAND find ${CMAKE_SOURCE_DIR}/sop_src -name "*.cpp" -o -name "*.hpp" -o -name "*.h"
-        | xargs clang-format --dry-run --Werror
+    COMMAND find ${CMAKE_SOURCE_DIR}/sop_src
+        \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" \)
+        -exec clang-format --dry-run --Werror {} +
     COMMENT "Checking code format"
 )
 
