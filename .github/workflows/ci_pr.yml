@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -59,13 +59,10 @@ jobs:
         run: |
           sh emscripten_build.sh
 
-      - name: Cleanup from last time
-        if: (matrix.platform == 'self-hosted')
-        run: rm -rf build
 
       - name: Add msbuild to PATH (windows).
         if: (matrix.platform == 'windows-latest')
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.3
 
       - name: Run cmake
         run: |
