@@ -27,6 +27,11 @@ JOURNEY_DIR="${PROJECT_ROOT}/journey"
 PROTOTYPES_DIR="${PROJECT_ROOT}/prototypes"
 CONFIG_FILE="${PROJECT_ROOT}/.big_picture.conf"
 
+# Memory files (matches .mcp.json config + markdown fallback)
+LOOPS_DIR="${PROJECT_ROOT}/loops"
+MEMORY_JSON="${PROJECT_ROOT}/memory.json"
+MEMORY_MD="${LOOPS_DIR}/memory.md"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -110,6 +115,220 @@ log_debug() {
     fi
 }
 
+# ============================================================================
+# MEMORY FUNCTIONS (Dual-mode: MCP + Markdown fallback)
+# ============================================================================
+
+# Ensure memory markdown file exists with header
+ensure_memory_md() {
+    if [[ ! -f "$MEMORY_MD" ]]; then
+        mkdir -p "$(dirname "$MEMORY_MD")"
+        cat > "$MEMORY_MD" << 'EOF'
+# Project Memory
+
+DO NOT MODIFY THE STRUCTURE of this file.
+The scripts parse specific sections and formats. Only modify the CONTENT within entries.
+
+## Summary
+
+Last updated: TBD
+
+### Anti-Patterns
+0
+
+### Failed Approaches (Dead Ends)
+0
+
+### Successful Patterns
+0
+
+## Anti-Patterns
+
+*(No anti-patterns recorded yet)*
+
+## Failed Approaches (Dead Ends)
+
+*(No failed approaches recorded yet)*
+
+## Successful Patterns
+
+*(No successful patterns recorded yet)*
+EOF
+    fi
+}
+
+# Search memory markdown for entities matching a query
+search_memory_md() {
+    local query="$1"
+    if [[ ! -f "$MEMORY_MD" ]]; then
+        return
+    fi
+
+    # Case-insensitive search in markdown
+    awk -v q="$query" '
+        BEGIN { IGNORECASE=1; in_section=0; found=0 }
+        /^## / { in_section=0 }
+        /^## (Anti-Patterns|Failed Approaches| Successful Patterns)/ { in_section=1 }
+        in_section && ($0 ~ q || /^- \*\*/) { print; found=1 }
+        /^## / && in_section && !/^## (Anti-Patterns|Failed Approaches|Successful Patterns)/ { in_section=0 }
+    ' "$MEMORY_MD"
+}
+
+# Add entry to memory markdown
+add_memory_md() {
+    local section="$1"  # "Anti-Patterns", "Failed Approaches", "Successful Patterns"
+    local entity="$2"
+    local description="$3"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%d")
+
+    ensure_memory_md
+
+    # Find section and append entry
+    local temp=$(mktemp)
+    awk -v section="$section" \
+        -v entity="$entity" \
+        -v desc="$description" \
+        -v timestamp="$timestamp" '
+        /^## '"$section"'$/ {
+            print
+            getline
+            if (/\*\(No.*recorded yet\)\*\*/) {
+                print ""
+            } else if (NF > 0) {
+                print ""
+            }
+            print "- **" entity "** (" timestamp ")"
+            print "  " desc
+            print ""
+            # Skip until next section
+            while (getline > 0 && !/^## /) {}
+            print $0
+            next
+        }
+        { print }
+    ' "$MEMORY_MD" > "$temp"
+    mv "$temp" "$MEMORY_MD"
+
+    # Update summary
+    update_memory_summary
+}
+
+# Update the summary section with counts
+update_memory_summary() {
+    local temp=$(mktemp)
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+    # Count entries per section
+    local anti_count=$(grep -c "^- \*\*" "$MEMORY_MD" 2>/dev/null || echo "0")
+
+    awk -v date="$timestamp" '
+        /^## Summary$/ {
+            print
+            getline
+            print "Last updated: " date
+            print ""
+            print "### Anti-Patterns"
+            print "'"$anti_count"'"
+            print ""
+            print "### Failed Approaches (Dead Ends)"
+            # Count failed approaches
+            while (getline > 0 && /^###/) {
+                header = $0
+                getline
+                if (/\*\(No.*recorded yet\)\*\*/) {
+                    count = 0
+                } else {
+                    count = 0
+                    while (getline > 0 && /^- \*\*/) {
+                        count++
+                    }
+                }
+                print header " " count
+            }
+            next
+        }
+        { print }
+    ' "$MEMORY_MD" > "$temp"
+    mv "$temp" "$MEMORY_MD"
+}
+
+# Get recent entries only (for token-efficient prompt injection)
+get_recent_memory_entries() {
+    local max_entries="${1:-10}"  # Default: 10 most recent entries per section
+    local temp=$(mktemp)
+
+    # Extract last N entries from each section
+    awk -v max="$max_entries" '
+        /^## (Anti-Patterns|Failed Approaches|Successful Patterns)/ {
+            section = $0
+            print section
+            count = 0
+            in_section = 1
+            next
+        }
+        in_section && /^- \*\*/ {
+            entries[++count] = $0
+            getline
+            entries[count] = entries[count] "\n" $0
+            getline
+            if (NF > 0) entries[count] = entries[count] "\n" $0
+            next
+        }
+        /^## / && in_section {
+            # Print last max entries from this section
+            start = (count > max) ? count - max + 1 : 1
+            for (i = start; i <= count; i++) {
+                print entries[i]
+                print ""
+            }
+            print $0
+            if ($0 !~ /^## (Anti-Patterns|Failed Approaches|Successful Patterns)/) {
+                in_section = 0
+            }
+            next
+        }
+        !in_section { print }
+    ' "$MEMORY_MD" > "$temp"
+    cat "$temp"
+    rm -f "$temp"
+}
+
+# Sync journey learnings to memory.md during CONSOLIDATING phase
+sync_journey_to_memory() {
+    local journey_file="$1"
+
+    ensure_memory_md
+
+    # Extract anti-patterns from journey file
+    local anti_patterns
+    anti_patterns=$(sed -n '/^## Anti-Patterns/,/^## /p' "$journey_file" | grep "^- \*\*" || true)
+
+    # Extract dead ends from journey file
+    local dead_ends
+    dead_ends=$(sed -n '/^## Dead Ends/,/^## /p' "$journey_file" | grep "^### " || true)
+
+    # Add anti-patterns to memory.md
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^-?\ *\*\*([^\*]+)\*\*:?\ *(.+)$ ]]; then
+            local pattern="${BASH_REMATCH[1]}"
+            local desc="${BASH_REMATCH[2]}"
+            add_memory_md "Anti-Patterns" "$pattern" "$desc"
+        fi
+    done <<< "$anti_patterns"
+
+    # Add dead ends to memory.md
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^#{3}\ (.+) ]]; then
+            local approach="${BASH_REMATCH[1]}"
+            # Extract reason from following lines
+            local reason=$(sed -n "/^### $approach/,/^###/p" "$journey_file" | grep "Reason:" | sed 's/.*Reason: //')
+            add_memory_md "Failed Approaches" "$approach" "Abandoned: $reason"
+        fi
+    done <<< "$dead_ends"
+}
+
 # Print usage information
 usage() {
     cat << EOF
@@ -126,6 +345,8 @@ Commands:
   $0 hint "message"         Add a user hint to the journey
   $0 rollback [N]           Rollback to checkpoint N (default: last checkpoint)
   $0 list-checkpoints       List all checkpoints for current journey
+  $0 query-memory [query]   Search or display project memory
+  $0 sync-mcp [query]       Sync memory from MCP to markdown (with optional query)
 
 Options:
   -v, --verbose             Enable verbose output
@@ -150,10 +371,19 @@ Environment:
 Configuration:
   .big_picture.conf  Optional config file in project root
 
+Memory:
+  Project memory is stored in loops/memory.md:
+  - Tracks anti-patterns, failed approaches, and successful patterns
+  - Use query-memory to search for past learnings before implementing
+  - Automatically synced during CONSOLIDATING phase
+  - Uses MCP memory tools when available in interactive sessions
+
 Examples:
   $0 "Improve low-frequency detection using ML"
   $0 hint "Try harmonic product spectrum first"
   $0 rollback 3
+  $0 query-memory "fft"
+  $0 query-memory "anti-pattern"
 
 EOF
 }
@@ -520,9 +750,17 @@ find_active_journey() {
     while IFS= read -r -d '' file; do
         sorted_journeys+=("${file}")
     done < <(
-        find "${JOURNEY_DIR}" -name "*.journey.md" -printf '%T@ %p\0' 2>/dev/null \
-            | sort -z -nr \
-            | cut -z -d' ' -f2-
+        # Portable approach: use stat to get modification time
+        for f in "${JOURNEY_DIR}"/*.journey.md; do
+            if [[ -f "$f" ]]; then
+                # Use stat -f %m on macOS, stat -c %Y on Linux
+                if stat -f %m "$f" >/dev/null 2>&1; then
+                    stat -f '%m %p' "$f"
+                else
+                    stat -c '%Y %p' "$f"
+                fi
+            fi
+        done 2>/dev/null | sort -rn | cut -d' ' -f2-
     )
 
     # Check if any journeys were found
@@ -794,6 +1032,44 @@ EOF
 
     cat << 'EOF'
 
+## Memory Integration
+
+This journey should leverage memory to avoid repeating past mistakes.
+
+### Phase: RESEARCHING
+- If MCP available: Use `mcp__memory__search_nodes` for relevant entities
+- Otherwise: Review recent memory entries below
+- Document any new findings
+
+### Phase: PLANNING
+- **CRITICAL**: Check Anti-Patterns section before selecting approaches
+- If an approach violated constraints in memory, DON'T select it
+- Record why you're choosing your selected approach
+
+### Phase: PIVOTING
+- Before pivoting, search memory for similar failed approaches
+- Add the failed approach to memory with reasons
+- Record the semantic constraint (anti-pattern) for future reference
+
+### Phase: CONSOLIDATING
+- Add successful patterns to memory for reuse
+- Document any new anti-patterns discovered
+- The script will automatically call sync_journey_to_memory() to update memory.md
+
+### Memory Output Format
+
+When using MCP:
+```
+mcp__memory__create_entities: entities=[{"name": "approach-name", "entityType": "failed-approach", "observations": ["why it failed"]}]
+```
+
+When using markdown fallback, append to memory.md:
+```markdown
+## Failed Approaches (Dead Ends)
+- **approach-name** (YYYY-MM-DD)
+  Reason: X didn't work because Y
+```
+
 ## Your Task
 
 Based on the journey state, perform the appropriate phase:
@@ -855,6 +1131,7 @@ Based on the journey state, perform the appropriate phase:
 - Update README.md / CLAUDE.md with new architecture
 - Run **full test suite** (not just guardrails)
 - Verify all baseline metrics still pass
+- Add successful patterns to memory for reuse
 - Transition to COMPLETE
 
 ### If PIVOTING:
@@ -902,6 +1179,14 @@ run_iteration() {
         echo ""
         echo "Current working directory: $(pwd)"
         echo ""
+
+        # Append recent memory.md entries (token-efficient)
+        if [[ -f "$MEMORY_MD" ]]; then
+            echo ""
+            echo "### Recent Memory Entries (last 10 per section):"
+            echo ""
+            get_recent_memory_entries 10 2>/dev/null || true
+        fi
     } > "$temp_prompt"
 
     # Run Claude with the prompt
@@ -968,6 +1253,25 @@ main_loop() {
                 log_info "Current pending questions:"
                 grep -A 20 "^## Pending Questions" "${journey_file}" | grep "^- \[ \]"
                 break
+                ;;
+            CONSOLIDATING)
+                # Sync journey learnings to memory before completing
+                log_info "Syncing journey learnings to memory..."
+                sync_journey_to_memory "${journey_file}"
+                run_iteration "${journey_file}"
+
+                # Ensure any changes Claude made are committed and pushed
+                local current_branch
+                current_branch=$(git branch --show-current)
+                if [[ -n "${current_branch}" ]]; then
+                    if ! git diff --quiet || ! git diff --cached --quiet; then
+                        log_warning "Uncommitted changes detected after iteration - committing now"
+                        git add -A
+                        git commit -m "chore(journey): auto-commit changes from iteration ${iteration} [${journey_name}]" || true
+                    fi
+                    log_info "Pushing to origin/${current_branch}..."
+                    git push origin "${current_branch}" || log_warning "Git push failed (may be no changes)"
+                fi
                 ;;
             *)
                 run_iteration "${journey_file}"
@@ -1117,7 +1421,7 @@ main() {
                 usage
                 exit 0
                 ;;
-            status|pivot|reflect|rollback|list-checkpoints)
+            status|pivot|reflect|rollback|list-checkpoints|query-memory|sync-mcp)
                 command="$1"
                 shift
                 ;;
@@ -1176,6 +1480,27 @@ main() {
             ;;
         list-checkpoints)
             handle_list_checkpoints
+            exit 0
+            ;;
+        query-memory)
+            ensure_memory_md
+            if [[ -n "${goal}" ]]; then
+                log_info "Searching memory.md for: ${goal}"
+                echo ""
+                search_memory_md "${goal}"
+            else
+                cat "$MEMORY_MD"
+            fi
+            exit 0
+            ;;
+        sync-mcp)
+            log_info "Memory MCP sync is handled automatically during interactive sessions."
+            log_info "When using MCP tools, also update loops/memory.md with the same information."
+            log_info "Use this command's argument as the query to search memory:"
+            if [[ -n "${goal}" ]]; then
+                echo "  Query: ${goal}"
+                search_memory_md "${goal}"
+            fi
             exit 0
             ;;
     esac

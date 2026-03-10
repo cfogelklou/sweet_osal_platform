@@ -25,6 +25,10 @@ PROJECT_ROOT="$SCRIPT_DIR"
 # Directory for working plan copies (tracked in git)
 LOOPS_DIR="$PROJECT_ROOT/loops"
 
+# Memory files (matches .mcp.json config + markdown fallback)
+MEMORY_JSON="${PROJECT_ROOT}/memory.json"
+MEMORY_MD="${LOOPS_DIR}/memory.md"
+
 # Verbose mode (can be set via -v flag, VERBOSE or VERBOSITY env vars)
 VERBOSE="${VERBOSE:-${VERBOSITY:-0}}"
 
@@ -102,6 +106,186 @@ setup_claude() {
     export ANTHROPIC_DEFAULT_SONNET_MODEL="$sonnet_model"
     export ANTHROPIC_DEFAULT_OPUS_MODEL="$opus_model"
     CLAUDE_CMD="claude --dangerously-skip-permissions"
+}
+
+# ============================================================================
+# MEMORY FUNCTIONS (Dual-mode: MCP + Markdown fallback)
+# ============================================================================
+
+# Ensure memory markdown file exists with header
+ensure_memory_md() {
+    if [[ ! -f "$MEMORY_MD" ]]; then
+        mkdir -p "$(dirname "$MEMORY_MD")"
+        cat > "$MEMORY_MD" << 'EOF'
+# Project Memory
+
+DO NOT MODIFY THE STRUCTURE of this file.
+The scripts parse specific sections and formats. Only modify the CONTENT within entries.
+
+## Summary
+
+Last updated: TBD
+
+### Anti-Patterns
+0
+
+### Failed Approaches (Dead Ends)
+0
+
+### Successful Patterns
+0
+
+## Anti-Patterns
+
+*(No anti-patterns recorded yet)*
+
+## Failed Approaches (Dead Ends)
+
+*(No failed approaches recorded yet)*
+
+## Successful Patterns
+
+*(No successful patterns recorded yet)*
+EOF
+    fi
+}
+
+# Search memory markdown for entities matching a query
+search_memory_md() {
+    local query="$1"
+    if [[ ! -f "$MEMORY_MD" ]]; then
+        return
+    fi
+
+    # Case-insensitive search in markdown
+    awk -v q="$query" '
+        BEGIN { IGNORECASE=1; in_section=0; found=0 }
+        /^## / { in_section=0 }
+        /^## (Anti-Patterns|Failed Approaches|Successful Patterns)/ { in_section=1 }
+        in_section && ($0 ~ q || /^- \*\*/) { print; found=1 }
+        /^## / && in_section && !/^## (Anti-Patterns|Failed Approaches|Successful Patterns)/ { in_section=0 }
+    ' "$MEMORY_MD"
+}
+
+# Add entry to memory markdown
+add_memory_md() {
+    local section="$1"  # "Anti-Patterns", "Failed Approaches", "Successful Patterns"
+    local entity="$2"
+    local description="$3"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%d")
+
+    ensure_memory_md
+
+    # Find section and append entry
+    local temp=$(mktemp)
+    awk -v section="$section" \
+        -v entity="$entity" \
+        -v desc="$description" \
+        -v timestamp="$timestamp" '
+        /^## '"$section"'$/ {
+            print
+            getline
+            if (/\*\(No.*recorded yet\)\*\*/) {
+                print ""
+            } else if (NF > 0) {
+                print ""
+            }
+            print "- **" entity "** (" timestamp ")"
+            print "  " desc
+            print ""
+            # Skip until next section
+            while (getline > 0 && !/^## /) {}
+            print $0
+            next
+        }
+        { print }
+    ' "$MEMORY_MD" > "$temp"
+    mv "$temp" "$MEMORY_MD"
+
+    # Update summary
+    update_memory_summary
+}
+
+# Update the summary section with counts
+update_memory_summary() {
+    local temp=$(mktemp)
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+    # Count entries per section
+    local anti_count=$(grep -c "^- \*\*" "$MEMORY_MD" 2>/dev/null || echo "0")
+
+    awk -v date="$timestamp" '
+        /^## Summary$/ {
+            print
+            getline
+            print "Last updated: " date
+            print ""
+            print "### Anti-Patterns"
+            print "'"$anti_count"'"
+            print ""
+            print "### Failed Approaches (Dead Ends)"
+            # Count failed approaches
+            while (getline > 0 && /^###/) {
+                header = $0
+                getline
+                if (/\*\(No.*recorded yet\)\*\*/) {
+                    count = 0
+                } else {
+                    count = 0
+                    while (getline > 0 && /^- \*\*/) {
+                        count++
+                    }
+                }
+                print header " " count
+            }
+            next
+        }
+        { print }
+    ' "$MEMORY_MD" > "$temp"
+    mv "$temp" "$MEMORY_MD"
+}
+
+# Get recent entries only (for token-efficient prompt injection)
+get_recent_memory_entries() {
+    local max_entries="${1:-10}"  # Default: 10 most recent entries per section
+    local temp=$(mktemp)
+
+    # Extract last N entries from each section
+    awk -v max="$max_entries" '
+        /^## (Anti-Patterns|Failed Approaches|Successful Patterns)/ {
+            section = $0
+            print section
+            count = 0
+            in_section = 1
+            next
+        }
+        in_section && /^- \*\*/ {
+            entries[++count] = $0
+            getline
+            entries[count] = entries[count] "\n" $0
+            getline
+            if (NF > 0) entries[count] = entries[count] "\n" $0
+            next
+        }
+        /^## / && in_section {
+            # Print last max entries from this section
+            start = (count > max) ? count - max + 1 : 1
+            for (i = start; i <= count; i++) {
+                print entries[i]
+                print ""
+            }
+            print $0
+            if ($0 !~ /^## (Anti-Patterns|Failed Approaches|Successful Patterns)/) {
+                in_section = 0
+            }
+            next
+        }
+        !in_section { print }
+    ' "$MEMORY_MD" > "$temp"
+    cat "$temp"
+    rm -f "$temp"
 }
 
 # Ensure loops directory exists
@@ -405,6 +589,43 @@ IMPORTANT:
 - If a task is blocked for a reason other than a DoD failure, note it in the plan and move on.
 - Follow the existing code style and patterns in the codebase.
 PROMPT_EOF
+
+    # Add memory section
+    cat << 'MEMORY_EOF'
+
+## Memory Usage
+
+**IMPORTANT**: Check available memory BEFORE implementing any approach.
+
+### If Memory MCP tools are available:
+Use `mcp__memory__search_nodes` and `mcp__memory__open_nodes` to:
+- Search for similar approaches that were tried before
+- Look for anti-patterns related to the current task
+- Check for failed implementations
+
+After completing each task, use `mcp__memory__create_entities` or `mcp__memory__add_observations` to record:
+- New anti-patterns discovered
+- Approaches that failed (with reasons)
+- Successful patterns to reuse
+
+### If Memory MCP is NOT available:
+Review the fallback memory entries below.
+
+After discovering new learnings, update memory.md using the format:
+```markdown
+## Failed Approaches (Dead Ends)
+- **approach-name** (YYYY-MM-DD)
+  Reason: X didn't work because Y
+```
+MEMORY_EOF
+
+    # Append recent memory.md entries (token-efficient: only last 5 per section)
+    if [[ -f "$MEMORY_MD" ]]; then
+        echo ""
+        echo "### Recent Memory Entries (last 5 per section):"
+        echo ""
+        get_recent_memory_entries 5 2>/dev/null || true
+    fi
 }
 
 # Run continuous build loop
@@ -541,6 +762,8 @@ ${GREEN}Usage:${NC}
   $0 -v <plan-file>            Verbose mode (show Claude output in real-time)
   $0 status                    Show status of all plans in loops/
   $0 status <plan-file>        Show remaining tasks for specific plan
+  $0 query-memory [query]      Search or display project memory
+  $0 sync-mcp                  Sync memory from MCP to markdown
   $0 --help                    Show this help
 
 ${GREEN}Options:${NC}
@@ -552,6 +775,12 @@ ${GREEN}Working Directory:${NC}
   - Running with a plan file copies it to loops/ (with checkbox conversion if needed)
   - Running without args finds the first active plan in loops/
   - Delete a plan from loops/ to re-ingest fresh from source
+
+${GREEN}Memory:${NC}
+  Project memory is stored in loops/memory.md:
+  - Tracks anti-patterns, failed approaches, and successful patterns
+  - Use query-memory to search for past learnings before implementing
+  - Automatically uses MCP memory tools when available in interactive sessions
 
 ${GREEN}Examples:${NC}
   # Ingest a plan and start working on it
@@ -565,6 +794,10 @@ ${GREEN}Examples:${NC}
 
   # Run with verbose output
   $0 -v docs/plan-to-fix-fft-multi.md
+
+  # Search memory for past approaches
+  $0 query-memory "socket"
+  $0 query-memory "anti-pattern"
 
   # Reset a plan (delete to re-ingest fresh)
   rm loops/plan-to-fix-fft-multi.md
@@ -607,6 +840,22 @@ main() {
                     plan_arg="$1"
                     shift
                 fi
+                ;;
+            query-memory)
+                ensure_memory_md
+                if [[ -n "$2" ]]; then
+                    log_info "Searching memory.md for: $2"
+                    echo ""
+                    search_memory_md "$2"
+                else
+                    cat "$MEMORY_MD"
+                fi
+                exit 0
+                ;;
+            sync-mcp)
+                log_info "Memory MCP sync is handled automatically during interactive sessions."
+                log_info "When using MCP tools, also update loops/memory.md with the same information."
+                exit 0
                 ;;
             -h|--help|help)
                 show_usage
