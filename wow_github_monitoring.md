@@ -52,17 +52,72 @@ git fetch origin
 ```bash
 # Get PR status
 gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json state,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,title,url
+```
 
-# Get ALL review comments (including thread replies)
+#### CRITICAL: GraphQL API Required for Copilot Review Comments
+
+> **IMPORTANT**: The REST API endpoint `/repos/{owner}/{repo}/pulls/{number}/comments` does **NOT** return all review comments from Copilot. You **MUST** use the GraphQL API to fetch all review comments reliably.
+
+**Why GraphQL is Required**:
+- Copilot creates **multiple separate review batches** on the same PR (e.g., after each commit)
+- Each review has a different `createdAt` timestamp
+- REST API `/comments` endpoint only returns standalone review comments, not comments nested within PR reviews
+- GraphQL returns the complete `repository.pullRequest.reviews[].comments[]` structure
+
+**GraphQL Query for All Review Comments**:
+
+```bash
+# Get ALL review comments via GraphQL (required for Copilot comments)
+gh api graphql -f query='
+query {
+  repository(owner: "cfogelklou", name: "sweet_osal_platform") {
+    pullRequest(number: {PR_NUMBER}) {
+      reviews(first: 150) {
+        nodes {
+          id
+          databaseId
+          author { login }
+          state
+          createdAt
+          body
+          comments(first: 100) {
+            nodes {
+              id
+              databaseId
+              body
+              path
+              line
+              originalLine
+              originalStartLine
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  }
+}'
+```
+
+**Key GraphQL Fields**:
+- `reviews(first: 150)` - Fetch many reviews (Copilot often creates 3+ batches)
+- `createdAt` - Filter for the most recent review batch
+- `databaseId` - Numeric ID used for reply endpoints
+- `author.login` - Copilot's login is `copilot-pull-request-reviewer`
+
+**REST API (Limited - Do NOT rely on for Copilot)**:
+
+```bash
+# This ONLY returns standalone review comments, NOT Copilot's nested comments
 gh api /repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments --jq '.[] | {path: .path, line: .line, body: .body, user: .user.login, created: .created_at, in_reply_to: .in_reply_to_id, id: .id}'
 
-# Get PR reviews (Copilot often creates reviews with inline comments)
+# Get PR reviews summary (but not the nested inline comments)
 gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json reviews --jq '.reviews[] | {author: .author.login, state: .state, body: .body}'
 ```
 
 **IMPORTANT**: Always check BOTH:
-1. Review comments (inline comments on specific lines)
-2. PR reviews (top-level reviews that contain inline comments, like Copilot's)
+1. **GraphQL reviews query** - The authoritative source for ALL review comments including Copilot's
+2. **PR reviews via REST** - Quick summary of review states (approved/changes_requested)
 
 ### 1.2 Record Initial State
 
@@ -173,10 +228,21 @@ Use the `Read` tool to check if the issue actually exists in the current codebas
 #### d. ALWAYS Reply
 
 **Quick reference** - Reply to comment ID `{COMMENT_ID}` on PR `{PR_NUMBER}`:
+
+> **Note**: When using GraphQL, the comment ID is the `databaseId` field (numeric), not the `id` field (GraphQL node ID string).
+
 ```bash
+# Method A: Replies sub-resource endpoint (recommended)
 gh api -X POST "/repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments/{COMMENT_ID}/replies" \
   -f body="Fixed — [explain what was changed and why]"
+
+# Method B: Base comments endpoint with in_reply_to
+gh api -X POST "/repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments" \
+  -f body="Fixed — [explain what was changed and why]" \
+  -F in_reply_to={COMMENT_ID}
 ```
+
+> **⚠️ CRITICAL**: Do NOT combine these methods. Method B with `-F in_reply_to` must NOT include `commit_id`, `path`, `line`, or `subject_type` parameters (those are for creating NEW comments, not replies).
 
 ### 4.2 Reply Templates
 
@@ -243,7 +309,35 @@ gh run view {RUN_ID} --repo cfogelklou/sweet_osal_platform --log-failed
 # Open PR in browser
 gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --web
 
-# List all comments on a PR
+# Get ALL review comments via GraphQL (required for Copilot)
+gh api graphql -f query='
+query {
+  repository(owner: "cfogelklou", name: "sweet_osal_platform") {
+    pullRequest(number: {PR_NUMBER}) {
+      reviews(first: 150) {
+        nodes {
+          id
+          databaseId
+          author { login }
+          state
+          createdAt
+          comments(first: 100) {
+            nodes {
+              id
+              databaseId
+              body
+              path
+              line
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  }
+}'
+
+# List all comments on a PR (REST API - limited, may miss Copilot comments)
 gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json comments --jq '.comments[] | {body: .body, author: .author.login, path: .path, line: .line}'
 
 # Get PR diff
