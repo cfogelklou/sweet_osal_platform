@@ -88,6 +88,21 @@ ctest -j8
 ./utils_test
 ```
 
+### Sanity Checks
+
+For a complete clean build and test (useful after pulling changes or before committing):
+
+```bash
+rm -rf build && mkdir build && cd build && cmake .. && make -j8 && ctest -j8
+```
+
+This command:
+1. Removes the existing build directory (clean slate)
+2. Creates a fresh build directory
+3. Configures with CMake
+4. Builds all targets with 8 parallel jobs
+5. Runs all tests with 8 parallel jobs
+
 ### Windows Build
 
 ```bash
