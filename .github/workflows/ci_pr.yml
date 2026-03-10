@@ -29,6 +29,11 @@ on:
 env:
   RELEASE: release
 
+# Cancel any previous runs for the same PR or branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Run unit tests
   unit-tests:
