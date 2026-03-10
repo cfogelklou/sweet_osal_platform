@@ -34,7 +34,7 @@ Add shared functions for memory operations with MCP detection and markdown fallb
 ```bash
 # Memory files (matches .mcp.json config + markdown fallback)
 MEMORY_JSON="${PROJECT_ROOT}/memory.json"
-MEMORY_MD="${PROJECT_ROOT}/memory.md"
+MEMORY_MD="${LOOPS_DIR}/memory.md"
 
 # Detect if memory MCP is available to the agent
 # This sets a flag that prompts can reference
@@ -311,13 +311,13 @@ Usage:
 ## Files to Modify
 
 1. **`loop.sh`**
-   - Add `MEMORY_MD="${PROJECT_ROOT}/memory.md"` (after line 37)
+   - Add `MEMORY_MD="${LOOPS_DIR}/memory.md"` (after line 30)
    - Add `ensure_memory_md()`, `search_memory_md()`, `add_memory_md()` functions (after line 105)
    - Modify `generate_prompt()` to include memory instructions
    - Add `query-memory` command to `main()`
 
 2. **`loop_big_picture.sh`**
-   - Add `MEMORY_MD="${PROJECT_ROOT}/memory.md"` (after line 38)
+   - Add `MEMORY_MD="${LOOPS_DIR}/memory.md"` (after line 33)
    - Add `ensure_memory_md()`, `search_memory_md()`, `add_memory_md()`, `sync_journey_to_memory()` functions (after line 111)
    - Modify `generate_iteration_prompt()` to include memory instructions
    - Add sync call in CONSOLIDATING state handling
@@ -326,14 +326,14 @@ Usage:
 ## Verification
 
 1. Run `./loop.sh status` or `./loop_big_picture.sh status` to ensure scripts still work
-2. Start a journey/plan and verify `memory.md` is created/updated
-3. After a journey completes or pivots, check `memory.md` has new entries
+2. Start a journey/plan and verify `loops/memory.md` is created/updated
+3. After a journey completes or pivots, check `loops/memory.md` has new entries
 4. In a new journey, verify memory context appears in prompts
 5. Test query command: `./loop_big_picture.sh query-memory "test"`
 
 ```bash
 # Check memory file
-cat memory.md
+cat loops/memory.md
 
 # Query for specific topics
 ./loop_big_picture.sh query-memory "failure"
@@ -343,7 +343,7 @@ cat memory.md
 ## Notes
 
 - **No jq dependency**: Markdown fallback works without jq (simpler than JSON parsing)
-- **Memory file location**: Uses `memory.md` in project root (separate from MCP's `memory.json`)
+- **Memory file location**: Uses `loops/memory.md` (separate from MCP's `memory.json`)
 - **Entity naming**: Use descriptive names like "fft-size-4096", "direct-socket-write"
 - **MCP tools are auto-detected**: The agent will automatically use MCP tools when available; prompts instruct it to fall back to markdown when MCP is unavailable
 - **Memory.md is version-controllable**: Can track in git to see evolution of learnings

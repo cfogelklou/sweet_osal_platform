@@ -63,9 +63,19 @@ msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
 ### Emscripten Build (WebAssembly)
 
 ```bash
-# See emscripten_build.sh in parent SAU project
-# SOP is included as part of SAU's WebAssembly build
+# Prerequisites:
+# - Emscripten SDK (emsdk) installed and activated
+#   (see https://emscripten.org/docs/getting_started/downloads.html)
+#
+# From the repository root:
+./emscripten_build.sh
 ```
+
+This script:
+1. Creates an `em/` build directory
+2. Configures with `emcmake cmake`
+3. Builds with `emmake make`
+4. Runs tests with `node` on generated `.js` files
 
 ---
 
