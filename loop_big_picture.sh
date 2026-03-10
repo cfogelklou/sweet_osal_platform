@@ -644,10 +644,10 @@ add_user_hint() {
         next_line=$(sed -n "$((insert_line + 1))p" "${journey_file}")
         if [[ "${next_line}" == *"*(No user hints yet)"* ]]; then
             # Replace the placeholder
-            sed -i '' "$((insert_line + 1))s/.*/- ${timestamp}: \"${hint}\"/" "${journey_file}"
+            sed_in_place "$((insert_line + 1))s/.*/- ${timestamp}: \"${hint}\"/" "${journey_file}"
         else
             # Add new hint
-            sed -i '' "${insert_line}a\\
+            sed_in_place "${insert_line}a\\
 - ${timestamp}: \"${hint}\"
 " "${journey_file}"
         fi
@@ -671,9 +671,9 @@ add_pending_question() {
         local next_line
         next_line=$(sed -n "$((insert_line + 1))p" "${journey_file}")
         if [[ "${next_line}" == *"*(No pending questions)"* ]]; then
-            sed -i '' "$((insert_line + 1))s/.*/- [ ] ${timestamp}: ${question}/" "${journey_file}"
+            sed_in_place "$((insert_line + 1))s/.*/- [ ] ${timestamp}: ${question}/" "${journey_file}"
         else
-            sed -i '' "${insert_line}a\\
+            sed_in_place "${insert_line}a\\
 - [ ] ${timestamp}: ${question}
 " "${journey_file}"
         fi

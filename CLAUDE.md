@@ -129,9 +129,9 @@ msbuild sweet_osal_platform.sln /property:Configuration=Debug -maxcpucount:4
 
 **Key API Functions**:
 ```c
-// Threading
-osal_thread_t* osal_thread_create(void (*func)(void*), void* arg);
-void osal_thread_join(osal_thread_t* thread);
+// Tasks
+OSALTaskPtrT OSALTaskCreate(OSALTaskFuncPtrT pTaskFunc, void* pParam, OSALPrioT prio, const OSALTaskStructT* pPlatform);
+void OSALTaskDelete(OSALTaskPtrT* ppTask);
 
 // Mutexes
 OSALMutexPtrT OSALCreateMutex(void);
@@ -146,9 +146,6 @@ uint32_t OSALGetMS(void);  // Millisecond timer
 // Memory
 void* OSALMALLOC(size_t size);
 void OSALFREE(void* ptr);
-
-// Tasks
-OSALTaskPtrT OSALTaskCreate(OSALTaskFuncPtrT pTaskFunc, void* pParam, OSALPrioT prio, const OSALTaskStructT* pPlatform);
 ```
 
 ### 2. Utils
