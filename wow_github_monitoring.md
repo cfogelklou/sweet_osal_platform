@@ -1,14 +1,12 @@
 # GitHub PR Monitoring Workflow
 
-**Repository**: `cfogelklou/sweet_osal_platform`
-**Main Branch**: `master` (and `optimizations_by_ai` for development)
 **Purpose**: Active monitoring of GitHub PRs for AI agents
 
 ---
 
 ## Scope
 
-**Default Behavior**: Monitor GitHub Actions failures on `master` and development branches.
+**Default Behavior**: Monitor GitHub Actions failures on main and development branches.
 
 **When Triggered**: When the user explicitly requests **"Monitor PR #XXX"**, the agent monitors that specific PR for:
 - GitHub Actions status
@@ -51,7 +49,7 @@ git fetch origin
 
 ```bash
 # Get PR status
-gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json state,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,title,url
+gh pr view {PR_NUMBER} --repo {owner}/{repo} --json state,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,title,url
 ```
 
 #### CRITICAL: GraphQL API Required for Copilot Review Comments
@@ -70,7 +68,7 @@ gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json state,mergea
 # Get ALL review comments via GraphQL (required for Copilot comments)
 gh api graphql -f query='
 query {
-  repository(owner: "cfogelklou", name: "sweet_osal_platform") {
+  repository(owner: "{owner}", name: "{repo}") {
     pullRequest(number: {PR_NUMBER}) {
       reviews(first: 150) {
         nodes {
@@ -109,15 +107,17 @@ query {
 
 ```bash
 # This ONLY returns standalone review comments, NOT Copilot's nested comments
-gh api /repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments --jq '.[] | {path: .path, line: .line, body: .body, user: .user.login, created: .created_at, in_reply_to: .in_reply_to_id, id: .id}'
+gh api /repos/{owner}/{repo}/pulls/{PR_NUMBER}/comments --jq '.[] | {path: .path, line: .line, body: .body, user: .user.login, created: .created_at, in_reply_to: .in_reply_to_id, id: .id}'
 
 # Get PR reviews summary (but not the nested inline comments)
-gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json reviews --jq '.reviews[] | {author: .author.login, state: .state, body: .body}'
+gh pr view {PR_NUMBER} --repo {owner}/{repo} --json reviews --jq '.reviews[] | {author: .author.login, state: .state, body: .body}'
 ```
 
 **IMPORTANT**: Always check BOTH:
 1. **GraphQL reviews query** - The authoritative source for ALL review comments including Copilot's
 2. **PR reviews via REST** - Quick summary of review states (approved/changes_requested)
+
+**Note**: Replace `{owner}`, `{repo}`, and `{PR_NUMBER}` placeholders with actual values in all commands below.
 
 ### 1.2 Record Initial State
 
@@ -168,7 +168,7 @@ When a GitHub Actions check fails:
 
 ```bash
 # Re-run the failed checks
-gh run rerun {RUN_ID} --repo cfogelklou/sweet_osal_platform
+gh run rerun {RUN_ID} --repo {owner}/{repo}
 ```
 
 ### 3.3 For Code Errors - Fix Locally
@@ -209,7 +209,7 @@ If `in_reply_to_id != null`, read ALL replies to check if already addressed:
 
 ```bash
 # Fetch all comments and filter by in_reply_to
-gh api /repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments --jq '.[] | select(.in_reply_to == {COMMENT_ID})'
+gh api /repos/{owner}/{repo}/pulls/{PR_NUMBER}/comments --jq '.[] | select(.in_reply_to == {COMMENT_ID})'
 ```
 
 #### b. Verify in Current Code
@@ -233,11 +233,11 @@ Use the `Read` tool to check if the issue actually exists in the current codebas
 
 ```bash
 # Method A: Replies sub-resource endpoint (recommended)
-gh api -X POST "/repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments/{COMMENT_ID}/replies" \
+gh api -X POST "/repos/{owner}/{repo}/pulls/{PR_NUMBER}/comments/{COMMENT_ID}/replies" \
   -f body="Fixed — [explain what was changed and why]"
 
 # Method B: Base comments endpoint with in_reply_to
-gh api -X POST "/repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments" \
+gh api -X POST "/repos/{owner}/{repo}/pulls/{PR_NUMBER}/comments" \
   -f body="Fixed — [explain what was changed and why]" \
   -F in_reply_to={COMMENT_ID}
 ```
@@ -279,7 +279,7 @@ gh api -X POST "/repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments
 
 ```bash
 # Check if PR is in a terminal state
-gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json state,merged,mergedAt,closedAt,isDraft
+gh pr view {PR_NUMBER} --repo {owner}/{repo} --json state,merged,mergedAt,closedAt,isDraft
 ```
 
 **Stop monitoring THIS PR if:**
@@ -301,18 +301,18 @@ When GitHub Actions pass AND all comments have replies:
 
 ```bash
 # Check GitHub Actions status
-gh pr checks {PR_NUMBER} --repo cfogelklou/sweet_osal_platform
+gh pr checks {PR_NUMBER} --repo {owner}/{repo}
 
 # Get failed build logs
-gh run view {RUN_ID} --repo cfogelklou/sweet_osal_platform --log-failed
+gh run view {RUN_ID} --repo {owner}/{repo} --log-failed
 
 # Open PR in browser
-gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --web
+gh pr view {PR_NUMBER} --repo {owner}/{repo} --web
 
 # Get ALL review comments via GraphQL (required for Copilot)
 gh api graphql -f query='
 query {
-  repository(owner: "cfogelklou", name: "sweet_osal_platform") {
+  repository(owner: "{owner}", name: "{repo}") {
     pullRequest(number: {PR_NUMBER}) {
       reviews(first: 150) {
         nodes {
@@ -338,13 +338,13 @@ query {
 }'
 
 # List all comments on a PR (REST API - limited, may miss Copilot comments)
-gh pr view {PR_NUMBER} --repo cfogelklou/sweet_osal_platform --json comments --jq '.comments[] | {body: .body, author: .author.login, path: .path, line: .line}'
+gh pr view {PR_NUMBER} --repo {owner}/{repo} --json comments --jq '.comments[] | {body: .body, author: .author.login, path: .path, line: .line}'
 
 # Get PR diff
-gh pr diff {PR_NUMBER} --repo cfogelklou/sweet_osal_platform
+gh pr diff {PR_NUMBER} --repo {owner}/{repo}
 
 # Re-run failed job
-gh run rerun {RUN_ID} --repo cfogelklou/sweet_osal_platform
+gh run rerun {RUN_ID} --repo {owner}/{repo}
 ```
 
 ---
@@ -383,3 +383,15 @@ gh run rerun {RUN_ID} --repo cfogelklou/sweet_osal_platform
 ---
 
 **Last Updated**: 2026-03-10
+
+---
+
+## Placeholders
+
+Replace these placeholders with actual values when using commands in this document:
+- `{owner}` - Repository owner (e.g., `cfogelklou`)
+- `{repo}` - Repository name (e.g., `sweet_audio_utils`, `sweet_osal_platform`)
+- `{PR_NUMBER}` - Pull request number
+- `{COMMENT_ID}` - Review comment ID (numeric `databaseId` from GraphQL)
+- `{RUN_ID}` - GitHub Actions run ID
+- `{BRANCH_NAME}` - Git branch name
