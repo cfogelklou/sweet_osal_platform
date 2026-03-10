@@ -1,5 +1,6 @@
 #ifndef FILE_FIND_AND_OPEN_HPP
 #define FILE_FIND_AND_OPEN_HPP 1
+#include <cstdint>
 #include <map>
 #include <string>
 
