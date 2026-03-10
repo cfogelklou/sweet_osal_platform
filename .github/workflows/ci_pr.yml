@@ -29,6 +29,11 @@ on:
 env:
   RELEASE: release
 
+# Cancel any previous runs for the same PR or branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Run unit tests
   unit-tests:
@@ -49,10 +54,8 @@ jobs:
         with:
           # Make sure to set a version number!
           version: 2.0.12
-          # This is the name of the cache folder.
-          # The cache folder will be placed in the build directory,
-          #  so make sure it doesn't conflict with anything!
-          actions-cache-folder: 'emsdk-cache'
+          # Disable cache due to GitHub Actions cache service instability
+          no-cache: true
 
       - name: Emscripten build and test
         if: (matrix.platform == 'ubuntu-latest')

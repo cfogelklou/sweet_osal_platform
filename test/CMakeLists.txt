@@ -60,8 +60,8 @@ set(SOURCE_FILES
 
 include_directories(
        .
-       ${SAU_COMMON_SRC}
-       ${SAU_TOP_DIR}
+       ${SOP_COMMON_SRC}
+       ${SOP_TOP_DIR}
 
 )
 
