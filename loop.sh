@@ -25,8 +25,8 @@ PROJECT_ROOT="$SCRIPT_DIR"
 # Directory for working plan copies (tracked in git)
 LOOPS_DIR="$PROJECT_ROOT/loops"
 
-# Verbose mode (can be set via -v flag or VERBOSITY env var)
-VERBOSE="${VERBOSE:-0}"
+# Verbose mode (can be set via -v flag, VERBOSE or VERBOSITY env vars)
+VERBOSE="${VERBOSE:-${VERBOSITY:-0}}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -436,7 +436,7 @@ run_loop() {
         echo "  - [ ] Task description 1"
         echo "  - [ ] Task description 2"
         echo ""
-        log_info "Run 'gemini -p \"Add checkboxes to $PLAN_FILE\"' for auto-conversion."
+        log_info "You can use the built-in Claude-based converter (see setup_claude/convert_plan_with_ai in this script) to auto-add checkboxes."
         exit 1
     fi
 
@@ -493,13 +493,15 @@ run_loop() {
             log_info "--- End Claude Output ---"
         else
             log_info "(Use -v flag to see Claude output in real-time)"
-            cat "$temp_prompt" | $CLAUDE_CMD -p > /tmp/ralph_output.txt 2>&1
+            local temp_output
+            temp_output="$(mktemp)"
+            cat "$temp_prompt" | $CLAUDE_CMD -p > "$temp_output" 2>&1
             exit_code=$?
 
             # Show output if failed
-            if [ -f /tmp/ralph_output.txt ]; then
-                [ $exit_code -ne 0 ] && cat /tmp/ralph_output.txt
-                rm -f /tmp/ralph_output.txt
+            if [ -f "$temp_output" ]; then
+                [ $exit_code -ne 0 ] && cat "$temp_output"
+                rm -f "$temp_output"
             fi
         fi
 

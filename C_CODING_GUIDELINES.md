@@ -21,26 +21,9 @@ This document defines the coding standards and conventions for the SOP (Sweet OS
 
 ## File Header & Copyright
 
-All source files should begin with the standard copyright header:
+All source files should begin with the standard copyright header matching the project's MIT license:
 
 ```cpp
-/******************************************************************************
-  Copyright 2014 Chris Fogelklou, Applaud Apps (Applicaudia)
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  @author: chris.fogelklou@gmail.com
-******************************************************************************/
 ```
 
 ---
@@ -54,10 +37,10 @@ All source files should begin with the standard copyright header:
 ### Methods and Functions
 - **C++ Class methods**: `camelCase`
   - **Examples**: `init()`, `process()`, `getData()`, `allocate()`
-- **C API functions**: `prefix_PascalCase()`
-  - **OSAL functions**: `osal_MutexCreate()`, `osal_ThreadCreate()`, `osal_SleepMs()`
-  - **Task scheduler**: `task_SchedCreate()`, `task_SchedRun()`
-  - **Utils**: `byteq_Init()`, `platform_Log()`
+- **C API functions**: `PrefixPascalCase()`
+  - **OSAL functions**: `OSALCreateMutex()`, `OSALSleep()`, `OSALGetMS()`
+  - **Task scheduler**: `TaskSchedCreate()`, `TaskSchedRun()`
+  - **Utils**: `ByteQCreate()`, `LOG_Log()`
 
 ### Variables
 - **Member variables**: `m_camelCase` (prefix with `m_`)
@@ -74,8 +57,8 @@ All source files should begin with the standard copyright header:
   - **Examples**: `MIN(a,b)`, `CLAMP(x, lo, hi)`
 
 ### Types
-- **Typedefs/Aliases**: `_t` suffix
-  - **Examples**: `osal_thread_t`, `osal_mutex_t`, `byteq_t`, `task_sched_t`
+- **Typedefs/Aliases**: `_t` suffix or `PascalCaseT`
+  - **Examples**: `ByteQ_t`, `OSALMutexPtrT`, `OSALTaskPtrT`, `OSALPrioT`
 - **Enums**: `E_PASCAL_CASE` or `kPascalCase` for values
   - **Examples**: `E_THREAD_RUNNING`, `E_MUTEX_LOCKED`, `kStateIdle`
 
@@ -155,12 +138,15 @@ if (ptr == nullptr) return false;
 class TaskScheduler {
 public:
   TaskScheduler()
-      : mMutex(std::unique_ptr<osal_mutex_t>(
-            osal_mutex_create(), osal_mutex_destroy)) {}
+      : mMutex(OSALCreateMutex()) {}
 
 private:
-  std::unique_ptr<osal_mutex_t, decltype(&osal_mutex_destroy)> mMutex;
+  std::unique_ptr<std::remove_pointer<OSALMutexPtrT>::type, decltype(&OSALDeleteMutex)> mMutex;
 };
+
+// Or use a custom deleter
+auto mutexDeleter = [](OSALMutexPtrT p) { OSALDeleteMutex(&p); };
+std::unique_ptr<std::remove_pointer<OSALMutexPtrT>::type, decltype(mutexDeleter)> mMutex(OSALCreateMutex(), mutexDeleter);
 
 // For arrays: use unique_ptr<T[]> or std::vector
 auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[1024]);
@@ -296,13 +282,13 @@ osal_mutex_t* osal_mutex_create(void);
 // Spin-wait with exponential backoff to reduce contention
 while (try_lock_failed) {
   backoff *= 2;
-  osal_sleep_ms(backoff);
+  OSALSleep(backoff);
 }
 
 // Bad: Just restates the code
 // Multiply backoff by 2 and sleep
 backoff *= 2;
-osal_sleep_ms(backoff);
+OSALSleep(backoff);
 ```
 
 ---
@@ -412,22 +398,25 @@ Use OSAL for platform-specific operations:
 ```cpp
 #include "osal/osal.h"
 
+// Initialization
+OSALInit();
+
 // Threading
-osal_thread_t* thread = osal_thread_create(workerFunc, arg);
+OSALTaskPtrT task = OSALTaskCreate(workerFunc, arg, OSAL_PRIO_MEDIUM, &platform);
 
 // Mutexes
-osal_mutex_t* mutex = osal_mutex_create();
-osal_mutex_lock(mutex);
+OSALMutexPtrT mutex = OSALCreateMutex();
+OSALLockMutex(mutex, OSAL_WAIT_INFINITE);
 // ... critical section ...
-osal_mutex_unlock(mutex);
+OSALUnlockMutex(mutex);
 
 // Timing
-osal_sleep_ms(10);  // Sleep for 10 milliseconds
-uint32_t time = osal_get_ticks();  // Millisecond timer
+OSALSleep(10);  // Sleep for 10 milliseconds
+uint32_t time = OSALGetMS();  // Millisecond timer
 
 // Memory
-void* ptr = osal_malloc(size);
-osal_free(ptr);
+void* ptr = OSALMALLOC(size);
+OSALFREE(ptr);
 ```
 
 ### Logging
@@ -436,9 +425,10 @@ osal_free(ptr);
 #include "utils/platform_log.h"
 
 // Log with severity levels
-platform_log(PL_MEDIUM, "Processing %d bytes", count);
-platform_error("Failed to allocate buffer");
-platform_debug("Debug info: %s", debugStr);
+LOG_Log("Processing %d bytes", count);
+LOG_Log("Failed to allocate buffer");
+
+// Note: See platform_log.h for additional logging functions and macros
 ```
 
 ---
@@ -473,7 +463,7 @@ class ByteQueueTest : public ::testing::Test {
 protected:
   void SetUp() override {
     // Test setup
-    byteq_init(&mQueue, mBuffer, sizeof(mBuffer));
+    ByteQCreate(&mQueue, mBuffer, sizeof(mBuffer));
   }
 
   void TearDown() override {
@@ -481,7 +471,7 @@ protected:
   }
 
   // Test data members
-  byteq_t mQueue;
+  ByteQ_t mQueue;
   uint8_t mBuffer[256];
 };
 
@@ -490,9 +480,9 @@ TEST_F(ByteQueueTest, WriteAndRead) {
   const uint8_t testData[] = {1, 2, 3, 4};
 
   // Act
-  byteq_write(&mQueue, testData, sizeof(testData));
+  ByteQCommitWrite(&mQueue, sizeof(testData));
   uint8_t output[4];
-  size_t read = byteq_read(&mQueue, output, sizeof(output));
+  unsigned int read = ByteQRead(&mQueue, output, sizeof(output));
 
   // Assert
   EXPECT_EQ(read, 4);

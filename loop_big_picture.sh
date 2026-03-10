@@ -303,25 +303,33 @@ get_journey_progress() {
     grep "^- Progress:" "${journey_file}" | sed 's/.*Progress: //'
 }
 
+# Portable in-place sed helper (works on BSD and GNU sed)
+sed_in_place() {
+    local expr="$1"
+    local file="$2"
+    sed -i.bak "$expr" "$file"
+    rm -f "${file}.bak"
+}
+
 # Update journey state
 set_journey_state() {
     local journey_file="$1"
     local new_state="$2"
-    sed -i '' "s/^- State: .*/- State: ${new_state}/" "${journey_file}"
+    sed_in_place "s/^- State: .*/- State: ${new_state}/" "${journey_file}"
 }
 
 # Update journey progress
 set_journey_progress() {
     local journey_file="$1"
     local progress="$2"
-    sed -i '' "s/^- Progress: .*/- Progress: ${progress}%/" "${journey_file}"
+    sed_in_place "s/^- Progress: .*/- Progress: ${progress}%/" "${journey_file}"
 }
 
 # Update current approach
 set_current_approach() {
     local journey_file="$1"
     local approach="$2"
-    sed -i '' "s/^- Current Approach: .*/- Current Approach: ${approach}/" "${journey_file}"
+    sed_in_place "s/^- Current Approach: .*/- Current Approach: ${approach}/" "${journey_file}"
 }
 
 # Add learning to journey
@@ -443,7 +451,9 @@ add_checkpoint() {
     local tag="$2"
     local description="$3"
     local id
-    id=$(grep "^## Checkpoints" -A 20 "${journey_file}" | grep -c "^|" || echo 0)
+    # Compute max existing checkpoint ID from first column (excluding header/separator)
+    id=$(grep "^## Checkpoints" -A 20 "${journey_file}" | grep "^|" | tail -n +2 | grep -E "^\| [0-9]+" | sed 's/^\| \([0-9]*\).*/\1/' | sort -n | tail -1)
+    id=$((id + 1))
 
     local section_line
     section_line=$(grep -n "^## Checkpoints" "${journey_file}" | cut -d: -f1)
@@ -452,7 +462,7 @@ add_checkpoint() {
         local insert_line=$((section_line + 3))
         local timestamp
         timestamp=$(date -u +"%Y-%m-%d")
-        sed -i '' "${insert_line}a\\
+        sed_in_place "${insert_line}a\\
 | ${id} | ${tag} | ${timestamp} | ${description} |
 " "${journey_file}"
     fi
@@ -500,21 +510,22 @@ list_journeys() {
 
 # Find active journey (first non-complete journey)
 find_active_journey() {
-    local journeys=()
+    # Collect journeys sorted by modification time (most recent first)
+    local sorted_journeys=()
     while IFS= read -r -d '' file; do
-        journeys+=("${file}")
-    done < <(find "${JOURNEY_DIR}" -name "*.journey.md" -print0 2>/dev/null)
+        sorted_journeys+=("${file}")
+    done < <(
+        find "${JOURNEY_DIR}" -name "*.journey.md" -printf '%T@ %p\0' 2>/dev/null \
+            | sort -z -nr \
+            | cut -z -d' ' -f2-
+    )
 
-    # Check if journeys array is empty
-    if [[ ${#journeys[@]} -eq 0 ]]; then
+    # Check if any journeys were found
+    if [[ ${#sorted_journeys[@]} -eq 0 ]]; then
         return 1
     fi
 
-    # Sort by modification time (most recent first)
-    local sorted_journeys
-    sorted_journeys=$(printf '%s\n' "${journeys[@]}" | sort -r)
-
-    for journey in ${sorted_journeys}; do
+    for journey in "${sorted_journeys[@]}"; do
         local state
         state=$(get_journey_state "${journey}")
         if [[ "${state}" != "COMPLETE" ]]; then
@@ -659,8 +670,8 @@ establish_baselines() {
     local baseline_date
     baseline_date=$(date -u +"%Y-%m-%d")
 
-    # Update baselines section
-    sed -i '' "s/| Test Pass Rate    | TBD      | TBD     | No decrease |/| Test Pass Rate    | TBD      | TBD     | No decrease |/; s/^|.*|$/| Test Pass Rate    | ${baseline_date}      | ${baseline_date}     | No decrease |/" "${journey_file}"
+    # Update baselines section: only modify the Test Pass Rate row
+    sed_in_place "s/^| Test Pass Rate[[:space:]]*|.*$/| Test Pass Rate    | ${baseline_date}      | ${baseline_date}     | No decrease |/" "${journey_file}"
 
     # Count tests
     local test_count=0
@@ -690,7 +701,17 @@ run_guardrails() {
     # Run tests
     log_debug "Running guardrail tests..."
     for test in ${GUARDRAIL_TESTS}; do
-        if ! eval "${TEST_COMMAND} >/dev/null 2>&1"; then
+        # Build the command for this specific guardrail test.
+        # If TEST_COMMAND is set, treat it as a prefix; otherwise treat each
+        # entry in GUARDRAIL_TESTS as a full command.
+        local test_cmd
+        if [[ -n "${TEST_COMMAND:-}" ]]; then
+            test_cmd="${TEST_COMMAND} ${test}"
+        else
+            test_cmd="${test}"
+        fi
+
+        if ! eval "${test_cmd} >/dev/null 2>&1"; then
             log_error "Test ${test} failed"
             return 1
         fi

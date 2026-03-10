@@ -122,19 +122,28 @@ sop/
 **Location**: `sop_src/osal/`
 
 **Purpose**: Provides cross-platform primitives for:
-- **Threading**: `osal_thread_t`, thread creation and management
-- **Mutexes**: `osal_mutex_t`, recursive and non-recursive locks
-- **Timing**: `osal_sleep_ms()`, `osal_get_ticks()` for millisecond timing
-- **Memory**: `osal_malloc()`, `osal_free()` for portable allocation
+- **Threading**: `OSALTaskPtrT`, task creation and management
+- **Mutexes**: `OSALMutexPtrT`, recursive and non-recursive locks
+- **Timing**: `OSALSleep()`, `OSALGetMS()` for millisecond timing
+- **Memory**: `OSALMALLOC()`, `OSALFREE()` for portable allocation
 
-**Key Types**:
+**Key APIs** (see `sop_src/osal/osal.h` for full list and exact signatures):
 ```c
-osal_thread_t*   osal_thread_create(void (*func)(void*), void* arg);
-osal_mutex_t*    osal_mutex_create();
-void             osal_mutex_lock(osal_mutex_t* mutex);
-void             osal_mutex_unlock(osal_mutex_t* mutex);
-void             osal_sleep_ms(uint32_t milliseconds);
-uint32_t         osal_get_ticks(void);
+// Initialization
+void OSALInit(void);
+
+// Mutexes
+OSALMutexPtrT OSALCreateMutex(void);
+void OSALDeleteMutex(OSALMutexPtrT* ppMutex);
+bool OSALLockMutex(OSALMutexPtrT pMutex, uint32_t timeoutMs);
+bool OSALUnlockMutex(OSALMutexPtrT pMutex);
+
+// Timing
+void OSALSleep(uint32_t milliseconds);
+uint32_t OSALGetMS(void);
+
+// Tasks
+OSALTaskPtrT OSALTaskCreate(OSALTaskFuncPtrT pTaskFunc, void* pParam, OSALPrioT prio, const OSALTaskStructT* pPlatform);
 ```
 
 ### Utils

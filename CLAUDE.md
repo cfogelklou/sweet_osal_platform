@@ -119,18 +119,21 @@ osal_thread_t* osal_thread_create(void (*func)(void*), void* arg);
 void osal_thread_join(osal_thread_t* thread);
 
 // Mutexes
-osal_mutex_t* osal_mutex_create();
-void osal_mutex_lock(osal_mutex_t* mutex);
-void osal_mutex_unlock(osal_mutex_t* mutex);
-void osal_mutex_destroy(osal_mutex_t* mutex);
+OSALMutexPtrT OSALCreateMutex(void);
+void OSALDeleteMutex(OSALMutexPtrT* ppMutex);
+bool OSALLockMutex(OSALMutexPtrT pMutex, uint32_t timeoutMs);
+bool OSALUnlockMutex(OSALMutexPtrT pMutex);
 
 // Timing
-void osal_sleep_ms(uint32_t milliseconds);
-uint32_t osal_get_ticks(void);  // Millisecond timer
+void OSALSleep(uint32_t milliseconds);
+uint32_t OSALGetMS(void);  // Millisecond timer
 
 // Memory
-void* osal_malloc(size_t size);
-void osal_free(void* ptr);
+void* OSALMALLOC(size_t size);
+void OSALFREE(void* ptr);
+
+// Tasks
+OSALTaskPtrT OSALTaskCreate(OSALTaskFuncPtrT pTaskFunc, void* pParam, OSALPrioT prio, const OSALTaskStructT* pPlatform);
 ```
 
 ### 2. Utils
@@ -153,14 +156,13 @@ void osal_free(void* ptr);
 #include "utils/byteq.h"
 
 // Logging
-platform_log(PL_MEDIUM, "Processing %d items", count);
-platform_error("Failed to allocate buffer");
+LOG_Log("Processing %d items", count);
 
 // Byte queue
-byteq_t queue;
-byteq_init(&queue, buffer, sizeof(buffer));
-byteq_write(&queue, data, len);
-size_t read = byteq_read(&queue, output, sizeof(output));
+ByteQ_t queue;
+ByteQCreate(&queue, buffer, sizeof(buffer));
+ByteQCommitWrite(&queue, len);
+unsigned int read = ByteQRead(&queue, output, sizeof(output));
 ```
 
 ### 3. Task Scheduler
