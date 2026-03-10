@@ -194,7 +194,7 @@ gh api -X POST "/repos/cfogelklou/sweet_osal_platform/pulls/{PR_NUMBER}/comments
 
 **CRITICAL**: You MUST `git commit` and `git push` — This is required for the user to see changes and for CI to re-run.
 
-> **Note**: The "No Git Commits" rule in `CLAUDE.md` does NOT apply during PR monitoring. You are explicitly authorized to commit/push PR fixes.
+> **Note**: During PR monitoring, you are explicitly authorized to commit and push PR fixes as needed to address CI failures and review feedback.
 
 ---
 
