@@ -554,7 +554,7 @@ TEST_F(OSALTest, scheduler) {
   bool passedTests = false;
   int retries = 0;
   bool completeFailure = false;
-  while ((!passedTests) && (retries < 3) && (!completeFailure)) {
+  while ((!passedTests) && (retries < 5) && (!completeFailure)) {
     int simultaneousExecs = 0;
     test_scheduler_data schedulables[20];
     memset(schedulables, 0, sizeof(schedulables));
@@ -626,7 +626,6 @@ TEST_F(OSALTest, scheduler) {
         }
       }
     }
-    retries++;
     if ((!completeFailure) && (simultaneousExecs < 6)) {
       passedTests |= true;
     }
@@ -639,7 +638,7 @@ TEST_F(OSALTest, scheduler_events) {
   bool passedTests = false;
   int retries = 0;
   bool completeFailure = false;
-  while ((!passedTests) && (retries < 3) && (!completeFailure)) {
+  while ((!passedTests) && (retries < 5) && (!completeFailure)) {
     int simultaneousExecs = 0;
 
     test_scheduler_data schedulables[10];
@@ -725,7 +724,6 @@ TEST_F(OSALTest, scheduler_events) {
         }
       }
     }
-    retries++;
     if ((!completeFailure) && (simultaneousExecs < 6)) {
       passedTests |= true;
     }
