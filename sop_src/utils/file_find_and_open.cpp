@@ -3,6 +3,9 @@
 #include "platform_log.h"
 #include "utils/file_utils.hpp"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 
 MyFile::MyFile(const char* name, const char* mode)
   : f(nullptr) {
@@ -21,7 +24,15 @@ MyFile::MyFile(const char* name, const char* mode)
   }
   if (nullptr == f) {
     LOG_TRACE(("Failed to open file:%s at path %s\r\n", name, s.c_str()));
-    LOG_ASSERT(nullptr != f);
+#ifndef LOG_DISABLE_ASSERT
+    // Test binaries must fail fast with a readable message instead of
+    // segfaulting on a nullptr MyFile later on. Release builds
+    // (LOG_DISABLE_ASSERT) keep the historical nullptr-return contract so
+    // MyOpenFiles::fopen() callers can handle the failure themselves.
+    printf("Missing required file: %s (searched from cwd %s)\n", name,
+           s.c_str());
+    exit(-999);
+#endif
   }
 }
 
